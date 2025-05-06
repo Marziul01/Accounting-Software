@@ -1,0 +1,247 @@
+:root {
+    --bg-color: #f5f5f9;
+    --text-color: #000000;
+    --card-bg: #f8f9fa;
+    --primary-color: #00a652;
+    --secondary-color: #f8a619;
+  }
+  
+  [data-theme="dark"] {
+    --bg-color: #121212;
+    --text-color: #e0e0e0;
+    --card-bg: #1e1e1e;
+  }
+  
+  body  {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+  }
+  h6, .h6, h5, .h5, h4, .h4, h3, .h3, h2, .h2, h1, .h1{
+    color: var(--text-color) !important;
+  }
+  .card, .navbar, .sidebar {
+    background-color: var(--card-bg);
+    color: var(--text-color);
+  }
+  .layout-navbar , .bg-menu-theme , .layout-menu{
+    background-color: var(--card-bg) !important;
+    color: var(--text-color) !important;
+  }
+
+.pass-error{
+    position: absolute;
+    bottom: -20px;
+}
+.login.app-brand-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  margin-top: -105px;
+  background: var(--card-bg);
+}
+.login-darkMOde{
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+}
+.btn-primary  {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    box-shadow: none;
+  }
+  
+  .btn-primary:hover , .btn-primary:active , .btn-primary:focus{
+    background-color: var(--secondary-color) !important;
+    border-color: var(--secondary-color) !important;
+    box-shadow: none;
+  }
+  
+  .btn-secondary {
+    background-color: var(--secondary-color);
+    border-color: var(--secondary-color);
+  }
+  
+  .btn-secondary:hover {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+  }
+  
+  .text-primary {
+    color: var(--primary-color) !important;
+  }
+  
+  .text-secondary {
+    color: var(--secondary-color) !important;
+  }
+  .form-control:focus , .input-group:focus-within .form-control , .input-group:focus-within .input-group-text {
+    border-color: var(--primary-color) !important;
+  }
+  .form-control {
+    color: var(--text-color) !important;
+  }
+  input:-webkit-autofill {
+    -webkit-text-fill-color: var(--text-color) !important;
+}
+.btn-outline-primary {
+    color: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+  }
+  
+  .btn-outline-primary:hover {
+    background-color: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+    color: #fff !important;
+    box-shadow: none !important;
+  }
+  .btn-outline-primary:focus , .btn-outline-primary:active{
+    color: #fff !important;
+    background-color: var(--primary-color) !important;
+  }
+  .btn-outline-secondary {
+    color: var(--secondary-color) !important;
+    border-color: var(--secondary-color) !important;
+  }
+  
+  .btn-outline-secondary:hover {
+    background-color: var(--secondary-color) !important;
+    color: #fff !important;
+    box-shadow: none !important;
+    border-color: var(--secondary-color) !important;
+  }
+  .btn-outline-secondary:focus , .btn-outline-secondary:active{
+    color: #fff !important;
+    background-color: var(--secondary-color) !important;
+  }
+  .text-muted{
+    color: var(--secondary-color) !important;
+  }
+  .bg-menu-theme .menu-inner > .menu-item.active > .menu-link {
+    color: var(--primary-color) !important;
+    background-color: #00a65336 !important;
+}
+.bg-label-primary{
+    background-color: var(--primary-color) !important;
+    color: #fff !important;
+}
+.nav-pills .nav-link.active, .nav-pills .nav-link.active:hover, .nav-pills .nav-link.active:focus {
+    color: #fff !important;
+    background-color: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+}
+.nav-pills .nav-link {
+    color: var(--text-color) !important;
+}
+.menu .app-brand.demo {
+  height: 100px;
+  margin-top: 12px;
+  padding: 0 10px;
+}
+.menu-inner-shadow{
+  top: 7.05rem;
+}
+.bg-menu-theme .menu-inner-shadow{
+  background: linear-gradient(#f8a61966 41%, rgb(149 89 0 / 11%) 95%, rgba(255, 255, 255, 0));
+}
+.bg-menu-theme .menu-inner > .menu-item.active:before {
+    background-color: var(--primary-color) !important;
+}
+.bg-menu-theme .menu-sub > .menu-item.active > .menu-link:not(.menu-toggle):before {
+    background-color: var(--secondary-color) !important;
+    border-color: var(--secondary-color) !important;
+}
+.app-brand .layout-menu-toggle{
+  background-color: var(--primary-color) !important;
+}
+.card-title{
+    color: var(--primary-color) !important;
+}
+.bg-menu-theme .menu-link{
+  color: var(--text-color) !important;
+}
+.bg-menu-theme .menu-item.active > .menu-link{
+  color: var(--primary-color) !important;
+}
+.dt-buttons, div.dataTables_wrapper div.dataTables_info{
+  position: absolute !important;
+}
+.dataTable.no-footer{
+  margin-top: 30px !important;
+  margin-bottom: 30px !important;
+}
+.my-custom-table-btn{
+  color: var(--secondary-color) !important ;
+  border-color: var(--secondary-color) !important ;
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+.table th, .table > :not(caption) > * > *{
+  color: var(--text-color) !important;
+}
+.disabled > .page-link{
+  color: var(--text-color) !important;
+}
+.page-item.active .page-link{
+  background-color: var(--primary-color) !important;
+  border-color: var(--primary-color) !important;
+}
+.btn{
+  box-shadow: none !important;
+}
+.modal-content{
+  background-color: var(--card-bg) !important;
+  color: var(--text-color) !important;
+}
+.modal-header{
+  border-bottom: 1px solid transparent !important;
+  padding-bottom: 15px;
+}
+.modal-header .btn-close{
+  color: var(--text-color) !important;
+}
+.modal-header .btn-close:hover{
+  color: var(--primary-color) !important;
+}
+.modal-header .btn-close:focus{
+  color: var(--primary-color) !important;
+}
+.form-label, .col-form-label{
+  color: var(--text-color) !important;
+}
+.form-select{
+  color: var(--text-color) !important;
+}
+.form-select:focus {
+  border-color: var(--primary-color) !important;
+}
+.form-select option{
+  color: black !important;
+}
+.form-check-label{
+  color: var(--text-color) !important;
+}
+.form-check-input:checked{
+  background-color: var(--primary-color) !important;
+  border-color: var(--primary-color) !important;
+  box-shadow: none !important;
+}
+div:where(.swal2-container){
+  z-index: 99999 !important;
+}
+.contact-card{
+  box-shadow: 0 0 10px skyblue !important;
+}
+.contact-card h3{
+  color: var(--primary-color) !important;
+}
+
+
+@media screen and (max-width: 768px) {
+  .dt-buttons, div.dataTables_wrapper div.dataTables_info{
+    position: relative !important;
+    margin-bottom: 15px !important;
+  }
+}

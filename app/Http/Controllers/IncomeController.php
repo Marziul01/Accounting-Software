@@ -1,0 +1,115 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use App\Models\Income;
+use App\Models\IncomeCategory;
+use App\Models\IncomeSubCategory;
+
+class IncomeController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     */
+    public function index()
+    {
+        // Fetch all income records from the database
+        $incomes = Income::all();
+
+        return view('admin.income.income', [
+            'incomes' => $incomes,
+            'incomeCategories' => IncomeCategory::where('status', 1)->get(),
+            'incomeSubCategories' => IncomeSubCategory::where('status', 1)->get(),
+        ]);
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        //
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        // Validate the request data
+        $request->validate([
+            'name' => 'required|string|max:255|unique:incomes,name',
+            'income_category_id' => 'required|exists:income_categories,id',
+            'date' => 'required|date',
+            'amount' => 'required|numeric',
+            'description' => 'nullable|string|max:1000',
+            'income_sub_category_id' => 'required|exists:income_sub_categories,id',
+        ]);
+
+        // Create a new income record
+        Income::create($request->all());
+
+        // Redirect back to the index with a success message
+        return response()->json([
+            'message' => 'Income record created successfully!',
+        ]);
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(string $id)
+    {
+        //
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(string $id)
+    {
+        //
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, string $id)
+    {
+        // Validate the request data
+        $request->validate([
+            'name' => 'required|string|max:255|unique:incomes,name,' . $id,
+            'income_category_id' => 'required|exists:income_categories,id',
+            'date' => 'required|date',
+            'amount' => 'required|numeric',
+            'description' => 'nullable|string|max:1000',
+            'income_sub_category_id' => 'required|exists:income_sub_categories,id',
+        ]);
+
+        // Find the income record and update it
+        $income = Income::findOrFail($id);
+        $income->update($request->all());
+
+        // Redirect back to the index with a success message
+        return response()->json([
+            'message' => 'Income record updated successfully!',
+            'id' => $income->id,
+        ]);
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(string $id)
+    {
+        // Find the income record by ID
+        $income = Income::findOrFail($id);
+
+        // Delete the income record
+        $income->delete();
+
+        // Redirect back to the index with a success message
+        return back()->with('success', 'Income record deleted successfully!');
+    }
+}
