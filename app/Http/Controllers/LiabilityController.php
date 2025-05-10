@@ -8,6 +8,7 @@ use App\Models\LiabilityTransaction;
 use Illuminate\Http\Request;
 use App\Models\Contact;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Auth;
 
 class LiabilityController extends Controller
 {
@@ -16,6 +17,9 @@ class LiabilityController extends Controller
      */
     public function index()
     {
+        if (Auth::user()->access->liability == 3) {
+            return redirect()->route('admin.dashboard')->with('error', 'You do not have permission to access this page.');
+        }
         $Liabilities = Liability::where('category_id', 1)->get();
         return view('admin.liability.index',[
             'liabilities' => $Liabilities,
@@ -26,6 +30,9 @@ class LiabilityController extends Controller
     }
 
     public function fixed(){
+        if (Auth::user()->access->liability == 3) {
+            return redirect()->route('admin.dashboard')->with('error', 'You do not have permission to access this page.');
+        }
 
         $Liabilities = Liability::where('category_id', 2)->get();
         return view('admin.liability.fixed',[
@@ -49,6 +56,9 @@ class LiabilityController extends Controller
      */
     public function store(Request $request)
     {
+        if (Auth::user()->access->liability != 2) {
+            return redirect()->route('admin.dashboard')->with('error', 'You do not have permission.');
+        }
         $request->validate([
             'name' => 'required',
             'subcategory_id' => 'required',
@@ -58,6 +68,8 @@ class LiabilityController extends Controller
             'user_name' => 'nullable|string',
             'mobile' => 'nullable|string',
             'email' => 'nullable|email',
+            'contact_id' => 'nullable|exists:contacts,id',
+
         ]);
 
         $data = $request->all();
@@ -111,6 +123,22 @@ class LiabilityController extends Controller
                 $data['contact_id'] = $contact->id;
             }
         }
+        // If contact_id exists but no photo uploaded, do not override photo
+        if ($request->hasFile('photo') && empty($data['photo'])) {
+            if ($photoPath) {
+                $data['photo'] = $photoPath;
+            }
+        }
+        
+        // Generate a unique slug for the liability
+        $baseSlug = Str::slug($this->convertToEnglish($request->name));
+        $slug = $baseSlug;
+        $counter = 1;
+        // Check if slug exists in the liabilities table
+        while (Liability::where('slug', $slug)->exists()) {
+            $slug = $baseSlug . '-' . $counter++;
+        }
+        $data['slug'] = $slug;
 
         $assetsfdf = Liability::create($data);
 
@@ -142,6 +170,9 @@ class LiabilityController extends Controller
      */
     public function update(Request $request, $id)
     {
+        if (Auth::user()->access->liability != 2) {
+            return redirect()->route('admin.dashboard')->with('error', 'You do not have permission.');
+        }
         $request->validate([
             'name' => 'required',
             'subcategory_id' => 'required',
@@ -229,6 +260,15 @@ class LiabilityController extends Controller
                 $contact->save();
             }
         }
+        // --- Generate a unique slug for the liability ---
+        $baseSlug = Str::slug($this->convertToEnglish($request->name));
+        $slug = $baseSlug;
+        $counter = 1;
+        // Check if slug exists in the liabilities table
+        while (Liability::where('slug', $slug)->where('id', '!=', $id)->exists()) {
+            $slug = $baseSlug . '-' . $counter++;
+        }
+        $data['slug'] = $slug;
 
         // --- Update asset (except amount) ---
         $asset->update($data);
@@ -262,6 +302,9 @@ class LiabilityController extends Controller
      */
     public function destroy(string $id)
     {
+        if (Auth::user()->access->liability != 2) {
+            return redirect()->route('admin.dashboard')->with('error', 'You do not have permission.');
+        }
         $asset = Liability::findOrFail($id);
         // Delete the image file if it exists
         $oldPath = public_path($asset->photo);

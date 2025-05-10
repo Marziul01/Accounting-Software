@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Expense;
 use App\Models\ExpenseCategory;
 use App\Models\ExpenseSubCategory;
+use Illuminate\Support\Facades\Auth;
 
 class ExpenseController extends Controller
 {
@@ -14,6 +15,9 @@ class ExpenseController extends Controller
      */
     public function index()
     {
+        if (Auth::user()->access->expense == 3) {
+            return redirect()->route('admin.dashboard')->with('error', 'You do not have permission to access this page.');
+        }
         // Fetch all expenses from the database
         $expenses = Expense::all();
 
@@ -37,16 +41,31 @@ class ExpenseController extends Controller
      */
     public function store(Request $request)
     {
+        if (Auth::user()->access->expense != 2) {
+            return redirect()->route('admin.dashboard')->with('error', 'You do not have permission to create .');
+        }
         // Validate the request data
         $request->validate([
-            'name' => 'required|string|max:255|unique:expenses,name',
+            'name' => 'required|string|max:255',
             'expense_category_id' => 'required|exists:expense_categories,id',
             'date' => 'required|date',
             'amount' => 'required|numeric',
             'description' => 'nullable|string|max:1000',
             'expense_sub_category_id' => 'required|exists:expense_sub_categories,id',
+            'slug' => 'required|string|max:255',
         ]);
 
+        $baseSlug = $request->slug;
+        $slug = $baseSlug;
+        $counter = 1;
+
+        // Check if slug exists in the contacts table
+        while (Expense::where('slug', $slug)->exists()) {
+            $slug = $baseSlug . '-' . $counter++;
+        }
+
+        $data['slug'] = $slug;
+        $request->merge(['slug' => $data['slug']]);
         // Create a new expense record
         Expense::create($request->all());
 
@@ -77,18 +96,31 @@ class ExpenseController extends Controller
      */
     public function update(Request $request, string $id)
     {
+        if (Auth::user()->access->expense != 2) {
+            return redirect()->route('admin.dashboard')->with('error', 'You do not have permission to update .');
+        }
         // Validate the request data
         $request->validate([
-            'name' => 'required|string|max:255|unique:expenses,name,' . $id,
+            'name' => 'required|string|max:255',
             'expense_category_id' => 'required|exists:expense_categories,id',
             'date' => 'required|date',
             'amount' => 'required|numeric',
             'description' => 'nullable|string|max:1000',
             'expense_sub_category_id' => 'required|exists:expense_sub_categories,id',
+            'slug' => 'required|string|max:255',
         ]);
 
         // Update the expense record
         $expense = Expense::findOrFail($id);
+        $baseSlug = $request->slug;
+        $slug = $baseSlug;
+        $counter = 1;
+        // Check if slug exists in the contacts table
+        while (Expense::where('slug', $slug)->where('id', '!=', $id)->exists()) {
+            $slug = $baseSlug . '-' . $counter++;
+        }
+        $data['slug'] = $slug;
+        $request->merge(['slug' => $data['slug']]);
         $expense->update($request->all());
 
         // Redirect back to the index with a success message
@@ -103,6 +135,9 @@ class ExpenseController extends Controller
      */
     public function destroy(string $id)
     {
+        if (Auth::user()->access->expense != 2) {
+            return redirect()->route('admin.dashboard')->with('error', 'You do not have permission to delete .');
+        }
         // Find the expense record and delete it
         $expense = Expense::findOrFail($id);
         $expense->delete();

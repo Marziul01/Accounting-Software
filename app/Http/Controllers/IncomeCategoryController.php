@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\IncomeCategory;
+use App\Models\IncomeSubCategory;
+use App\Models\Income;
+use Illuminate\Support\Facades\Auth;
 
 class IncomeCategoryController extends Controller
 {
@@ -12,6 +15,10 @@ class IncomeCategoryController extends Controller
      */
     public function index()
     {
+
+        if(Auth::user()->access->income == 3 ){
+            return redirect()->route('admin.dashboard')->with('error', 'You do not have permission to access this page.');
+        }
         // Fetch all income categories from the database
         $incomeCategories = IncomeCategory::all();
 
@@ -33,11 +40,27 @@ class IncomeCategoryController extends Controller
      */
     public function store(Request $request)
     {
+        if(Auth::user()->access->income != 2){
+            return redirect()->route('admin.dashboard')->with('error', 'You do not have permission .');
+        }
         // Validate the request data
         $request->validate([
-            'name' => 'required|string|max:255|unique:income_categories,name',
+            'name' => 'required|string|max:255',
             'desc' => 'nullable|string|max:1000',
+            'slug' => 'required|string|max:255',
         ]);
+
+        $baseSlug = $request->slug;
+        $slug = $baseSlug;
+        $counter = 1;
+
+        // Check if slug exists in the contacts table
+        while (IncomeCategory::where('slug', $slug)->exists()) {
+            $slug = $baseSlug . '-' . $counter++;
+        }
+
+        $data['slug'] = $slug;
+        $request->merge(['slug' => $data['slug']]);
 
         // Create a new income category
         IncomeCategory::create($request->all());
@@ -69,14 +92,29 @@ class IncomeCategoryController extends Controller
      */
     public function update(Request $request, string $id)
     {
+        if(Auth::user()->access->income != 2){
+            return redirect()->route('admin.dashboard')->with('error', 'You do not have permission .');
+        }
         // Validate the request data
         $request->validate([
-            'name' => 'required|string|max:255|unique:income_categories,name,' . $id,
+            'name' => 'required|string|max:255',
             'desc' => 'nullable|string|max:1000',
+            'slug' => 'required|string|max:255',
         ]);
 
         // Find the income category by ID and update it
         $incomeCategory = IncomeCategory::findOrFail($id);
+
+        // Check if the slug already exists in the database
+        $baseSlug = $request->slug;
+        $slug = $baseSlug;
+        $counter = 1;
+        while (IncomeCategory::where('slug', $slug)->where('id', '!=', $id)->exists()) {
+            $slug = $baseSlug . '-' . $counter++;
+        }
+        $data['slug'] = $slug;
+        $request->merge(['slug' => $data['slug']]);
+    
         $incomeCategory->update($request->all());
 
         // Redirect back to the index with a success message
@@ -91,6 +129,9 @@ class IncomeCategoryController extends Controller
      */
     public function destroy(string $id)
     {
+        if(Auth::user()->access->income != 2){
+            return redirect()->route('admin.dashboard')->with('error', 'You do not have permission .');
+        }
         // Find the income category by ID and delete it
         $incomeCategory = IncomeCategory::findOrFail($id);
         $incomeCategory->delete();

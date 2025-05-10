@@ -6,7 +6,7 @@
         <div class="card ">
             <div class="card-header d-flex justify-content-between align-items-center border-bottom-1">
                 <h5 class="mb-0">Investment</h5>
-                <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                <button type="button" class="btn btn-primary {{ Auth::user()->access->investment == 1 ? 'disabled' : '' }}" data-bs-toggle="modal"
                     data-bs-target="#addmodals">Add New Investment</button>
             </div>
             <div class="card-body  text-nowrap">
@@ -37,12 +37,12 @@
                                 <td>{{ \Carbon\Carbon::parse($investment->income_date)->format('d M, Y') ?? 'N/A' }}</td> <!-- ✅ Income Date -->
                                 <td>
                                     <div class="d-flex align-items-center gap-1 cursor-pointer">
-                                        <a class="btn btn-sm btn-outline-secondary" href="#" data-bs-toggle="modal"
+                                        <a class="btn btn-sm btn-outline-secondary {{ Auth::user()->access->investment == 1 ? 'disabled' : '' }}" href="#" data-bs-toggle="modal"
                                            data-bs-target="#editModal{{ $investment->id }}"><i class="bx bx-edit-alt me-1"></i> Edit</a>
                                         <form action="{{ route('investment.destroy', $investment->id) }}" method="POST" class="d-inline">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="btn btn-sm btn-outline-danger delete-confirm">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger delete-confirm {{ Auth::user()->access->investment == 1 ? 'disabled' : '' }}">
                                                 <i class="bx bx-trash me-1"></i> Delete
                                             </button>
                                         </form>

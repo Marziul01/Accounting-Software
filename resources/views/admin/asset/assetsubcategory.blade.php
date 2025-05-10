@@ -6,7 +6,7 @@
         <div class="card ">
             <div class="card-header d-flex justify-content-between align-items-center border-bottom-1">
                 <h5 class="mb-0">Asset Sub Category</h5>
-                <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                <button type="button" class="btn btn-primary {{ Auth::user()->access->asset == 1 ? 'disabled' : '' }}" data-bs-toggle="modal"
                     data-bs-target="#addmodals">Add Asset Sub Category</button>
             </div>
             <div class="card-body  text-nowrap">
@@ -39,13 +39,13 @@
                                 </td>
                                 <td>
                                     <div class="d-flex align-items-center gap-1 cursor-pointer">
-                                            <a class=" btn btn-sm btn-outline-secondary" href="" data-bs-toggle="modal"
+                                            <a class=" btn btn-sm btn-outline-secondary {{ Auth::user()->access->asset == 1 ? 'disabled' : '' }}" href="" data-bs-toggle="modal"
                                             data-bs-target="#editModal{{ $assetsubcategory->id }}"><i
                                                     class="bx bx-edit-alt me-1"></i> Edit</a>
                                         <form action="{{ route('assetsubcategory.destroy', $assetsubcategory->id) }}" method="POST" class="d-inline">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="btn btn-sm btn-outline-danger delete-confirm" ><i
+                                            <button type="submit" class="btn btn-sm btn-outline-danger delete-confirm {{ Auth::user()->access->asset == 1 ? 'disabled' : '' }}" ><i
                                                     class="bx bx-trash me-1"></i> Delete</button>
                                         </form>
                                     </div>

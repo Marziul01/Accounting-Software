@@ -9,6 +9,7 @@ use App\Models\AssetSubCategory;
 use App\Models\AssetTransaction;
 use App\Models\Contact;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Auth;
 
 class AssetController extends Controller
 {
@@ -17,6 +18,9 @@ class AssetController extends Controller
      */
     public function index()
     {
+        if (auth()->user()->access->asset == 3) {
+            return redirect()->route('admin.dashboard')->with('error', 'You do not have permission to access this page.');
+        }
         $assets = Asset::where('category_id', 1)->get();
         return view('admin.asset.index',[
             'assets' => $assets,
@@ -27,6 +31,10 @@ class AssetController extends Controller
     }
 
     public function fixed(){
+
+        if (auth()->user()->access->asset == 3) {
+            return redirect()->route('admin.dashboard')->with('error', 'You do not have permission to access this page.');
+        }
 
         $assets = Asset::where('category_id', 2)->get();
         return view('admin.asset.fixed',[
@@ -49,6 +57,9 @@ class AssetController extends Controller
      */
     public function store(Request $request)
     {
+        if (auth()->user()->access->asset != 2) {
+            return redirect()->route('admin.dashboard')->with('error', 'You do not have permission to create .');
+        }
         $request->validate([
             'name' => 'required',
             'subcategory_id' => 'required',
@@ -58,6 +69,8 @@ class AssetController extends Controller
             'user_name' => 'nullable|string',
             'mobile' => 'nullable|string',
             'email' => 'nullable|email',
+            'contact_id' => 'nullable|exists:contacts,id',
+            
         ]);
 
         $data = $request->all();
@@ -112,6 +125,23 @@ class AssetController extends Controller
             }
         }
 
+        // If contact_id exists but no photo uploaded, do not override photo
+        if ($request->hasFile('photo') && empty($data['photo'])) {
+            if ($photoPath) {
+                $data['photo'] = $photoPath;
+            }
+        }
+        // --- Slug logic ---
+        $baseSlug = Str::slug($this->convertToEnglish($request->name));
+        $slug = $baseSlug;
+        $counter = 1;
+        // Check if slug exists in the assets table
+        while (Asset::where('slug', $slug)->exists()) {
+            $slug = $baseSlug . '-' . $counter++;
+        }
+        $data['slug'] = $slug;
+
+
         $assetsfdf = Asset::create($data);
 
         return response()->json([
@@ -144,6 +174,9 @@ class AssetController extends Controller
      */
     public function update(Request $request, $id)
     {
+        if (auth()->user()->access->asset != 2) {
+            return redirect()->route('admin.dashboard')->with('error', 'You do not have permission to create .');
+        }
         $request->validate([
             'name' => 'required',
             'subcategory_id' => 'required',
@@ -193,7 +226,9 @@ class AssetController extends Controller
                 $slug = $baseSlug;
                 $counter = 1;
 
+
                 // Check if slug exists in the contacts table
+                
                 while (Contact::where('slug', $slug)->exists()) {
                     $slug = $baseSlug . '-' . $counter++;
                 }
@@ -232,6 +267,16 @@ class AssetController extends Controller
             }
         }
 
+        // --- Update slug logic ---
+        $baseSlug = Str::slug($this->convertToEnglish($request->name));
+        $slug = $baseSlug;
+        $counter = 1;
+        // Check if slug exists in the assets table
+        while (Asset::where('slug', $slug)->where('id', '!=', $id)->exists()) {
+            $slug = $baseSlug . '-' . $counter++;
+        }
+        $data['slug'] = $slug;
+
         // --- Update asset (except amount) ---
         $asset->update($data);
 
@@ -267,6 +312,9 @@ class AssetController extends Controller
      */
     public function destroy(string $id)
     {
+        if (auth()->user()->access->asset != 2) {
+            return redirect()->route('admin.dashboard')->with('error', 'You do not have permission to delete .');
+        }
         $asset = Asset::findOrFail($id);
         // Delete the image file if it exists
         $oldPath = public_path($asset->photo);

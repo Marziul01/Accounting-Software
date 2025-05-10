@@ -4,35 +4,46 @@
     <div class="container-fluid flex-grow-1 container-p-y">
         <!-- Basic Bootstrap Table -->
         <div class="card ">
-            <div class="card-header d-flex justify-content-between align-items-center border-bottom-1">
-                <h5 class="mb-0">Contact</h5>
-                <button type="button" class="btn btn-primary {{ Auth::user()->access->contact == 1 ? 'disabled' : '' }}"  data-bs-toggle="modal" data-bs-target="#addmodals">Add New
-                    Contact</button>
+            <div class="card-header d-flex justify-content-between align-items-center border-bottom-1"> 
+                <h5 class="mb-0">BankBooks</h5>
+                <button type="button" class="btn btn-primary {{ Auth::user()->access->bankbook == 1 ? 'disabled' : '' }}" data-bs-toggle="modal" data-bs-target="#addmodals">Add New
+                    BankBook</button>
             </div>
             <div class="card-body row text-nowrap gap-3">
-                @if ($contacts->isNotEmpty())
-                    @foreach ($contacts as $contact)
+                @if ($bankbooks->isNotEmpty())
+                    @foreach ($bankbooks as $bankbook)
                         <div class="card contact-card col-md-3">
                             <div class="card-header d-flex justify-content-between">
-                                <a class=" btn btn-sm btn-outline-secondary {{ Auth::user()->access->contact == 1 ? 'disabled' : '' }} " href="" data-bs-toggle="modal"
-                                    data-bs-target="#editModal{{ $contact->id }}"><i class="bx bx-edit-alt me-1"></i>
+                                <a class=" btn btn-sm btn-outline-secondary {{ Auth::user()->access->bankbook == 1 ? 'disabled' : '' }}" href="" data-bs-toggle="modal"
+                                    data-bs-target="#editModal{{ $bankbook->id }}"><i class="bx bx-edit-alt me-1"></i>
                                     Edit</a>
-                                <form action="{{ route('contact.destroy', $contact->id) }}" method="POST" class="d-inline">
+                                <form action="{{ route('bankbook.destroy', $bankbook->id) }}" method="POST" class="d-inline">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="btn btn-sm btn-outline-danger delete-confirm {{ Auth::user()->access->contact == 1 ? 'disabled' : '' }}"><i
+                                    <button type="submit" class="btn btn-sm btn-outline-danger delete-confirm {{ Auth::user()->access->bankbook == 1 ? 'disabled' : '' }}"><i
                                             class="bx bx-trash me-1"></i> Delete</button>
                                 </form>
                             </div>
                             <div class="card-body">
                                 <div>
-                                    <img src="{{ $contact->image ? asset($contact->image) : asset('admin-assets/img/nophoto.jpg') }}"
-                                        width="150px" height="150px" style="object-fit: cover" alt="" class="my-2">
-                                    <h3>{{ $contact->name }}</h3>
-                                    <p>Mobile Number : {{ $contact->mobile_number }} </p>
-                                    <p>Email : {{ $contact->email ?? 'N/A' }} </p>
-                                    <p>Date of Birth : {{ $contact->date_of_birth ?? 'N/A' }} </p>
-                                    <p>Marrige Date : {{ $contact->marriage_date ?? 'N/A' }} </p>
+                                    <div class="d-flex align-items-center justify-content-between gap-2 mb-3">
+                                        <i class="bx bx-wallet bx-lg text-info bank_card_icon"></i>
+                                        <div class="bank_card_info">
+                                            <h4> {{ $bankbook->bank_name }} ( {{ $bankbook->branch_name }} ) </h4>
+                                            <p class="bank_type float-right"> {{ $bankbook->account_type }} </p>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex align-items-end justify-content-between gap-2 mb-3">
+                                        <div>
+                                            <h3 class="account_number">{{ $bankbook->account_number }}</h3>
+                                            <p class="holder_name">{{ $bankbook->account_holder_name }} </p>
+                                            <p class="nominee">Nominee Name: {{ $bankbook->nominee_name }}</p>
+                                        </div>
+                                        <div class="bank_card_info">
+                                            <p class="bank_type float-right font-xx">Balance: {{ number_format($bankbook->balance, 2) }} </p>
+                                        </div>
+                                    </div>
+                                    
                                 </div>
                             </div>
 
@@ -49,7 +60,7 @@
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Add Contact</h5>
+                    <h5 class="modal-title" id="exampleModalLabel">Add BankBook</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form id="addIncomeCategoryForms">
@@ -57,40 +68,35 @@
 
                     <div class="modal-body">
                         <div class="mb-3">
-                            <label for="name" class="form-label">Name</label>
-                            <input type="text" class="form-control name-input" id="name" name="name" required>
-
+                            <label for="name" class="form-label">Account Holder Name</label>
+                            <input type="text" class="form-control name-input" id="name" name="account_holder_name" required>
                         </div>
                         <div class="mb-3">
-                            <label for="slug" class="form-label">Slug</label>
-                            <input type="text" class="form-control slug-output" id="slug" name="slug" readonly>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="amount" class="form-label">Mobile Number</label>
-                            <input type="number" class="form-control" id="amount" name="mobile_number" required>
+                            <label for="amount" class="form-label">Account Number</label>
+                            <input type="number" class="form-control" id="amount" name="account_number" required>
                         </div>
                         <div class="mb-3">
-                            <label for="income_date" class="form-label">Email</label>
-                            <input type="email" class="form-control" id="income_date" name="email" required>
+                            <label for="name" class="form-label">Bank Name</label>
+                            <input type="text" class="form-control name-input" id="name" name="bank_name" required>
                         </div>
                         <div class="mb-3">
-                            <label for="income_date" class="form-label">Date of Birth</label>
-                            <input type="date" class="form-control" id="income_date" name="date_of_birth" required>
+                            <label for="name" class="form-label">Branch Name</label>
+                            <input type="text" class="form-control name-input" id="name" name="branch_name" required>
                         </div>
                         <div class="mb-3">
-                            <label for="income_date" class="form-label">Marrige Date</label>
-                            <input type="date" class="form-control" id="income_date" name="marriage_date" required>
-                        </div>
-                        <div class="mb-3 form-check">
-                            <input class="form-check-input" type="checkbox" name="sms_option" value="1"
-                                id="sms_option">
-                            <label class="form-check-label" for="sms_option">SMS Option</label>
+                            <label for="name" class="form-label">Nominee Name</label>
+                            <input type="text" class="form-control name-input" id="name" name="nominee_name" required>
                         </div>
                         <div class="mb-3">
-                            <label for="income_date" class="form-label">Image</label>
-                            <input type="file" accept="image/*" class="form-control" id="income_date" name="image"
-                                required>
+                            <label for="name" class="form-label">Account Type</label>
+                            <select name="account_type" id="" class="form-select" required>
+                                <option value="">Select Account Type</option>
+                                <option value="Savings Account">Savings Account</option>
+                                <option value="Current Account">Current Account</option>
+                                <option value="Monthly DPS Account">Monthly DPS Account</option>
+                                <option value="Fixed Deposit Account">Fixed Deposit Account</option>
+                                <option value="Sanchaypatra Account">Sanchaypatra Account</option>
+                            </select>
                         </div>
 
                     </div>
@@ -106,67 +112,57 @@
     <!-- / Modal -->
 
 
-    @if ($contacts->isNotEmpty())
-        @foreach ($contacts as $contact)
-            <div class="modal fade" id="editModal{{ $contact->id }}">
+    @if ($bankbooks->isNotEmpty())
+        @foreach ($bankbooks as $bankbook)
+            <div class="modal fade" id="editModal{{ $bankbook->id }}">
                 <div class="modal-dialog modal-lg">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h5 class="modal-title" id="exampleModalLabel">Edit Contact </h5>
+                            <h5 class="modal-title" id="exampleModalLabel">Edit BankBook </h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal"
                                 aria-label="Close"></button>
                         </div>
-                        <form id="editIncomeCategoryForms{{ $contact->id }}"
-                            action="{{ route('contact.update', $contact->id) }}">
+                        <form id="editIncomeCategoryForms{{ $bankbook->id }}"
+                            action="{{ route('bankbook.update', $bankbook->id) }}">
                             @csrf
                             @method('PUT')
                             <div class="modal-body">
 
                                 <div class="mb-3">
-                                    <label for="name" class="form-label">Name</label>
-                                    <input type="text" class="form-control name-input" id="name" name="name"
-                                        value="{{ $contact->name }}" required>
-
+                                    <label for="name" class="form-label">Account Holder Name</label>
+                                    <input type="text" class="form-control name-input" id="name" name="account_holder_name"
+                                        value="{{ $bankbook->account_holder_name }}" required>
                                 </div>
                                 <div class="mb-3">
-                                    <label for="slug" class="form-label">Slug</label>
-                                    <input type="text" class="form-control slug-output" id="slug" name="slug"
-                                        value="{{ $contact->slug }}" readonly>
+                                    <label for="amount" class="form-label">Account Number</label>
+                                    <input type="number" class="form-control" id="amount" name="account_number"
+                                        value="{{ $bankbook->account_number }}" required>
                                 </div>
                                 <div class="mb-3">
-                                    <label for="amount" class="form-label">Mobile Number</label>
-                                    <input type="number" class="form-control" id="amount" name="mobile_number"
-                                        required value="{{ $contact->mobile_number }}">
+                                    <label for="name" class="form-label">Bank Name</label>
+                                    <input type="text" class="form-control name-input" id="name" name="bank_name"
+                                        value="{{ $bankbook->bank_name }}" required>
                                 </div>
                                 <div class="mb-3">
-                                    <label for="income_date" class="form-label">Email</label>
-                                    <input type="email" class="form-control" id="income_date" name="email" required
-                                        value="{{ $contact->email }}">
+                                    <label for="name" class="form-label">Branch Name</label>
+                                    <input type="text" class="form-control name-input" id="name" name="branch_name"
+                                        value="{{ $bankbook->branch_name }}" required>
                                 </div>
                                 <div class="mb-3">
-                                    <label for="income_date" class="form-label">Date of Birth</label>
-                                    <input type="date" class="form-control" id="income_date" name="date_of_birth"
-                                        required
-                                        value="{{ $contact->date_of_birth ? \Carbon\Carbon::parse($contact->date_of_birth)->format('Y-m-d') : '' }}">
+                                    <label for="name" class="form-label">Nominee Name</label>
+                                    <input type="text" class="form-control name-input" id="name" name="nominee_name"
+                                        value="{{ $bankbook->nominee_name }}" required>
                                 </div>
                                 <div class="mb-3">
-                                    <label for="income_date" class="form-label">Marrige Date</label>
-                                    <input type="date" class="form-control" id="income_date" name="marriage_date"
-                                        required
-                                        value="{{ $contact->marriage_date ? \Carbon\Carbon::parse($contact->marriage_date)->format('Y-m-d') : '' }}">
-                                </div>
-                                <div class="mb-3 form-check">
-                                    <input class="form-check-input" type="checkbox" name="sms_option" value="1"
-                                        id="sms_option" {{ $contact->sms_option == 1 ? 'checked' : '' }}>
-                                    <label class="form-check-label" for="sms_option">SMS Option</label>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="income_date" class="form-label">Image</label>
-                                    <input type="file" accept="image/*" class="form-control" id="income_date"
-                                        name="image" required>
-                                    <p class="my-2">Previous Image</p>
-                                    <img src="{{ asset($contact->image) }}" width="100px" height="100px"
-                                        style="object-fit: fill" alt="">
+                                    <label for="name" class="form-label">Account Type</label>
+                                    <select name="account_type" id="" class="form-select" required>
+                                        <option value="">Select Account Type</option>
+                                        <option value="Savings Account" {{ $bankbook->account_type == 'Savings Account' ? 'selected' : '' }}>Savings Account</option>
+                                        <option value="Current Account" {{ $bankbook->account_type == 'Current Account' ? 'selected' : '' }}>Current Account</option>
+                                        <option value="Monthly DPS Account" {{ $bankbook->account_type == 'Monthly DPS Account' ? 'selected' : '' }}>Monthly DPS Account</option>
+                                        <option value="Fixed Deposit Account" {{ $bankbook->account_type == 'Fixed Deposit Account' ? 'selected' : '' }}>Fixed Deposit Account</option>
+                                        <option value="Sanchaypatra Account" {{ $bankbook->account_type == 'Sanchaypatra Account' ? 'selected' : '' }}>Sanchaypatra Account</option>
+                                    </select>
                                 </div>
 
                             </div>
@@ -202,7 +198,7 @@
 
 
 @section('scripts')
-    @if ($contacts->isNotEmpty())
+    @if ($bankbooks->isNotEmpty())
         <script>
             $('#myTable').DataTable({
                 pageLength: 20,
@@ -312,7 +308,7 @@
         attachSlugListener('addmodals');
 
         // Attach for all Edit Modals
-        @foreach ($contacts as $expensecategory)
+        @foreach ($bankbooks as $expensecategory)
             attachSlugListener('editModal{{ $expensecategory->id }}');
         @endforeach
     </script>
@@ -334,7 +330,7 @@
                 }
 
                 $.ajax({
-                    url: "{{ route('contact.store') }}",
+                    url: "{{ route('bankbook.store') }}",
                     method: "POST",
                     data: formData,
                     headers: {

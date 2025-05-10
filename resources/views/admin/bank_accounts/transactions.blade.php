@@ -1,0 +1,533 @@
+@extends('admin.master')
+
+@section('content')
+    <div class="container-fluid flex-grow-1 container-p-y">
+        <!-- Basic Bootstrap Table -->
+        <div class="card ">
+
+            @if ($bankaccounts->isNotEmpty())
+                    <div class="card-header">
+                        <ul class="nav nav-tabs" id="bankAccountTabs" role="tablist">
+                            @foreach ($bankaccounts as $index => $bankaccount)
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link {{ $index === 0 ? 'active' : '' }}" id="tab-{{ $bankaccount->id }}" data-bs-toggle="tab" data-bs-target="#content-{{ $bankaccount->id }}" type="button" role="tab" aria-controls="content-{{ $bankaccount->id }}" aria-selected="{{ $index === 0 ? 'true' : 'false' }}">
+                                        {{ $bankaccount->bank_name }}
+                                    </button>
+                                </li>
+                            @endforeach
+                        </ul>
+                    </div>
+                    <div class="card-body">
+                        <div class="tab-content px-0" id="bankAccountTabsContent">
+                            @foreach ($bankaccounts as $index => $bankaccount)
+                                <div class="tab-pane fade {{ $index === 0 ? 'show active' : '' }}" id="content-{{ $bankaccount->id }}" role="tabpanel" aria-labelledby="tab-{{ $bankaccount->id }}">
+                                    <div class="card-header d-flex justify-content-between align-items-center border-bottom-1 px-0 pt-0">
+                                        <h5 class="mb-0">{{ $bankaccount->bank_name }} Transactions</h5>
+                                        <button type="button" class="btn btn-primary {{ Auth::user()->access->bankbook == 1 ? 'disabled' : '' }}" data-bs-toggle="modal"
+                                            data-bs-target="#addmodals{{ $bankaccount->id }}">Add New Transactions</button>
+                                    </div>
+                                    <div class="card-body  text-nowrap px-0">
+                                        <div class="table-responsive">
+                                            <table class="table" id="myTable{{ $bankaccount->id }}">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Sl</th>
+                                                        <th>Transaction Name</th>
+                                                        <th>Transaction Id</th>
+                                                        <th>Amount</th>
+                                                        <th>Transaction Date</th>
+                                                        <th>Transaction Type</th>
+                                                        <th>Description</th>
+                                                        <th>Actions</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody class="table-border-bottom-0">
+                                                    @if($bankaccount->transactions->isNotEmpty())
+                                                    @foreach ($bankaccount->transactions as $transaction )
+                                                    <tr>
+                                                        <td>{{ $loop->iteration }}</td>
+                                                        
+                                                        <td>{{ $transaction->name }}</td>
+                                                        <td>{{ $transaction->transaction_id }}</td> <!-- ✅ Transaction ID -->
+                                                        <td>{{ $transaction->amount ?? 'N/A' }}</td> <!-- ✅ Amount -->
+                                                        <td>{{ \Carbon\Carbon::parse($transaction->transaction_date)->format('d M, Y') ?? 'N/A' }}</td> <!-- ✅ Income Date -->
+                                                        <td>
+                                                            @if($transaction->transaction_type == 'credit')
+                                                                <span class="badge bg-label-success">জমা</span>
+                                                            @elseif($transaction->transaction_type == 'debit')
+                                                                <span class="badge bg-label-danger">উত্তোলন</span>
+                                                            @else
+                                                                <span class="badge bg-label-secondary">N/A</span>
+                                                            @endif
+                                                        </td> <!-- ✅ Transaction Type -->
+
+                                                        <td>{{ $transaction->description ?? 'N/A' }}</td>
+                                                        
+                                                        
+                                                        <td>
+                                                            <div class="d-flex align-items-center gap-1 cursor-pointer">
+                                                                <a class="btn btn-sm btn-outline-secondary {{ Auth::user()->access->bankbook == 1 ? 'disabled' : '' }}" href="#" data-bs-toggle="modal"
+                                                                data-bs-target="#editModal{{ $transaction->id }}"><i class="bx bx-edit-alt me-1"></i> Edit</a>
+                                                                <form action="{{ route('banktransaction.destroy', $transaction->id) }}" method="POST" class="d-inline">
+                                                                    @csrf
+                                                                    @method('DELETE')
+                                                                    <button type="submit" class="btn btn-sm btn-outline-danger delete-confirm {{ Auth::user()->access->bankbook == 1 ? 'disabled' : '' }}">
+                                                                        <i class="bx bx-trash me-1"></i> Delete
+                                                                    </button>
+                                                                </form>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                    
+                                                    @endforeach
+                                                    @else
+                                                    <tr>
+                                                        <td colspan="7" class="text-center">No transaction found.</td>
+                                                    </tr>
+                                                    @endif
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                    @else
+                    <div class="card-body">
+                        <div class="alert alert-warning" role="alert">
+                            No bank accounts found. Please add a bank account first.
+                        </div>
+                    </div>
+            @endif
+            
+        </div>
+    </div>
+    
+    @if($bankaccounts->isNotEmpty())
+        @foreach ($bankaccounts as $bankaccount )
+    <!-- Modal -->
+    <div class="modal fade" id="addmodals{{ $bankaccount->id }}">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Add New {{ $bankaccount->bank_name }} Transactions</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="addIncomeCategoryForms{{ $bankaccount->id }}">
+                    @csrf
+                    
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Transaction Name</label>
+                            <input type="text" class="form-control name-input" id="name" name="name"  required>
+                           
+                        </div>
+                        <div class="mb-3">
+                            <label for="slug" class="form-label">Slug</label>
+                            <input type="text" class="form-control slug-output" id="slug" name="slug"  readonly>
+                        </div>
+                        <input type="hidden" name="bank_account_id" value="{{ $bankaccount->id }}">
+                        <div class="mb-3">
+                            <label for="add_income_sub_category_id" class="form-label">Transaction Type</label>
+                            <select class="form-select subcategory-select" id="add_income_sub_category_id" name="transaction_type" required>
+                                <option value="">Select Transaction Type</option>
+                                <option value="credit">জমা</option>
+                                <option value="debit">উত্তোলন</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="amount" class="form-label">Amount</label>
+                            <input type="number" class="form-control" id="amount" name="amount" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="income_date" class="form-label">Transaction Date</label>
+                            <input type="date" class="form-control" id="income_date" name="transaction_date" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="income_date" class="form-label">Transaction ID</label>
+                            <input type="text" class="form-control" id="income_date" name="transaction_id" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="Description" class="form-label">Description</label>
+                            <textarea class="form-control" id="Description" name="description" rows="3"></textarea>
+                        </div>
+                        
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">Confirm</button>
+                    </div>
+                </form>
+                
+            </div>  
+        </div>
+    </div>
+    @endforeach
+    @endif
+
+    <!-- / Modal -->
+      
+
+    @if($banktransactions->isNotEmpty())
+        @foreach ($banktransactions as $banktransaction )
+
+        <div class="modal fade" id="editModal{{ $banktransaction->id }}">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Edit Bank Transaction</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form id="editIncomeCategoryForms{{ $banktransaction->id }}" action="{{ route('banktransaction.update', $banktransaction->id) }}">
+                        @csrf
+                        @method('PUT')
+                        <div class="modal-body">
+
+                            <div class="mb-3">
+                                <label for="name" class="form-label">Transaction Name</label>
+                                <input type="text" class="form-control name-input" id="name" name="name" value="{{ $banktransaction->name }}" required>
+                               
+                            </div>
+                            <div class="mb-3">
+                                <label for="slug" class="form-label">Slug</label>
+                                <input type="text" class="form-control slug-output" id="slug" name="slug" value="{{ $banktransaction->slug }}" readonly>
+                            </div>
+                            <div class="mb-3">
+                                <label for="add_income_category_id" class="form-label">Bank Account</label>
+                                <select class="form-select category-select" id="add_income_category_id" name="bank_account_id" required>
+                                    <option value="">Select Bank Account</option>
+                                    @foreach ($bankaccounts as $bankaccount)
+                                        <option value="{{ $bankaccount->id }}" {{ $banktransaction->bank_account_id == $bankaccount->id ? 'selected' : '' }}>{{ $bankaccount->bank_name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="add_income_sub_category_id" class="form-label">Transaction Type</label>
+                                <select class="form-select subcategory-select" id="add_income_sub_category_id" name="transaction_type" required>
+                                    <option value="">Select Transaction Type</option>
+                                    <option value="credit" {{ $banktransaction->transaction_type == 'credit' ? 'selected' : '' }}>জমা</option>
+                                    <option value="debit" {{ $banktransaction->transaction_type == 'debit' ? 'selected' : '' }}>উত্তোলন</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="transaction_id" class="form-label">Transaction ID</label>
+                                <input type="text" class="form-control" id="transaction_id" name="transaction_id" value="{{ $banktransaction->transaction_id }}" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="amount" class="form-label">Amount</label>
+                                <input type="number" class="form-control" id="amount" name="amount" value="{{ $banktransaction->amount }}" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="income_date" class="form-label">Income Date</label>
+                                <input type="date" class="form-control" id="income_date" name="transaction_date" value="{{ $banktransaction->transaction_date }}" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="Description" class="form-label">Description</label>
+                                <textarea class="form-control" id="Description" name="description" rows="3">{{ $banktransaction->description }}</textarea>
+                                
+                            </div>
+                            
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-primary">Confirm</button>
+                        </div>
+                    </form>
+                    
+                </div>  
+            </div>
+        </div>
+        @endforeach
+    @endif
+    <!-- / Modal -->
+
+
+    <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body d-flex justify-content-center flex-column align-items-center auth-success-modal">
+                    <img src="{{ asset('admin-assets/img/double-check.gif') }}" width="25%" alt="">
+                    <h5 class="modal-title text-center" id="successModalLabel">Success</h5>
+                    <p id="successMessage" class="text-center">Login successful!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+@endsection
+
+
+@section('scripts')
+
+<script>
+    $(document).ready(function () {
+        @foreach ($bankaccounts as $bankaccount)
+            @if (isset($bankaccount->transactions) && $bankaccount->transactions->isNotEmpty())
+                $('#myTable{{ $bankaccount->id }}').DataTable({
+                    pageLength: 20,
+                    dom: 'Bfrtip',
+                    buttons: [
+                        {
+                            extend: 'csv',
+                            text: 'Export CSV',
+                            className: 'btn btn-sm my-custom-table-btn',
+                            exportOptions: {
+                                columns: ':not(:last-child)'
+                            }
+                        },
+                        {
+                            extend: 'print',
+                            text: 'Print Table',
+                            className: 'btn btn-sm my-custom-table-btn',
+                            exportOptions: {
+                                columns: ':not(:last-child)'
+                            }
+                        }
+                    ]
+                });
+            @endif
+        @endforeach
+    });
+</script>
+
+<script>
+    const banglaToEnglishMap = {
+        'অ': 'a', 'আ': 'aa', 'ই': 'i', 'ঈ': 'ii', 'উ': 'u', 'ঊ': 'uu',
+        'এ': 'e', 'ঐ': 'oi', 'ও': 'o', 'ঔ': 'ou',
+        'ক': 'k', 'খ': 'kh', 'গ': 'g', 'ঘ': 'gh', 'ঙ': 'ng',
+        'চ': 'ch', 'ছ': 'chh', 'জ': 'j', 'ঝ': 'jh', 'ঞ': 'n',
+        'ট': 't', 'ঠ': 'th', 'ড': 'd', 'ঢ': 'dh', 'ণ': 'n',
+        'ত': 't', 'থ': 'th', 'দ': 'd', 'ধ': 'dh', 'ন': 'n',
+        'প': 'p', 'ফ': 'ph', 'ব': 'b', 'ভ': 'bh', 'ম': 'm',
+        'য': 'j', 'র': 'r', 'ল': 'l', 'শ': 'sh', 'ষ': 'ss',
+        'স': 's', 'হ': 'h', 'ড়': 'r', 'ঢ়': 'rh', 'য়': 'y',
+        'ৎ': 't', 'ং': 'ng', 'ঃ': '', 'ঁ': ''
+    };
+
+    function transliterate(text) {
+        return text.split('').map(char => banglaToEnglishMap[char] || char).join('');
+    }
+
+    function generateSlug(text) {
+        const englishText = transliterate(text);
+        return englishText
+            .toLowerCase()
+            .replace(/[^\w\s]/gi, '') // remove special characters
+            .trim()
+            .replace(/\s+/g, '_');    // replace spaces with "_"
+    }
+
+    function attachSlugListener(modalId) {
+        const modal = document.getElementById(modalId);
+        if (!modal) return;
+
+        modal.addEventListener('shown.bs.modal', () => {
+            const input = modal.querySelector('.name-input');
+            const slugInput = modal.querySelector('.slug-output');
+            if (input && slugInput) {
+                input.addEventListener('input', function () {
+                    slugInput.value = generateSlug(this.value);
+                });
+            }
+        });
+    }
+
+    // Attach for Add Modal
+    @foreach ($bankaccounts as $bankaccount)
+        attachSlugListener('addmodals{{ $bankaccount->id }}');
+    @endforeach
+
+    // Attach for all Edit Modals
+    @foreach ($banktransactions as $incomecategory)
+        attachSlugListener('editModal{{ $incomecategory->id }}');
+    @endforeach
+</script>
+
+{{-- <script>
+    $(document).ready(function () {
+
+        $('form#addIncomeCategoryForms button[type="submit"]').on('click', function (e) {
+            e.preventDefault();
+           
+
+            toastr.clear();
+
+            let form = $('#addIncomeCategoryForms')[0]; // ✅ get the actual form element
+            let formData = new FormData(form);          // ✅ pass the form here
+
+            for (let [key, value] of formData.entries()) {
+                console.log(`${key}: ${value}`);
+            }
+
+            $.ajax({
+                url: "{{ route('banktransaction.store') }}",
+                method: "POST",
+                data: formData,
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    
+                    $('#successMessage').text(response.message); // Set dynamic success message
+                    $('#successModal').modal('show');
+
+                    $('#addIncomeCategoryForms')[0].reset();
+                    $('#addmodals').modal('hide');
+
+                    setTimeout(function () {
+                        window.location.reload();
+                    }, 2000);
+                },
+                error: function (xhr) {
+                    console.log('Error:', xhr);
+                    if (xhr.status === 422) {
+                        let errors = xhr.responseJSON.errors;
+                        for (let key in errors) {
+                            toastr.error(errors[key][0]);
+                        }
+                    } else {
+                        toastr.error("An error occurred. Please try again.");
+                    }
+                }
+            });
+        });
+    });
+</script> --}}
+
+
+<script>
+    $(document).ready(function () {
+        $('form[id^="editIncomeCategoryForms"] button[type="submit"]').on('click', function (e) {
+            e.preventDefault();
+
+            toastr.clear();
+
+            let form = $(this).closest('form')[0]; // get the closest form to the clicked button
+            let formData = new FormData(form);
+
+            for (let [key, value] of formData.entries()) {
+                console.log(`${key}: ${value}`);
+            }
+
+            $.ajax({
+                url: form.action,
+                method: "POST",
+                data: formData,
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    $('#successMessage').text(response.message);
+                    $('#successModal').modal('show');
+
+                    form.reset();
+                    $('#editModal' + response.id).modal('hide');
+
+                    setTimeout(function () {
+                        window.location.reload();
+                    }, 2000);
+                },
+                error: function (xhr) {
+                    console.log('Error:', xhr);
+                    if (xhr.status === 422) {
+                        let errors = xhr.responseJSON.errors;
+                        for (let key in errors) {
+                            toastr.error(errors[key][0]);
+                        }
+                    } else {
+                        toastr.error("An error occurred. Please try again.");
+                    }
+                }
+            });
+        });
+    });
+
+</script>
+
+<script>
+    $(document).on('click', '.delete-confirm', function (e) {
+        e.preventDefault();
+
+        const form = $(this).closest('form');
+
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "This action cannot be undone.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                form.submit();
+            }
+        });
+    });
+</script>
+    
+    
+<script>
+    $(document).ready(function () {
+        $('form[id^="addIncomeCategoryForms"] button[type="submit"]').on('click', function (e) {
+            e.preventDefault();
+
+            toastr.clear();
+
+            let form = $(this).closest('form')[0]; // get the closest form to the clicked button
+            let formData = new FormData(form);
+
+            for (let [key, value] of formData.entries()) {
+                console.log(`${key}: ${value}`);
+            }
+
+            $.ajax({
+                url: "{{ route('banktransaction.store') }}",
+                method: "POST",
+                data: formData,
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    
+                    $('#successMessage').text(response.message); // Set dynamic success message
+                    $('#successModal').modal('show');
+
+                    form.reset();
+                    $('#addmodals' + response.id).modal('hide');
+
+                    setTimeout(function () {
+                        window.location.reload();
+                    }, 2000);
+                },
+                error: function (xhr) {
+                    console.log('Error:', xhr);
+                    if (xhr.status === 422) {
+                        let errors = xhr.responseJSON.errors;
+                        for (let key in errors) {
+                            toastr.error(errors[key][0]);
+                        }
+                    } else {
+                        toastr.error("An error occurred. Please try again.");
+                    }
+                }
+            });
+        });
+    });
+
+</script>
+
+    
+    
+    
+
+@endsection

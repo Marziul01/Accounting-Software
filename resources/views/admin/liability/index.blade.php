@@ -6,7 +6,7 @@
         <div class="card ">
             <div class="card-header d-flex justify-content-between align-items-center border-bottom-1">
                 <h5 class="mb-0">Current Liabilities</h5>
-                <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                <button type="button" class="btn btn-primary {{ Auth::user()->access->liability == 1 ? 'disabled' : '' }}" data-bs-toggle="modal"
                     data-bs-target="#addmodals">Add New Current Liabilities </button>
             </div>
             <div class="card-body  text-nowrap">
@@ -37,7 +37,7 @@
                                 
                                 <td>
                                     <div class="d-flex align-items-center gap-1 cursor-pointer">
-                                        <a class=" btn btn-sm btn-primary" href="" data-bs-toggle="modal"
+                                        <a class=" btn btn-sm btn-primary {{ Auth::user()->access->liability == 1 ? 'disabled' : '' }}" href="" data-bs-toggle="modal"
                                         data-bs-target="#updateModal{{ $liability->id }}"><i
                                                 class="bx bx-wallet me-1"></i> Update Liability Transaction</a>
                                                 <a class=" btn btn-sm btn-outline-primary" href="" data-bs-toggle="modal"
@@ -46,13 +46,13 @@
                                         <a class=" btn btn-sm btn-outline-secondary" href="" data-bs-toggle="modal"
                                         data-bs-target="#viewModal{{ $liability->id }}"><i
                                                 class="bx bx-show me-1"></i> See Details</a>
-                                            <a class=" btn btn-sm btn-outline-secondary" href="" data-bs-toggle="modal"
+                                            <a class=" btn btn-sm btn-outline-secondary {{ Auth::user()->access->liability == 1 ? 'disabled' : '' }}" href="" data-bs-toggle="modal"
                                             data-bs-target="#editModal{{ $liability->id }}"><i
                                                     class="bx bx-edit-alt me-1"></i> Edit</a>
                                         <form action="{{ route('liability.destroy', $liability->id) }}" method="POST" class="d-inline">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="btn btn-sm btn-outline-danger delete-confirm" ><i
+                                            <button type="submit" class="btn btn-sm btn-outline-danger delete-confirm {{ Auth::user()->access->liability == 1 ? 'disabled' : '' }}" ><i
                                                     class="bx bx-trash me-1"></i> Delete</button>
                                         </form>
                                     </div>
@@ -419,7 +419,7 @@
     @endif
 
     @if($liabilities->isNotEmpty())
-        @foreach ($liabilities as $asset )
+        @foreach ($liabilities as $liability )
 
         <div class="modal fade" id="updateModal{{ $liability->id }}">
             <div class="modal-dialog modal-lg">
@@ -500,13 +500,13 @@
                                             
                                             <td>
                                                 <div class="d-flex align-items-center gap-1 cursor-pointer">
-                                                        <a class=" btn btn-sm btn-outline-secondary" href="" data-bs-toggle="modal"
+                                                        <a class=" btn btn-sm btn-outline-secondary {{ Auth::user()->access->liability == 1 ? 'disabled' : '' }}" href="" data-bs-toggle="modal"
                                                         data-bs-target="#edittranModal{{ $liabilityTransaction->id }}"><i
                                                                 class="bx bx-edit-alt me-1"></i> Edit</a>
                                                     <form action="{{ route('liabilitytransaction.destroy', $liabilityTransaction->id) }}" method="POST" class="d-inline">
                                                         @csrf
                                                         @method('DELETE')
-                                                        <button type="submit" class="btn btn-sm btn-outline-danger delete-confirm" ><i
+                                                        <button type="submit" class="btn btn-sm btn-outline-danger delete-confirm {{ Auth::user()->access->liability == 1 ? 'disabled' : '' }}" ><i
                                                                 class="bx bx-trash me-1"></i> Delete</button>
                                                     </form>
                                                 </div>

@@ -12,6 +12,10 @@ class InvestmentCategoryController extends Controller
      */
     public function index()
     {
+        // Check if the user has permission to access this page
+        if (auth()->user()->access->investment == 3) {
+            return redirect()->route('admin.dashboard')->with('error', 'You do not have permission to access this page.');
+        }
         // Fetch all investment categories from the database
         $investmentCategories = InvestmentCategory::all();
 
@@ -33,12 +37,26 @@ class InvestmentCategoryController extends Controller
      */
     public function store(Request $request)
     {
+        // Check if the user has permission to create investment categories
+        if (auth()->user()->access->investment != 2) {
+            return redirect()->route('admin.dashboard')->with('error', 'You do not have permission to create investment categories.');
+        }
         // Validate the request data
         $request->validate([
-            'name' => 'required|string|max:255|unique:investment_categories,name',
+            'name' => 'required|string|max:255',
             'description' => 'nullable|string|max:1000',
+            'slug' => 'required|string|max:255',
         ]);
 
+        $baseSlug = $request->name;
+        $slug = $baseSlug;
+        $counter = 1;
+        // Check if slug exists in the investments table
+        while (InvestmentCategory::where('slug', $slug)->exists()) {
+            $slug = $baseSlug . '-' . $counter++;
+        }
+        $data['slug'] = $slug;
+        $request->merge(['slug' => $data['slug']]);
         // Create a new investment category
         InvestmentCategory::create($request->all());
 
@@ -69,14 +87,28 @@ class InvestmentCategoryController extends Controller
      */
     public function update(Request $request, string $id)
     {
+        // Check if the user has permission to update investment categories
+        if (auth()->user()->access->investment != 2) {
+            return redirect()->route('admin.dashboard')->with('error', 'You do not have permission to update investment categories.');
+        }
         // Validate the request data
         $request->validate([
-            'name' => 'required|string|max:255|unique:investment_categories,name,' . $id,
+            'name' => 'required|string|max:255',
             'description' => 'nullable|string|max:1000',
+            'slug' => 'required|string|max:255',
         ]);
 
         // Update the investment category
         $investmentCategory = InvestmentCategory::findOrFail($id);
+        $baseSlug = $request->name;
+        $slug = $baseSlug;
+        $counter = 1;
+        // Check if slug exists in the investments table
+        while (InvestmentCategory::where('slug', $slug)->where('id', '!=', $id)->exists()) {
+            $slug = $baseSlug . '-' . $counter++;
+        }
+        $data['slug'] = $slug;
+        $request->merge(['slug' => $data['slug']]);
         $investmentCategory->update($request->all());
 
         // Redirect back to the index with a success message
@@ -91,6 +123,10 @@ class InvestmentCategoryController extends Controller
      */
     public function destroy(string $id)
     {
+        // Check if the user has permission to delete investment categories
+        if (auth()->user()->access->investment != 2) {
+            return redirect()->route('admin.dashboard')->with('error', 'You do not have permission to delete investment categories.');
+        }
         // Find the investment category by ID and delete it
         $investmentCategory = InvestmentCategory::findOrFail($id);
         $investmentCategory->delete();

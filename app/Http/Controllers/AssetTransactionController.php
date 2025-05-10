@@ -29,6 +29,10 @@ class AssetTransactionController extends Controller
      */
     public function store(Request $request)
     {
+        // Check if the user has permission to create asset transactions
+        if (auth()->user()->access->asset != 2) {
+            return redirect()->route('admin.dashboard')->with('error', 'You do not have permission to create asset transactions.');
+        }
         // Validate the request data
         $request->validate([
             'asset_id' => 'required|exists:assets,id',
@@ -79,6 +83,10 @@ class AssetTransactionController extends Controller
      */
     public function update(Request $request, string $id)
     {
+        // Check if the user has permission to update asset transactions
+        if (auth()->user()->access->asset != 2) {
+            return redirect()->route('admin.dashboard')->with('error', 'You do not have permission to update asset transactions.');
+        }
         // Validate the request data
         $request->validate([
             'asset_id' => 'required|exists:assets,id',
@@ -132,6 +140,10 @@ class AssetTransactionController extends Controller
      */
     public function destroy(string $id)
     {
+        // Check if the user has permission to delete asset transactions
+        if (auth()->user()->access->asset != 2) {
+            return redirect()->route('admin.dashboard')->with('error', 'You do not have permission to delete asset transactions.');
+        }
         // Find the asset transaction
         $assetTransaction = AssetTransaction::findOrFail($id);
 

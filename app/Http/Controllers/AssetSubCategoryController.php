@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\AssetSubCategory;
 use App\Models\AssetCategory;
 use App\Models\Asset;
+use Illuminate\Support\Facades\Auth;
 
 class AssetSubCategoryController extends Controller
 {
@@ -14,6 +15,9 @@ class AssetSubCategoryController extends Controller
      */
     public function index()
     {
+        if (Auth::user()->access->asset == 3) {
+            return redirect()->route('admin.dashboard')->with('error', 'You do not have permission to access this page.');
+        }
         // Fetch all asset subcategories from the database
         $assetSubCategories = AssetSubCategory::all();
 
@@ -36,13 +40,28 @@ class AssetSubCategoryController extends Controller
      */
     public function store(Request $request)
     {
+        if (Auth::user()->access->asset != 2) {
+            return redirect()->route('admin.dashboard')->with('error', 'You do not have permission to create .');
+        }
         // Validate the request data
         $request->validate([
-            'name' => 'required|string|max:255|unique:asset_sub_categories,name',
+            'name' => 'required|string|max:255',
             'description' => 'nullable|string|max:1000',
             'asset_category_id' => 'required|exists:asset_categories,id',
+            'slug' => 'required|string|max:255',
         ]);
 
+        $baseSlug = $request->slug;
+        $slug = $baseSlug;
+        $counter = 1;
+
+        // Check if slug exists in the contacts table
+        while (AssetSubCategory::where('slug', $slug)->exists()) {
+            $slug = $baseSlug . '-' . $counter++;
+        }
+
+        $data['slug'] = $slug;
+        $request->merge(['slug' => $data['slug']]);
         // Create a new asset subcategory
         AssetSubCategory::create($request->all());
 
@@ -73,15 +92,28 @@ class AssetSubCategoryController extends Controller
      */
     public function update(Request $request, string $id)
     {
+        if (Auth::user()->access->asset != 2) {
+            return redirect()->route('admin.dashboard')->with('error', 'You do not have permission to create .');
+        }
         // Validate the request data
         $request->validate([
-            'name' => 'required|string|max:255|unique:asset_sub_categories,name,' . $id,
+            'name' => 'required|string|max:255',
             'description' => 'nullable|string|max:1000',
             'asset_category_id' => 'required|exists:asset_categories,id',
+            'slug' => 'required|string|max:255',
         ]);
 
         // Find the asset subcategory by ID and update it
         $assetSubCategory = AssetSubCategory::findOrFail($id);
+        $baseSlug = $request->slug;
+        $slug = $baseSlug;
+        $counter = 1;
+        // Check if slug exists in the contacts table
+        while (AssetSubCategory::where('slug', $slug)->where('id', '!=', $id)->exists()) {
+            $slug = $baseSlug . '-' . $counter++;
+        }
+        $data['slug'] = $slug;
+        $request->merge(['slug' => $data['slug']]);
         $assetSubCategory->update($request->all());
 
         // Redirect back to the index with a success message
@@ -96,6 +128,9 @@ class AssetSubCategoryController extends Controller
      */
     public function destroy(string $id)
     {
+        if (Auth::user()->access->asset != 2) {
+            return redirect()->route('admin.dashboard')->with('error', 'You do not have permission to delete .');
+        }
         // Find the asset subcategory by ID and delete it
         $assetSubCategory = AssetSubCategory::findOrFail($id);
         $assetSubCategory->delete();

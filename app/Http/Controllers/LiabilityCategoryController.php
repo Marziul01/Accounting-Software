@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AssetCategory;
 use Illuminate\Http\Request;
 use App\Models\LiabilityCategory;
 
@@ -12,6 +13,10 @@ class LiabilityCategoryController extends Controller
      */
     public function index()
     {
+        // Check if the user has permission to access this page
+        if (auth()->user()->access->liability == 3) {
+            return redirect()->route('admin.dashboard')->with('error', 'You do not have permission to access this page.');
+        }
         // Fetch all liability categories from the database
         $liabilityCategories = LiabilityCategory::all();
 
@@ -33,12 +38,28 @@ class LiabilityCategoryController extends Controller
      */
     public function store(Request $request)
     {
+        // Check if the user has permission to create liability categories
+        if (auth()->user()->access->liability != 2) {
+            return redirect()->route('admin.dashboard')->with('error', 'You do not have permission.');
+        }
         // Validate the request data
         $request->validate([
-            'name' => 'required|string|max:255|unique:liability_categories,name',
+            'name' => 'required|string|max:255',
             'description' => 'nullable|string|max:1000',
+            'slug' => 'required|string|max:255',
         ]);
 
+        $baseSlug = $request->slug;
+        $slug = $baseSlug;
+        $counter = 1;
+
+        // Check if slug exists in the contacts table
+        while (LiabilityCategory::where('slug', $slug)->exists()) {
+            $slug = $baseSlug . '-' . $counter++;
+        }
+
+        $data['slug'] = $slug;
+        $request->merge(['slug' => $data['slug']]);
         // Create a new liability category
         LiabilityCategory::create($request->all());
 
@@ -69,14 +90,28 @@ class LiabilityCategoryController extends Controller
      */
     public function update(Request $request, string $id)
     {
+        // Check if the user has permission to update liability categories
+        if (auth()->user()->access->liability != 2) {
+            return redirect()->route('admin.dashboard')->with('error', 'You do not have permission.');
+        }
         // Validate the request data
         $request->validate([
-            'name' => 'required|string|max:255|unique:liability_categories,name,' . $id,
+            'name' => 'required|string|max:255',
             'description' => 'nullable|string|max:1000',
+            'slug' => 'required|string|max:255',
         ]);
 
         // Update the specified liability category
         $liabilityCategory = LiabilityCategory::findOrFail($id);
+        $baseSlug = $request->slug;
+        $slug = $baseSlug;
+        $counter = 1;
+        // Check if slug exists in the contacts table
+        while (LiabilityCategory::where('slug', $slug)->where('id', '!=', $id)->exists()) {
+            $slug = $baseSlug . '-' . $counter++;
+        }
+        $data['slug'] = $slug;
+        $request->merge(['slug' => $data['slug']]);
         $liabilityCategory->update($request->all());
 
         // Redirect back to the index with a success message
@@ -91,6 +126,10 @@ class LiabilityCategoryController extends Controller
      */
     public function destroy(string $id)
     {
+        // Check if the user has permission to delete liability categories
+        if (auth()->user()->access->liability != 2) {
+            return redirect()->route('admin.dashboard')->with('error', 'You do not have permission.');
+        }
         // Find the liability category by ID
         $liabilityCategory = LiabilityCategory::findOrFail($id);
 

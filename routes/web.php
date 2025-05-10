@@ -22,10 +22,12 @@ use App\Http\Controllers\LiabilitySubSubCategoryController;
 use App\Http\Controllers\AssetSubSubCategoryController;
 use App\Http\Controllers\AssetTransactionController;
 use App\Http\Controllers\BankAccountController;
+use App\Http\Controllers\BankTransactionController;
 use App\Http\Controllers\InvestmentCategoryController;
 use App\Http\Controllers\InvestmentController;
 use App\Http\Controllers\InvestmentSubCategoryController;
 use App\Http\Controllers\LiabilityTransactionController;
+use App\Http\Controllers\UserController;
 use App\Models\AssetSubSubCategory;
 use App\Models\Investment;
 
@@ -75,6 +77,11 @@ Route::prefix('admin')->middleware(['auth:admin', 'admin.only'])->group(function
     Route::get('/liabilities/fixed-liability/', [LiabilityController::class, 'fixed'])->name('liabilityFixed');
     Route::resource('assettransaction', AssetTransactionController::class);
     Route::resource('liabilitytransaction', LiabilityTransactionController::class);
+    Route::resource('banktransaction', BankTransactionController::class);
+    Route::get('/admin/users/', [UserController::class, 'index'])->name('admin.users');
+    Route::post('/admin/users/store', [UserController::class, 'store'])->name('user.store');
+    Route::post('/admin/users/update/{user}', [UserController::class, 'update'])->name('user.update');
+    Route::post('/admin/users/delete/{user}', [UserController::class, 'destroy'])->name('user.destroy');
 
 });
 

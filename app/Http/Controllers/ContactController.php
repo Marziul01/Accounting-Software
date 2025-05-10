@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Contact;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -13,6 +14,11 @@ class ContactController extends Controller
      */
     public function index()
     {
+
+        if(Auth::user()->access->contact == 3 ){
+            return redirect()->route('admin.dashboard')->with('error', 'You do not have permission to access this page.');
+        }
+
         return view('admin.contact.contact',[
             'contacts' => Contact::all(),
         ]);
@@ -31,10 +37,15 @@ class ContactController extends Controller
      */
     public function store(Request $request)
     {
+
+        if(Auth::user()->access->contact != 2){
+            return redirect()->route('admin.dashboard')->with('error', 'You do not have permission to create .');
+        }
+
         $request->validate([
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'name' => 'required|string|max:255',
-            'slug' => 'required|string|max:255|unique:contacts,slug',
+            'slug' => 'required|string|max:255',
             'mobile_number' => 'required|string|max:15|unique:contacts,mobile_number',
             'email' => 'nullable|email|max:255|unique:contacts,email',
             'date_of_birth' => 'nullable|date',
@@ -94,12 +105,17 @@ class ContactController extends Controller
      */
     public function update(Request $request, string $id)
     {
+
+         if(Auth::user()->access->contact != 2){
+            return redirect()->route('admin.dashboard')->with('error', 'You do not have permission to update .');
+        }
+
         $contact = Contact::findOrFail($id);
 
         $request->validate([
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'name' => 'required|string|max:255',
-            'slug' => 'required|string|max:255|unique:contacts,slug,' . $contact->id,
+            'slug' => 'required|string|max:255',
             'mobile_number' => 'required|string|max:15|unique:contacts,mobile_number,' . $contact->id,
             'email' => 'nullable|email|max:255|unique:contacts,email,' . $contact->id,
             'date_of_birth' => 'nullable|date',
@@ -126,9 +142,9 @@ class ContactController extends Controller
         $baseSlug = $request->slug;
         $slug = $baseSlug;
         $counter = 1;
-
-        // Check if slug exists in the contacts table
-        while (Contact::where('slug', $slug)->exists()) {
+        while (
+            Contact::where('slug', $slug)->where('id', '!=', $contact->id)->exists()
+        ) {
             $slug = $baseSlug . '-' . $counter++;
         }
 
@@ -148,6 +164,10 @@ class ContactController extends Controller
      */
     public function destroy(string $id)
     {
+        if(Auth::user()->access->contact != 2){
+            return redirect()->route('admin.dashboard')->with('error', 'You do not have permission to delete .');
+        }
+
         $contact = Contact::findOrFail($id);
 
         if ($contact->image && file_exists(public_path($contact->image))) {

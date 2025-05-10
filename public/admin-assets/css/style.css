@@ -237,7 +237,50 @@ div:where(.swal2-container){
 .contact-card h3{
   color: var(--primary-color) !important;
 }
-
+.bank_card_icon{
+  font-size: 45px !important;
+}
+.bank_card_info h4{
+  font-size: 16px !important;
+  margin-bottom: 0px !important;
+}
+.bank_type{
+  font-size: 11px !important;
+  padding: 3px 8px;
+  border-radius: 5px;
+  background-color: var(--secondary-color);
+  color: black !important;
+  width: fit-content;
+  
+}
+.holder_name{
+  font-size: 16px !important;
+  margin-bottom: 5px !important;
+}
+.nominee{
+  font-size: 12px !important;
+}
+.nav-link{
+  color: var(--text-color) !important;
+}
+.nav-link:hover{
+  color: var(--primary-color) !important;
+}
+.nav-link.active{
+  color: var(--primary-color) !important;
+  border-color: var(--primary-color) !important;
+  box-shadow: 0 -2px 0 var(--primary-color) inset !important;
+}
+.nav-pills .nav-link.active{
+  background-color: var(--primary-color) !important;
+  color: #fff !important;
+}
+.float-right{
+  float: right !important;
+}
+.font-xx{
+  font-size: 14px !important ;
+}
 
 @media screen and (max-width: 768px) {
   .dt-buttons, div.dataTables_wrapper div.dataTables_info{
