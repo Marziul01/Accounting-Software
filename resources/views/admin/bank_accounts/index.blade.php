@@ -38,10 +38,11 @@
                                             <h3 class="account_number">{{ $bankbook->account_number }}</h3>
                                             <p class="holder_name">{{ $bankbook->account_holder_name }} </p>
                                             <p class="nominee">Nominee Name: {{ $bankbook->nominee_name }}</p>
+                                            <div class="bank_card_info">
+                                                <p class="bank_type font-xx">Balance: {{ number_format($bankbook->balance, 2) }} </p>
+                                            </div>
                                         </div>
-                                        <div class="bank_card_info">
-                                            <p class="bank_type float-right font-xx">Balance: {{ number_format($bankbook->balance, 2) }} </p>
-                                        </div>
+                                        
                                     </div>
                                     
                                 </div>

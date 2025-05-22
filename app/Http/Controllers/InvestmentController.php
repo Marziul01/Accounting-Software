@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Investment;
 use App\Models\InvestmentCategory;
 use App\Models\InvestmentSubCategory;
+use App\Models\InvestmentTransaction;
 
 class InvestmentController extends Controller
 {
@@ -25,6 +26,7 @@ class InvestmentController extends Controller
             'investmentCategories' => $investmentCategories,
             'investmentSubCategories' => InvestmentSubCategory::where('status', 1)->get(),
             'investments' => Investment::all(),
+            'investmentTransactions' => InvestmentTransaction::all(),
         ]);
     }
 
@@ -52,7 +54,7 @@ class InvestmentController extends Controller
             'investment_sub_category_id' => 'required|exists:investment_sub_categories,id',
             'amount' => 'required|numeric|min:0',
             'date' => 'required|date',
-            'investment_type' => 'required',
+            
             'slug' => 'required|string|max:255',
         ]);
         
@@ -107,7 +109,7 @@ class InvestmentController extends Controller
             'investment_sub_category_id' => 'required|exists:investment_sub_categories,id',
             'amount' => 'required|numeric|min:0',
             'date' => 'required|date',
-            'investment_type' => 'required',
+           
             'slug' => 'required|string|max:255',
         ]);
 
@@ -123,6 +125,21 @@ class InvestmentController extends Controller
         $data['slug'] = $slug;
         $request->merge(['slug' => $data['slug']]);
         $investment->update($request->all());
+
+        $finalAmount = $request->amount;
+
+        $transactions = InvestmentTransaction::where('investment_id', $id)->get();
+
+        foreach ($transactions as $transaction) {
+            if ($transaction->transaction_type === 'Deposit') {
+                $finalAmount += $transaction->amount;
+            } elseif ($transaction->transaction_type === 'Withdraw') {
+                $finalAmount -= $transaction->amount;
+            }
+        }
+
+        $investment->amount = $finalAmount;
+        $investment->save();
 
         // Redirect back to the index with a success message
         return response()->json([
@@ -146,5 +163,22 @@ class InvestmentController extends Controller
 
         // Redirect back to the index with a success message
         return back()->with('success', 'Investment deleted successfully!');
+    }
+
+    public function report()
+    {
+        // Check if the user has permission to access this page
+        if (auth()->user()->access->investment == 3) {
+            return redirect()->route('admin.dashboard')->with('error', 'You do not have permission to access this page.');
+        }
+        // Fetch all investment categories from the database
+        $investmentCategories = InvestmentCategory::where('status', 1)->get();
+
+        return view('admin.investment.investment-report', [
+            'investmentCategories' => $investmentCategories,
+            'investmentSubCategories' => InvestmentSubCategory::where('status', 1)->get(),
+            'investments' => Investment::all(),
+            'investmentTransactions' => InvestmentTransaction::all(),
+        ]);
     }
 }

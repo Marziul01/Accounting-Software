@@ -4,12 +4,16 @@
     --card-bg: #f8f9fa;
     --primary-color: #00a652;
     --secondary-color: #f8a619;
+    --table-odd-row: #d4edda;
+    --table-even-row: #fff3cd;
   }
   
   [data-theme="dark"] {
     --bg-color: #121212;
     --text-color: #e0e0e0;
     --card-bg: #1e1e1e;
+    --table-odd-row: #003a0e;
+    --table-even-row: #443400;
   }
   
   body  {
@@ -245,7 +249,7 @@ div:where(.swal2-container){
   margin-bottom: 0px !important;
 }
 .bank_type{
-  font-size: 11px !important;
+  font-size: 9px !important;
   padding: 3px 8px;
   border-radius: 5px;
   background-color: var(--secondary-color);
@@ -281,6 +285,15 @@ div:where(.swal2-container){
 .font-xx{
   font-size: 14px !important ;
 }
+table tbody tr:nth-child(odd) {
+    background-color: var(--table-odd-row); /* Light green */
+}
+
+/* Apply yellow-orange to even rows */
+table tbody tr:nth-child(even) {
+    background-color: var(--table-even-row); /* Light yellow-orange */
+}
+
 
 @media screen and (max-width: 768px) {
   .dt-buttons, div.dataTables_wrapper div.dataTables_info{

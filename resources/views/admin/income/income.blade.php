@@ -32,7 +32,7 @@
                                 <td>{{ $income->name }}</td>
                                 <td>{{ $income->description ?? 'N/A' }}</td>
                                 <td>{{ $income->amount ?? 'N/A' }}</td> <!-- ✅ Amount -->
-                                <td>{{ \Carbon\Carbon::parse($income->income_date)->format('d M, Y') ?? 'N/A' }}</td> <!-- ✅ Income Date -->
+                                <td>{{ \Carbon\Carbon::parse($income->date)->format('d M, Y') ?? 'N/A' }}</td> <!-- ✅ Income Date -->
                                 <td>
                                     <div class="d-flex align-items-center gap-1 cursor-pointer">
                                         <a class="btn btn-sm btn-outline-secondary {{ Auth::user()->access->income == 1 ? 'disabled' : '' }}" href="#" data-bs-toggle="modal"

@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Liability;
-use App\Models\LiabilityTransaction;
+use App\Models\Investment;
+use App\Models\InvestmentTransaction;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
-class LiabilityTransactionController extends Controller
+class InvestmentTransactionController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -30,36 +32,33 @@ class LiabilityTransactionController extends Controller
     public function store(Request $request)
     {
         // Check if the user has permission to create liability transactions
-        if (auth()->user()->access->liability != 2) {
-            return redirect()->route('admin.dashboard')->with('error', 'You do not have permission to create liability transactions.');
+        if (auth()->user()->access->investment != 2) {
+            return redirect()->route('admin.dashboard')->with('error', 'You do not have permission to create investment transactions.');
         }
-        
-        // Validate the request data
         $request->validate([
-            'liability_id' => 'required|exists:liabilities,id',
+            'investment_id' => 'required|exists:investments,id',
             'amount' => 'required',
             'transaction_type' => 'required',
             'transaction_date' => 'required|date',
         ]);
 
         // Create a new asset sub-subcategory
-        $assetTransaction = LiabilityTransaction::create($request->all());
+        $investmentTransaction = InvestmentTransaction::create($request->all());
 
         // Update the asset amount based on the transaction type
-        $asset = Liability::findOrFail($request->liability_id);
+        $investment = Investment::findOrFail($request->investment_id);
 
         if ($request->transaction_type === 'Deposit') {
-            $asset->amount += $request->amount;
+            $investment->amount += $request->amount;
         } elseif ($request->transaction_type === 'Withdraw') {
-            $asset->amount -= $request->amount;
+            $investment->amount -= $request->amount;
         }
 
-        $asset->save();
+        $investment->save();
 
-        // Redirect back to the index with a success message
         return response()->json([
-            'message' => 'Liability Transaction created successfully!',
-            'id' => $assetTransaction->id,
+            'message' => 'Investment Transaction created successfully!',
+            'id' => $investmentTransaction->id,
         ]);
     }
 
@@ -85,34 +84,34 @@ class LiabilityTransactionController extends Controller
     public function update(Request $request, string $id)
     {
         // Check if the user has permission to update liability transactions
-        if (auth()->user()->access->liability != 2) {
-            return redirect()->route('admin.dashboard')->with('error', 'You do not have permission to update liability transactions.');
+        if (auth()->user()->access->investment != 2) {
+            return redirect()->route('admin.dashboard')->with('error', 'You do not have permission to update investment transactions.');
         }
         $request->validate([
-            'liability_id' => 'required|exists:liabilities,id',
+            'investment_id' => 'required|exists:investments,id',
             'amount' => 'required|numeric|min:0',
             'transaction_type' => 'required|in:Deposit,Withdraw',
             'transaction_date' => 'required|date',
         ]);
 
         // Find the existing asset transaction
-        $assetTransaction = LiabilityTransaction::findOrFail($id);
+        $investmentTransaction = InvestmentTransaction::findOrFail($id);
         
         // Save previous values before update
-        $previousAmount = $assetTransaction->amount;
-        $previousType = $assetTransaction->transaction_type;
+        $previousAmount = $investmentTransaction->amount;
+        $previousType = $investmentTransaction->transaction_type;
 
         // Update the transaction record
-        $assetTransaction->update($request->all());
+        $investmentTransaction->update($request->all());
 
         // Fetch the associated asset
-        $asset = Liability::findOrFail($request->asset_id);
+        $investment = Investment::findOrFail($request->investment_id);
 
         // Reverse the previous transaction
         if ($previousType === 'Deposit') {
-            $asset->amount -= $previousAmount;
+            $investment->amount -= $previousAmount;
         } elseif ($previousType === 'Withdraw') {
-            $asset->amount += $previousAmount;
+            $investment->amount += $previousAmount;
         }
 
         // Apply the new transaction
@@ -120,17 +119,17 @@ class LiabilityTransactionController extends Controller
         $newType = $request->transaction_type;
 
         if ($newType === 'Deposit') {
-            $asset->amount += $newAmount;
+            $investment->amount += $newAmount;
         } elseif ($newType === 'Withdraw') {
-            $asset->amount -= $newAmount;
+            $investment->amount -= $newAmount;
         }
 
         // Save the updated asset amount
-        $asset->save();
+        $investment->save();
 
         return response()->json([
-            'message' => 'Liability Transaction updated successfully!',
-            'id' => $assetTransaction->id,
+            'message' => 'Investment Transaction updated successfully!',
+            'id' => $investmentTransaction->id,
         ]);
     }
 
@@ -140,28 +139,28 @@ class LiabilityTransactionController extends Controller
     public function destroy(string $id)
     {
         // Check if the user has permission to delete liability transactions
-        if (auth()->user()->access->liability != 2) {
-            return redirect()->route('admin.dashboard')->with('error', 'You do not have permission to delete liability transactions.');
+        if (auth()->user()->access->investment != 2) {
+            return redirect()->route('admin.dashboard')->with('error', 'You do not have permission to delete investment transactions.');
         }
-        $assetTransaction = LiabilityTransaction::findOrFail($id);
+        $investmentTransaction = InvestmentTransaction::findOrFail($id);
 
         // Get the associated asset
-        $asset = Liability::findOrFail($assetTransaction->asset_id);
+        $investment = Investment::findOrFail($investmentTransaction->asset_id);
 
         // Reverse the transaction effect on the asset amount
-        if ($assetTransaction->transaction_type === 'Deposit') {
-            $asset->amount -= $assetTransaction->amount;
-        } elseif ($assetTransaction->transaction_type === 'Withdraw') {
-            $asset->amount += $assetTransaction->amount;
+        if ($investmentTransaction->transaction_type === 'Deposit') {
+            $investment->amount -= $investmentTransaction->amount;
+        } elseif ($investmentTransaction->transaction_type === 'Withdraw') {
+            $investment->amount += $investmentTransaction->amount;
         }
 
         // Save the updated asset
-        $asset->save();
+        $investment->save();
 
         // Now delete the transaction
-        $assetTransaction->delete();
+        $investmentTransaction->delete();
 
         // Return back with success
-        return back()->with('success', 'Liability Transaction deleted successfully!');
+        return back()->with('success', 'Investment Transaction deleted successfully!');
     }
 }

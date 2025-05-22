@@ -20,11 +20,29 @@ class IncomeController extends Controller
         }
         // Fetch all income records from the database
         $incomes = Income::all();
+        $firstDate = $incomes->min('date');
+        $lastDate = $incomes->max('date');
 
         return view('admin.income.income', [
             'incomes' => $incomes,
             'incomeCategories' => IncomeCategory::where('status', 1)->get(),
             'incomeSubCategories' => IncomeSubCategory::where('status', 1)->get(),
+            'firstDate' => $firstDate,
+            'lastDate' => $lastDate,
+        ]);
+    }
+
+    public static function report()
+    {
+        $incomes = Income::all();
+        $firstDate = $incomes->min('date');
+        $lastDate = $incomes->max('date');
+        return view('admin.income.report', [
+            'incomes' => Income::all(),
+            'incomeCategories' => IncomeCategory::where('status', 1)->get(),
+            'incomeSubCategories' => IncomeSubCategory::where('status', 1)->get(),
+            'firstDate' => $firstDate,
+            'lastDate' => $lastDate,
         ]);
     }
 
@@ -156,4 +174,58 @@ class IncomeController extends Controller
         // Redirect back to the index with a success message
         return back()->with('success', 'Income record deleted successfully!');
     }
+
+    public function IncomesubcategoryReport($slug, Request $request)
+    {
+        $subcategory = IncomeSubCategory::where('slug', $slug)->firstOrFail();
+
+        $startDate = $request->start_date ?? now()->startOfMonth()->toDateString();
+        $endDate = $request->end_date ?? now()->endOfMonth()->toDateString();
+
+        $incomes = Income::where('income_sub_category_id', $subcategory->id)
+            ->whereBetween('date', [$startDate, $endDate])
+            ->get();
+
+        return view('admin.income.subcategory-report', compact('subcategory', 'incomes', 'startDate', 'endDate'));
+    }
+
+    public function filter(Request $request)
+    {
+        $startDate = $request->start_date;
+        $endDate = $request->end_date;
+
+        $incomeCategories = IncomeCategory::with('incomeSubCategories')->get();
+        $incomes = Income::whereBetween('date', [$startDate, $endDate])->get();
+
+        return response()->json([
+            'html' => view('admin.income.partial-table', compact('incomeCategories', 'incomes', 'startDate', 'endDate'))->render()
+        ]);
+    }
+
+
+    public function fullReport(Request $request)
+    {
+        $startDate = $request->start_date ?? now()->startOfMonth()->toDateString();
+        $endDate = $request->end_date ?? now()->endOfMonth()->toDateString();
+
+        $incomes = Income::whereBetween('date', [$startDate, $endDate])->get();
+        $incomeCategories = IncomeCategory::where('status', 1)->get();
+
+        return view('admin.income.full-report', compact('incomes', 'startDate', 'endDate' , 'incomeCategories'));
+    }
+
+    public function IncomecategoryReport(Request $request)
+    {
+        $startDate = $request->start_date ?? now()->startOfMonth()->toDateString();
+        $endDate = $request->end_date ?? now()->endOfMonth()->toDateString();
+        $category = IncomeCategory::where('slug', $request->slug)->firstOrFail();
+
+        $incomes = Income::whereBetween('date', [$startDate, $endDate])->get();
+        $incomeCategories = IncomeCategory::where('status', 1)->get();
+
+        return view('admin.income.category-report', compact('category','incomes', 'startDate', 'endDate' , 'incomeCategories'));
+    }
+
+
+
 }

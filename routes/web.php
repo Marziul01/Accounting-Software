@@ -26,10 +26,12 @@ use App\Http\Controllers\BankTransactionController;
 use App\Http\Controllers\InvestmentCategoryController;
 use App\Http\Controllers\InvestmentController;
 use App\Http\Controllers\InvestmentSubCategoryController;
+use App\Http\Controllers\InvestmentTransactionController;
 use App\Http\Controllers\LiabilityTransactionController;
 use App\Http\Controllers\UserController;
 use App\Models\AssetSubSubCategory;
 use App\Models\Investment;
+use App\Models\InvestmentTransaction;
 
 Route::get('/', [Homecontroller::class, 'index'])->name('home');
 
@@ -82,6 +84,21 @@ Route::prefix('admin')->middleware(['auth:admin', 'admin.only'])->group(function
     Route::post('/admin/users/store', [UserController::class, 'store'])->name('user.store');
     Route::post('/admin/users/update/{user}', [UserController::class, 'update'])->name('user.update');
     Route::post('/admin/users/delete/{user}', [UserController::class, 'destroy'])->name('user.destroy');
+
+    Route::get('/incomes/report', [IncomeController::class, 'report'])->name('income.report');
+    Route::get('/incomes/category/report', [IncomeController::class, 'IncomecategoryReport'])->name('admin.IncomecategoryReport');
+    Route::get('/incomes/subcategory/report/{slug}', [IncomeController::class, 'IncomesubcategoryReport'])->name('admin.IncomesubcategoryReport');
+    Route::get('/admin/income-report/filter/', [IncomeController::class, 'filter'])->name('admin.incomeReport.filter');
+    Route::get('/full-income-report', [IncomeController::class, 'fullreport'])->name('admin.fullreport');
+
+    Route::get('/expenses/report', [ExpenseController::class, 'report'])->name('expense.report');
+    Route::get('/expenses/category/report', [ExpenseController::class, 'expensecategoryReport'])->name('admin.expensecategoryReport');
+    Route::get('/expenses/subcategory/report/{slug}', [ExpenseController::class, 'expensesubcategoryReport'])->name('admin.expensesubcategoryReport');
+    Route::get('/admin/expense-report/filter/', [ExpenseController::class, 'filter'])->name('admin.expenseReport.filter');
+    Route::get('/full-expense-report', [ExpenseController::class, 'fullreport'])->name('admin.fullreport.exponse');
+    
+    Route::resource('investmenttransaction', InvestmentTransactionController::class);
+    Route::get('/investments/report', [InvestmentController::class, 'report'])->name('investment.report');
 
 });
 

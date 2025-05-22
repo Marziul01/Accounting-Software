@@ -16,7 +16,7 @@
                             <tr>
                                 <th>Sl</th>
                                 <th>Investment Category</th>
-                                <th>Investment Type</th>
+                                
                                 <th>Name</th>
                                 <th>Description</th>
                                 <th>Amount</th>
@@ -25,18 +25,24 @@
                             </tr>
                         </thead>
                         <tbody class="table-border-bottom-0">
-                            @if($investments->isNotEmpty())
+                            @if($investments->isNotEmpty()) 
                             @foreach ($investments as $investment )
                             <tr>
                                 <td>{{ $loop->iteration }}</td>
                                 <td>{{ $investment->investmentCategory->name ?? 'Investment Category Not Assigned' }} - ( {{ $investment->investmentSubCategory->name ?? 'Investment Sub Category Not Assigned' }} ) </td>
-                                <td>{{ $investment->investment_type }}</td>
+                                
                                 <td>{{ $investment->name }}</td>
                                 <td>{{ $investment->description ?? 'N/A' }}</td>
                                 <td>{{ $investment->amount ?? 'N/A' }}</td> <!-- ✅ Amount -->
                                 <td>{{ \Carbon\Carbon::parse($investment->income_date)->format('d M, Y') ?? 'N/A' }}</td> <!-- ✅ Income Date -->
                                 <td>
                                     <div class="d-flex align-items-center gap-1 cursor-pointer">
+                                        <a class=" btn btn-sm btn-primary {{ Auth::user()->access->investment == 1 ? 'disabled' : '' }}" href="" data-bs-toggle="modal"
+                                        data-bs-target="#updateModal{{ $investment->id }}"><i
+                                                class="bx bx-wallet me-1"></i> Add New Transaction</a>
+                                                <a class=" btn btn-sm btn-outline-primary" href="" data-bs-toggle="modal"
+                                        data-bs-target="#seeModal{{ $investment->id }}"><i
+                                                class="bx bx-wallet me-1"></i> See All Transactions</a>
                                         <a class="btn btn-sm btn-outline-secondary {{ Auth::user()->access->investment == 1 ? 'disabled' : '' }}" href="#" data-bs-toggle="modal"
                                            data-bs-target="#editModal{{ $investment->id }}"><i class="bx bx-edit-alt me-1"></i> Edit</a>
                                         <form action="{{ route('investment.destroy', $investment->id) }}" method="POST" class="d-inline">
@@ -100,14 +106,7 @@
                                 <option value="">Select Sub Category</option>
                             </select>
                         </div>
-                        <div class="mb-3">
-                            <label  class="form-label">Investment Type</label>
-                            <select class="form-select" name="investment_type" required>
-                                <option value="">Select Investment Type</option>
-                                <option value="Deposit">Deposit</option>
-                                <option value="Withdraw">Withdraw</option>
-                            </select>
-                        </div>
+                        
                         <div class="mb-3">
                             <label for="amount" class="form-label">Amount</label>
                             <input type="number" class="form-control" id="amount" name="amount" required>
@@ -184,14 +183,7 @@
                                 </select>
 
                             </div>
-                            <div class="mb-3">
-                                <label  class="form-label">Investment Type</label>
-                                <select class="form-select" name="investment_type" required>
-                                    <option value="">Select Investment Type</option>
-                                    <option value="Deposit" {{ $investment->investment_type == 'Deposit' ? 'selected' : '' }}>Deposit</option>
-                                    <option value="Withdraw" {{ $investment->investment_type == 'Withdraw' ? 'selected' : '' }}>Withdraw</option>
-                                </select>
-                            </div>
+                            
                             <div class="mb-3">
                                 <label for="amount" class="form-label">Amount</label>
                                 <input type="number" class="form-control" id="amount" name="amount" value="{{ $investment->amount }}" required>
@@ -218,6 +210,162 @@
         @endforeach
     @endif
     <!-- / Modal -->
+
+    @if($investments->isNotEmpty())
+        @foreach ($investments as $investment )
+
+        <div class="modal fade" id="updateModal{{ $investment->id }}">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Add New Investment Transaction </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    
+                        <div class="modal-body">
+                            <form id="assetForms{{ $investment->id }}">
+                                @csrf
+                                <div class="row">
+                                        <input type="hidden" name="investment_id" value="{{ $investment->id }}">
+                                        <div class="col-12 mb-3">
+                                            <label>Transation Type</label>
+                                            <select name="transaction_type" id="" class="form-select">
+                                                <option value="Deposit">জমা </option>
+                                                <option value="Withdraw">উত্তোলন</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-12 mb-3">
+                                            <label>Amount</label>
+                                            <input type="number" name="amount" class="form-control" required >
+                                        </div>
+                                    
+                                        <div class="col-12 mb-3">
+                                            <label>Transaction Date</label>
+                                            <input type="date" name="transaction_date" class="form-control" required >
+                                        </div>
+    
+                                        <div class="col-12 mb-3">
+                                            <button type="submit" class="btn btn-primary">Submit</button>
+                                        </div>
+                                </div>
+                                
+                            </form>
+                        </div>
+                </div>  
+            </div>
+        </div>
+        @endforeach
+    @endif
+
+
+    @if($investments->isNotEmpty())
+        @foreach ($investments as $investment )
+
+        <div class="modal fade" id="seeModal{{ $investment->id }}">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel"> See All Investment Transactions </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    
+                        <div class="modal-body">
+                            <div class="table-responsive">
+                                <table class="table" id="myTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Sl</th>
+                                            <th>Transaction Type</th>
+                                            <th>Amount</th>
+                                            <th>Transaction Date </th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="table-border-bottom-0">
+                                        @if($investmentTransactions->where('investment_id', $investment->id )->isNotEmpty())
+                                        @foreach ($investmentTransactions->where('investment_id', $investment->id ) as $investmentTransaction )
+                                        <tr>
+                                            <td>{{ $loop->iteration }}</td>
+                                            <td>{{ $investmentTransaction->transaction_type }}</td>
+                                            <td>{{ $investmentTransaction->amount }}</td>
+                                            <td>{{ $investmentTransaction->transaction_date }} </td>
+                                            
+                                            
+                                            <td>
+                                                <div class="d-flex align-items-center gap-1 cursor-pointer">
+                                                        <a class=" btn btn-sm btn-outline-secondary {{ Auth::user()->access->investment == 1 ? 'disabled' : '' }}" href="" data-bs-toggle="modal"
+                                                        data-bs-target="#edittranModal{{ $investmentTransaction->id }}"><i
+                                                                class="bx bx-edit-alt me-1"></i> Edit</a>
+                                                    <form action="{{ route('investmenttransaction.destroy', $investmentTransaction->id) }}" method="POST" class="d-inline">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="btn btn-sm btn-outline-danger delete-confirm {{ Auth::user()->access->investment == 1 ? 'disabled' : '' }}" ><i
+                                                                class="bx bx-trash me-1"></i> Delete</button>
+                                                    </form>
+                                                </div>
+                                            </td>
+                                        </tr> 
+                                        @endforeach
+                                        @else
+                                        <tr>
+                                            <td colspan="4" class="text-center">No investment Transaction found.</td>
+                                        </tr>
+                                        @endif
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                </div>  
+            </div>
+        </div>
+        @endforeach
+    @endif
+
+    @if($investmentTransactions->isNotEmpty())
+        @foreach ($investmentTransactions as $investmentTransaction )
+
+        <div class="modal fade" id="edittranModal{{ $investmentTransaction->id }}">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Edit Investment Transaction</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form id="editTransCategoryForms{{ $investmentTransaction->id }}" action="{{ route('investmenttransaction.update', $investmentTransaction->id) }}">
+                        @csrf
+                        @method('PUT')
+                        <div class="modal-body">
+                            <div class="row">
+                                <input type="hidden" name="investment_id" value="{{ $investmentTransaction->investment_id }}">
+                                <div class="col-12 mb-3">
+                                    <label>Transation Type</label>
+                                    <select name="transaction_type" id="" class="form-select">
+                                        <option value="Deposit" {{ $investmentTransaction->transaction_type == 'Deposit' ? 'Selected' : '' }} >জমা </option>
+                                        <option value="Withdraw" {{ $investmentTransaction->transaction_type == 'Withdraw' ? 'Selected' : '' }}>উত্তোলন</option>
+                                    </select>
+                                </div>
+                                <div class="col-12 mb-3">
+                                    <label>Amount</label>
+                                    <input type="number" name="amount" class="form-control" required value="{{ $investmentTransaction->amount }}">
+                                </div>
+                            
+                                <div class="col-12 mb-3">
+                                    <label>Transaction Date</label>
+                                    <input type="date" name="transaction_date" class="form-control" required value="{{ $investmentTransaction->transaction_date }}" >
+                                </div>
+
+                                <div class="col-12 mb-3">
+                                    <button type="submit" class="btn btn-primary">Submit</button>
+                                </div>
+                        </div>
+                        </div>
+                    </form>
+                    
+                </div>  
+            </div>
+        </div>
+        @endforeach
+    @endif
 
 
     <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
@@ -509,6 +657,110 @@
 </script>
     
     
+<script>
+    $(document).ready(function () {
+        $('form[id^="editTransCategoryForms"] button[type="submit"]').on('click', function (e) {
+            e.preventDefault();
+
+            toastr.clear();
+
+            let form = $(this).closest('form')[0]; // get the closest form to the clicked button
+            let formData = new FormData(form);
+
+            for (let [key, value] of formData.entries()) {
+                console.log(`${key}: ${value}`);
+            }
+
+            $.ajax({
+                url: form.action,
+                method: "POST",
+                data: formData,
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    $('#successMessage').text(response.message);
+                    $('#successModal').modal('show');
+
+                    form.reset();
+                    $('#edittranModal' + response.id).modal('hide');
+
+                    setTimeout(function () {
+                        window.location.reload();
+                    }, 2000);
+                },
+                error: function (xhr) {
+                    console.log('Error:', xhr);
+                    if (xhr.status === 422) {
+                        let errors = xhr.responseJSON.errors;
+                        for (let key in errors) {
+                            toastr.error(errors[key][0]);
+                        }
+                    } else {
+                        toastr.error("An error occurred. Please try again.");
+                    }
+                }
+            });
+        });
+    });
+
+</script>
+
+<script>
+    $(document).ready(function () {
+
+        
+            $('form[id^="assetForms"] button[type="submit"]').on('click', function (e) {
+            e.preventDefault();
+           
+
+            toastr.clear();
+
+            let form = $(this).closest('form')[0]; // ✅ get the actual form element
+            let formData = new FormData(form);         // ✅ pass the form here
+
+            for (let [key, value] of formData.entries()) {
+                console.log(`${key}: ${value}`);
+            }
+
+            $.ajax({
+                url: "{{ route('investmenttransaction.store') }}",
+                method: "POST",
+                data: formData,
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    
+                    $('#successMessage').text(response.message); // Set dynamic success message
+                    $('#successModal').modal('show');
+
+                    form.reset();
+                    $('#updateModal' + response.id).modal('hide');
+
+                    setTimeout(function () {
+                        window.location.reload();
+                    }, 2000);
+                },
+                error: function (xhr) {
+                    console.log('Error:', xhr);
+                    if (xhr.status === 422) {
+                        let errors = xhr.responseJSON.errors;
+                        for (let key in errors) {
+                            toastr.error(errors[key][0]);
+                        }
+                    } else {
+                        toastr.error("An error occurred. Please try again.");
+                    }
+                }
+            });
+        });
+    });
+</script>
     
 
 

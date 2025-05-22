@@ -4,31 +4,15 @@
     <div class="container-fluid flex-grow-1 container-p-y">
         <!-- Basic Bootstrap Table -->
         <div class="card ">
-
-            @if ($bankaccounts->isNotEmpty())
-                    <div class="card-header">
-                        <ul class="nav nav-tabs" id="bankAccountTabs" role="tablist">
-                            @foreach ($bankaccounts as $index => $bankaccount)
-                                <li class="nav-item" role="presentation">
-                                    <button class="nav-link {{ $index === 0 ? 'active' : '' }}" id="tab-{{ $bankaccount->id }}" data-bs-toggle="tab" data-bs-target="#content-{{ $bankaccount->id }}" type="button" role="tab" aria-controls="content-{{ $bankaccount->id }}" aria-selected="{{ $index === 0 ? 'true' : 'false' }}">
-                                        {{ $bankaccount->bank_name }}
-                                    </button>
-                                </li>
-                            @endforeach
-                        </ul>
+                    <div class="card-header d-flex justify-content-between align-items-center border-bottom-1 mb-0 ">
+                        <h5 class="mb-0">All Bank Transactions</h5>
+                                        <button type="button" class="btn btn-primary {{ Auth::user()->access->bankbook == 1 ? 'disabled' : '' }}" data-bs-toggle="modal"
+                                            data-bs-target="#addmodals">Add New Transactions</button>
                     </div>
                     <div class="card-body">
-                        <div class="tab-content px-0" id="bankAccountTabsContent">
-                            @foreach ($bankaccounts as $index => $bankaccount)
-                                <div class="tab-pane fade {{ $index === 0 ? 'show active' : '' }}" id="content-{{ $bankaccount->id }}" role="tabpanel" aria-labelledby="tab-{{ $bankaccount->id }}">
-                                    <div class="card-header d-flex justify-content-between align-items-center border-bottom-1 px-0 pt-0">
-                                        <h5 class="mb-0">{{ $bankaccount->bank_name }} Transactions</h5>
-                                        <button type="button" class="btn btn-primary {{ Auth::user()->access->bankbook == 1 ? 'disabled' : '' }}" data-bs-toggle="modal"
-                                            data-bs-target="#addmodals{{ $bankaccount->id }}">Add New Transactions</button>
-                                    </div>
-                                    <div class="card-body  text-nowrap px-0">
+                        
                                         <div class="table-responsive">
-                                            <table class="table" id="myTable{{ $bankaccount->id }}">
+                                            <table class="table" id="myTable">
                                                 <thead>
                                                     <tr>
                                                         <th>Sl</th>
@@ -42,8 +26,8 @@
                                                     </tr>
                                                 </thead>
                                                 <tbody class="table-border-bottom-0">
-                                                    @if($bankaccount->transactions->isNotEmpty())
-                                                    @foreach ($bankaccount->transactions as $transaction )
+                                                    @if($banktransactions->isNotEmpty())
+                                                    @foreach ($banktransactions as $transaction )
                                                     <tr>
                                                         <td>{{ $loop->iteration }}</td>
                                                         
@@ -89,33 +73,23 @@
                                             </table>
                                         </div>
                                         
-                                    </div>
-                                </div>
-                            @endforeach
-                        </div>
+                                
                     </div>
-                    @else
-                    <div class="card-body">
-                        <div class="alert alert-warning" role="alert">
-                            No bank accounts found. Please add a bank account first.
-                        </div>
-                    </div>
-            @endif
+                    
             
         </div>
     </div>
     
-    @if($bankaccounts->isNotEmpty())
-        @foreach ($bankaccounts as $bankaccount )
+   
     <!-- Modal -->
-    <div class="modal fade" id="addmodals{{ $bankaccount->id }}">
+    <div class="modal fade" id="addmodals">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Add New {{ $bankaccount->bank_name }} Transactions</h5>
+                    <h5 class="modal-title" id="exampleModalLabel">Add New  Transactions</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form id="addIncomeCategoryForms{{ $bankaccount->id }}">
+                <form id="addIncomeCategoryForms">
                     @csrf
                     
                     <div class="modal-body">
@@ -128,7 +102,16 @@
                             <label for="slug" class="form-label">Slug</label>
                             <input type="text" class="form-control slug-output" id="slug" name="slug"  readonly>
                         </div>
-                        <input type="hidden" name="bank_account_id" value="{{ $bankaccount->id }}">
+                        <div class="mb-3">
+                                <label for="add_income_category_id" class="form-label">Bank Account</label>
+                                <select class="form-select category-select" id="add_income_category_id" name="bank_account_id" required>
+                                    <option value="">Select Bank Account</option>
+                                    @foreach ($bankaccounts as $bankaccount)
+                                        <option value="{{ $bankaccount->id }}" >{{ $bankaccount->bank_name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        
                         <div class="mb-3">
                             <label for="add_income_sub_category_id" class="form-label">Transaction Type</label>
                             <select class="form-select subcategory-select" id="add_income_sub_category_id" name="transaction_type" required>
@@ -163,8 +146,7 @@
             </div>  
         </div>
     </div>
-    @endforeach
-    @endif
+
 
     <!-- / Modal -->
       
@@ -264,9 +246,8 @@
 
 <script>
     $(document).ready(function () {
-        @foreach ($bankaccounts as $bankaccount)
-            @if (isset($bankaccount->transactions) && $bankaccount->transactions->isNotEmpty())
-                $('#myTable{{ $bankaccount->id }}').DataTable({
+        
+                $('#myTable}').DataTable({
                     pageLength: 20,
                     dom: 'Bfrtip',
                     buttons: [
@@ -288,8 +269,7 @@
                         }
                     ]
                 });
-            @endif
-        @endforeach
+            
     });
 </script>
 
@@ -336,9 +316,9 @@
     }
 
     // Attach for Add Modal
-    @foreach ($bankaccounts as $bankaccount)
-        attachSlugListener('addmodals{{ $bankaccount->id }}');
-    @endforeach
+    
+        attachSlugListener('addmodals');
+    
 
     // Attach for all Edit Modals
     @foreach ($banktransactions as $incomecategory)
@@ -346,7 +326,7 @@
     @endforeach
 </script>
 
-{{-- <script>
+<script>
     $(document).ready(function () {
 
         $('form#addIncomeCategoryForms button[type="submit"]').on('click', function (e) {
@@ -397,7 +377,7 @@
             });
         });
     });
-</script> --}}
+</script>
 
 
 <script>
@@ -474,7 +454,7 @@
 </script>
     
     
-<script>
+{{-- <script>
     $(document).ready(function () {
         $('form[id^="addIncomeCategoryForms"] button[type="submit"]').on('click', function (e) {
             e.preventDefault();
@@ -524,7 +504,7 @@
         });
     });
 
-</script>
+</script> --}}
 
     
     

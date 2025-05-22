@@ -28,6 +28,20 @@ class ExpenseController extends Controller
         ]);
     }
 
+    public static function report()
+    {
+        $expense = Expense::all();
+        $firstDate = $expense->min('date');
+        $lastDate = $expense->max('date');
+        return view('admin.expense.report', [
+            'expenses' => Expense::all(),
+            'expenseCategories' => ExpenseCategory::where('status', 1)->get(),
+            'expenseSubCategories' => ExpenseSubCategory::where('status', 1)->get(),
+            'firstDate' => $firstDate,
+            'lastDate' => $lastDate,    
+        ]);
+    }
+
     /**
      * Show the form for creating a new resource.
      */
@@ -144,5 +158,57 @@ class ExpenseController extends Controller
 
         // Redirect back to the index with a success message
         return back()->with('success', 'Expense record deleted successfully!');
+    }
+
+    public function expensecategoryReport(Request $request)
+    {
+        $category = ExpenseCategory::where('slug', $request->slug)->firstOrFail();
+
+        $startDate = $request->start_date ?? now()->startOfMonth()->toDateString();
+        $endDate = $request->end_date ?? now()->endOfMonth()->toDateString();
+
+        $expenses = Expense::where('expense_category_id', $category->id)
+            ->whereBetween('date', [$startDate, $endDate])
+            ->get();
+
+        return view('admin.expense.category-report', compact('category', 'expenses', 'startDate', 'endDate'));
+    }
+
+    public function expensesubcategoryReport($slug, Request $request)
+    {
+        $subcategory = ExpenseSubCategory::where('slug', $slug)->firstOrFail();
+
+        $startDate = $request->start_date ?? now()->startOfMonth()->toDateString();
+        $endDate = $request->end_date ?? now()->endOfMonth()->toDateString();
+
+        $expenses = Expense::where('expense_sub_category_id', $subcategory->id)
+            ->whereBetween('date', [$startDate, $endDate])
+            ->get();
+
+        return view('admin.expense.subcategory-report', compact('subcategory', 'expenses', 'startDate', 'endDate'));
+    }
+
+    public function filter(Request $request)
+    {
+        $startDate = $request->start_date;
+        $endDate = $request->end_date;
+
+        $expenseCategories = ExpenseCategory::all();
+        $expenses = Expense::whereBetween('date', [$startDate, $endDate])->get();
+
+        return response()->json([
+            'html' => view('admin.expense.partial-table', compact('expenseCategories', 'expenses', 'startDate', 'endDate'))->render()
+        ]);
+    }
+
+    public function fullReport(Request $request)
+    {
+        $startDate = $request->start_date ?? now()->startOfMonth()->toDateString();
+        $endDate = $request->end_date ?? now()->endOfMonth()->toDateString();
+
+        $expenses = Expense::whereBetween('date', [$startDate, $endDate])->get();
+        $expenseCategories = ExpenseCategory::where('status', 1)->get();
+
+        return view('admin.expense.full-report', compact('expenses', 'startDate', 'endDate' , 'expenseCategories'));
     }
 }
