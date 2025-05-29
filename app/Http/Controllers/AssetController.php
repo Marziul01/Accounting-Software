@@ -10,6 +10,8 @@ use App\Models\AssetTransaction;
 use App\Models\Contact;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
+use App\Models\AssetSubSubCategory;
+use Illuminate\Support\Carbon;
 
 class AssetController extends Controller
 {
@@ -334,5 +336,194 @@ class AssetController extends Controller
 
         return str_replace($bangla, $english, $text);
     }
+
+    public function getSubcategories($categoryId)
+    {
+        $subCategories = AssetSubCategory::where('asset_category_id', $categoryId)->where('status', 1)->get();
+        return response()->json($subCategories);
+    }
+    public function getSubSubcategories($subCategoryId)
+    {
+        $subSubCategories = AssetSubSubCategory::where('asset_sub_category_id', $subCategoryId)->where('status', 1)->get();
+        return response()->json($subSubCategories);
+    }
+    
+    public function report(Request $request)
+    {
+        if (auth()->user()->access->asset == 3) {
+            return redirect()->route('admin.dashboard');
+        }
+
+        $categories = AssetCategory::with('assetSubCategories.assetSubSubCategories')->get();
+        $subSubcategories = AssetSubSubCategory::all();
+
+        $startDate = $request->get('start_date', now()->startOfMonth()->toDateString());
+        $endDate = $request->get('end_date', now()->toDateString());
+
+        // Default category, subcategory, sub-subcategory
+        $defaultCategory = $categories->first();
+        $defaultSubcategory = $defaultCategory->assetSubCategories->first() ?? null;
+        $defaultSubsubcategory = $defaultSubcategory?->assetSubSubCategories->first();
+
+        // Fetch assets under default selection
+        $filteredAssets = Asset::query()
+            ->when($defaultCategory, fn($q) => $q->where('category_id', $defaultCategory->id))
+            ->when($defaultSubcategory, fn($q) => $q->where('subcategory_id', $defaultSubcategory->id))
+            ->when($defaultSubsubcategory, fn($q) => $q->where('subsubcategory_id', $defaultSubsubcategory->id))
+            ->whereBetween('entry_date', [$startDate, $endDate])
+            ->get();
+
+        return view('admin.asset.report', [
+            'categories' => $categories,
+            'filteredAssets' => $filteredAssets,
+            'subSubcategories' => $subSubcategories,
+            'startDate' => $startDate,
+            'endDate' => $endDate
+        ]);
+    }
+
+
+    public function filterasset(Request $request)
+    {
+        // Get all filters
+        $categoryId = $request->input('category_id');
+        $subcategoryId = $request->input('subcategory_id');
+        $subsubcategoryId = $request->input('subsubcategory_id');
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+
+        // Base query
+        $query = Asset::query();
+
+        // Join relations
+        $query->with(['category', 'subcategory']);
+
+        // Apply filters
+        if ($categoryId) {
+            $query->where('category_id', $categoryId);
+        }
+
+        if ($subcategoryId) {
+            $query->where('subcategory_id', $subcategoryId);
+        }
+
+        if ($subsubcategoryId) {
+            $query->where('subsubcategory_id', $subsubcategoryId);
+        }
+
+        if ($startDate) {
+            $query->whereDate('entry_date', '>=', $startDate);
+        }
+
+        if ($endDate) {
+            $query->whereDate('entry_date', '<=', $endDate);
+        }
+
+        // Get filtered data
+        $assets = $query->get();
+
+        // Return as JSON (for AJAX)
+        return response()->json($assets->map(function ($asset) {
+            return [
+                'slug' => $asset->slug,
+                'category_name' => $asset->category->name ?? 'N/A',
+                'subcategory_name' => $asset->subcategory->name ?? 'N/A',
+                'name' => $asset->name,
+                'description' => $asset->description,
+                'value' => $asset->amount,
+                'formatted_date' => \Carbon\Carbon::parse($asset->entry_date)->format('d M, Y'),
+            ];
+        }));
+    }
+
+    public function fullAssetReport(Request $request)
+    {
+        $startDate = $request->start_date ? Carbon::parse($request->start_date)->startOfDay() : null;
+        $endDate = $request->end_date ? Carbon::parse($request->end_date)->endOfDay() : null;
+
+        $categories = AssetCategory::with([
+            'assetSubCategories.assetSubSubCategories.assets' => function ($query) use ($startDate, $endDate) {
+                if ($startDate) {
+                    $query->whereDate('entry_date', '>=', $startDate);
+                }
+                if ($endDate) {
+                    $query->whereDate('entry_date', '<=', $endDate);
+                }
+            }
+        ])->get();
+
+        return view('admin.asset.full_report', compact('categories', 'startDate', 'endDate'));
+    }
+
+    public function categoryReport(Request $request, $slug)
+    {
+        $startDate = $request->start_date ? Carbon::parse($request->start_date)->startOfDay() : null;
+        $endDate = $request->end_date ? Carbon::parse($request->end_date)->endOfDay() : null;
+
+        $category = AssetCategory::where('slug', $slug)->with([
+            'assetSubCategories.assetSubSubCategories.assets' => function ($query) use ($startDate, $endDate) {
+                if ($startDate) {
+                    $query->whereDate('entry_date', '>=', $startDate);
+                }
+                if ($endDate) {
+                    $query->whereDate('entry_date', '<=', $endDate);
+                }
+            }
+        ])->firstOrFail();
+
+        return view('admin.asset.category_report', compact('category', 'startDate', 'endDate'));
+    }
+
+    public function subcategoryReport(Request $request, $slug)
+    {
+        $startDate = $request->start_date ? Carbon::parse($request->start_date)->startOfDay() : null;
+        $endDate = $request->end_date ? Carbon::parse($request->end_date)->endOfDay() : null;
+
+        $subcategory = AssetSubCategory::where('slug', $slug)->with([
+            'assetSubSubCategories.assets' => function ($query) use ($startDate, $endDate) {
+                if ($startDate) {
+                    $query->whereDate('entry_date', '>=', $startDate);
+                }
+                if ($endDate) {
+                    $query->whereDate('entry_date', '<=', $endDate);
+                }
+            }
+        ])->firstOrFail();
+
+        return view('admin.asset.subcategory_report', compact('subcategory', 'startDate', 'endDate'));
+    }
+
+    public function subsubcategoryReport(Request $request, $slug)
+    {
+        $startDate = $request->start_date ? Carbon::parse($request->start_date)->startOfDay() : null;
+        $endDate = $request->end_date ? Carbon::parse($request->end_date)->endOfDay() : null;
+
+        $subsubcategory = AssetSubSubCategory::where('slug', $slug)->with([
+            'assets' => function ($query) use ($startDate, $endDate) {
+                if ($startDate) {
+                    $query->whereDate('entry_date', '>=', $startDate);
+                }
+                if ($endDate) {
+                    $query->whereDate('entry_date', '<=', $endDate);
+                }
+            }
+        ])->firstOrFail();
+
+        return view('admin.asset.sub_subcategory_report', compact('subsubcategory', 'startDate', 'endDate'));
+    }
+
+    public function singleassetReport($slug)
+    {
+        $asset = Asset::with(['transactions', 'subsubcategory.assetSubCategory.assetCategory'])->where('slug', $slug)->firstOrFail();
+
+        // Calculations
+        $totalDeposit = $asset->transactions->where('transaction_type', 'Deposit')->sum('amount');
+        $totalWithdraw = $asset->transactions->where('transaction_type', 'Withdraw')->sum('amount');
+        $initialAmount = $asset->amount - $totalDeposit + $totalWithdraw;
+        $currentBalance = $asset->amount;
+
+        return view('admin.asset.asset_report', compact('asset', 'totalDeposit', 'totalWithdraw', 'initialAmount', 'currentBalance'));
+    }
+
 
 }

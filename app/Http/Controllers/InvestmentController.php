@@ -7,6 +7,8 @@ use App\Models\Investment;
 use App\Models\InvestmentCategory;
 use App\Models\InvestmentSubCategory;
 use App\Models\InvestmentTransaction;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Validator;
 
 class InvestmentController extends Controller
 {
@@ -165,20 +167,184 @@ class InvestmentController extends Controller
         return back()->with('success', 'Investment deleted successfully!');
     }
 
-    public function report()
+    public function report(Request $request )
     {
         // Check if the user has permission to access this page
         if (auth()->user()->access->investment == 3) {
             return redirect()->route('admin.dashboard')->with('error', 'You do not have permission to access this page.');
         }
         // Fetch all investment categories from the database
-        $investmentCategories = InvestmentCategory::where('status', 1)->get();
+         $categories = InvestmentCategory::all();
+        $subcategories = InvestmentSubCategory::all();
+
+        // Default filter values
+        $selectedCategoryId = $request->input('category_id', $categories->first()->id ?? null);
+        $selectedSubcategoryId = $request->input('subcategory_id', '');
+        $startDate = $request->input('start_date', Carbon::now()->startOfMonth()->toDateString());
+        $endDate = $request->input('end_date', Carbon::now()->toDateString());
+
+        // Fetch filtered investments
+        $query = Investment::query();
+
+        if ($selectedCategoryId) {
+            $query->where('investment_category_id', $selectedCategoryId);
+        }
+
+        if ($selectedSubcategoryId) {
+            $query->where('investment_sub_category_id', $selectedSubcategoryId);
+        }
+
+        if ($startDate && $endDate) {
+            $query->whereBetween('date', [$startDate, $endDate]);
+        }
+
+        $filteredInvestments = $query->with(['investmentCategory', 'investmentSubCategory'])->latest()->get();
 
         return view('admin.investment.investment-report', [
-            'investmentCategories' => $investmentCategories,
-            'investmentSubCategories' => InvestmentSubCategory::where('status', 1)->get(),
-            'investments' => Investment::all(),
-            'investmentTransactions' => InvestmentTransaction::all(),
+            'categories' => $categories,
+            'subcategories' => $subcategories,
+            'filteredInvestments' => $filteredInvestments,
+            'selectedCategoryId' => $selectedCategoryId,
+            'selectedSubcategoryId' => $selectedSubcategoryId,
+            'startDate' => $startDate,
+            'endDate' => $endDate,
         ]);
     }
+
+
+    public function getSubcategories($categoryId)
+    {
+        $subcategories = InvestmentSubCategory::where('investment_category_id', $categoryId)->get();
+
+        return response()->json($subcategories);
+    }
+
+    
+    public function filterInvestments(Request $request)
+    {
+        $query = Investment::with(['investmentCategory', 'investmentSubCategory']);
+
+        if ($request->category_id) {
+            $query->where('investment_category_id', $request->category_id);
+        }
+
+        if ($request->subcategory_id) {
+            $query->where('investment_sub_category_id', $request->subcategory_id);
+        }
+
+        if ($request->start_date) {
+            $query->whereDate('date', '>=', $request->start_date);
+        }
+
+        if ($request->end_date) {
+            $query->whereDate('date', '<=', $request->end_date);
+        }
+
+        $investments = $query->orderBy('date', 'desc')->get();
+
+        // Only return JSON for AJAX
+        if ($request->ajax()) {
+            return response()->json(
+                $investments->map(function ($investment) {
+                    return [
+                        'id' => $investment->id,
+                        'name' => $investment->name,
+                        'description' => $investment->description,
+                        'amount' => $investment->amount,
+                        'date' => $investment->date,
+                        'formatted_date' => \Carbon\Carbon::parse($investment->date)->format('d M, Y'),
+                        'category_name' => $investment->investmentCategory->name ?? 'N/A',
+                        'subcategory_name' => $investment->investmentSubCategory->name ?? 'N/A',
+                        'slug' => $investment->slug ?? '',
+                    ];
+                })
+            );
+        }
+
+        // If not AJAX, redirect back or show a view
+        return redirect()->back();
+    }
+
+
+    public function categoryReport(Request $request, $slug)
+    {
+        $category = InvestmentCategory::where('slug', $slug)->firstOrFail();
+
+        $startDate = $request->start_date;
+        $endDate = $request->end_date;
+
+        $query = Investment::with('investmentSubCategory')
+            ->where('investment_category_id', $category->id);
+
+        if ($startDate && $endDate) {
+            $query->whereBetween('date', [$startDate, $endDate]);
+        }
+
+        $investments = $query->get()->groupBy('investment_sub_category_id');
+        $investmentTransactions = InvestmentTransaction::all();
+
+        return view('admin.investment.category-report', compact('category', 'investments', 'startDate', 'endDate' , 'investmentTransactions'));
+    }
+
+    public function subcategoryReport($slug, Request $request)
+    {
+        $startDate = $request->start_date;
+        $endDate = $request->end_date ?? now()->format('Y-m-d');
+
+        $subcategory = InvestmentSubCategory::where('slug', $slug)->firstOrFail();
+
+        $investments = Investment::with('transactions')
+            ->where('investment_sub_category_id', $subcategory->id)
+            ->when($startDate, fn($q) => $q->where('date', '>=', $startDate))
+            ->where('date', '<=', $endDate)
+            ->get();
+
+        $transactions = InvestmentTransaction::whereIn('investment_id', $investments->pluck('id'))->get();
+
+        return view('admin.investment.subcategory-report', [
+            'subcategory' => $subcategory,
+            'investments' => $investments,
+            'investmentTransactions' => $transactions,
+            'startDate' => $startDate,
+            'endDate' => $endDate,
+        ]);
+    }
+    public function singleInvestmentReport($slug)
+    {
+        $investment = Investment::with(['transactions', 'investmentSubCategory.investmentCategory'])->where('slug', $slug)->firstOrFail();
+
+        $transactions = $investment->transactions;
+
+        $totalInvested = $transactions->sum('investment_amount');
+        $totalReturned = $transactions->sum('return_amount');
+        $profitOrLoss = $totalReturned - $totalInvested;
+
+        return view('admin.investment.single_report', compact(
+            'investment',
+            'transactions',
+            'totalInvested',
+            'totalReturned',
+            'profitOrLoss'
+        ));
+    }
+
+    public function fullReport(Request $request)
+    {
+        $startDate = $request->start_date;
+        $endDate = $request->end_date;
+
+        // Fetch all categories
+        $categories = InvestmentCategory::with(['investmentSubCategories.investments' => function ($query) use ($startDate, $endDate) {
+            if ($startDate && $endDate) {
+                $query->whereBetween('date', [$startDate, $endDate]);
+            }
+        }])->get();
+
+        // Get all investment transactions
+        $investmentTransactions = InvestmentTransaction::all();
+
+        return view('admin.investment.full-report', compact('categories', 'startDate', 'endDate', 'investmentTransactions'));
+    }
+
+
 }

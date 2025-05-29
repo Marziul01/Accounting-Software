@@ -228,6 +228,12 @@
                         <div class="text-truncate" data-i18n="eCommerce">Fixed Assets</div>
                     </a>
                 </li>
+                <li class="menu-item {{ Route::currentRouteName() == 'assets.report' ? 'active' : '' }}">
+                    <a href="{{ route('assets.report') }}"
+                        class="menu-link">
+                        <div class="text-truncate" data-i18n="eCommerce">Reports</div>
+                    </a>
+                </li>
             </ul>
         </li>   
         @endif
@@ -264,6 +270,12 @@
                         <div class="text-truncate" data-i18n="eCommerce">Short Term Liabilities</div>
                     </a>
                 </li>
+                <li class="menu-item {{ Route::currentRouteName() == 'liability.report' ? 'active' : '' }}">
+                    <a href="{{ route('liability.report') }}"
+                        class="menu-link">
+                        <div class="text-truncate" data-i18n="eCommerce">Reports</div>
+                    </a>
+                </li>
             </ul>
         </li>
         @endif
@@ -285,7 +297,12 @@
                         <div class="text-truncate" data-i18n="CRM">Bank Transactions</div>
                     </a>
                 </li>
-                
+                <li class="menu-item {{ Route::currentRouteName() == 'bankbook.report' ? 'active' : '' }}">
+                    <a href="{{ route('bankbook.report') }}"
+                        class="menu-link">
+                        <div class="text-truncate" data-i18n="eCommerce">Reports</div>
+                    </a>
+                </li>
             </ul>
         </li>
         @endif

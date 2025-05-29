@@ -121,4 +121,101 @@ class BankAccountController extends Controller
         // Redirect back with success message
         return back()->with('success', 'Bank account deleted successfully.');
     }
+
+    public function report(Request $request)
+    {
+        if (auth()->user()->access->bankbook == 3) {
+            return redirect()->route('admin.dashboard')->with('error', 'You do not have permission to access this page.');
+        }
+
+        // Fetch all bank accounts
+        $bankAccounts = BankAccount::all();
+
+        // Get selected bank account or default to first
+        $selectedBankAccount = $request->get('bank_account_id', $bankAccounts->first()?->id);
+
+        // Date range
+        $startDate = $request->get('start_date', now()->startOfMonth()->toDateString());
+        $endDate = $request->get('end_date', now()->toDateString());
+
+        // Fetch transactions for selected bank account and date range
+        $filteredTransactions = [];
+        if ($selectedBankAccount) {
+            $filteredTransactions = \App\Models\BankTransaction::where('bank_account_id', $selectedBankAccount)
+                ->whereBetween('transaction_date', [$startDate, $endDate])
+                ->orderBy('transaction_date', 'desc')
+                ->get();
+        }
+
+        return view('admin.bank_accounts.report', [
+            'bankAccounts' => $bankAccounts,
+            'selectedBankAccount' => $selectedBankAccount,
+            'filteredTransactions' => $filteredTransactions,
+            'startDate' => $startDate,
+            'endDate' => $endDate,
+        ]);
+    }
+
+    public function filter(Request $request)
+    {
+        $bankAccountId = $request->input('bank_account_id');
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+
+        $query = \App\Models\BankTransaction::query();
+
+        if ($bankAccountId) {
+            $query->where('bank_account_id', $bankAccountId);
+        }
+
+        if ($startDate) {
+            $query->whereDate('transaction_date', '>=', $startDate);
+        }
+
+        if ($endDate) {
+            $query->whereDate('transaction_date', '<=', $endDate);
+        }
+
+        $filteredTransactions = $query->orderBy('transaction_date', 'desc')->get();
+
+        return response()->json($filteredTransactions->map(function ($transaction) {
+            return [
+                'id' => $transaction->id,
+                'name' => $transaction->name,
+                'description' => $transaction->description,
+                'amount' => $transaction->amount,
+                'transaction_type' => $transaction->transaction_type,
+                'transaction_date' => \Carbon\Carbon::parse($transaction->transaction_date)->format('d M, Y'),
+            ];
+        }));
+    }
+
+    public function bankbookreport(Request $request)
+    {
+        $startDate = \Carbon\Carbon::parse($request->start_date)->startOfDay();
+        $endDate = \Carbon\Carbon::parse($request->end_date)->endOfDay();
+
+        $bankAccount = BankAccount::with(['transactions' => function ($query) use ($startDate, $endDate) {
+            $query->whereBetween('transaction_date', [$startDate, $endDate])
+                ->orderBy('transaction_date');
+        }])->findOrFail($request->id);
+
+        $transactions = $bankAccount->transactions;
+
+        $totalDeposit = $transactions->where('transaction_type', 'credit')->sum('amount');
+        $totalWithdraw = $transactions->where('transaction_type', 'debit')->sum('amount');
+        $initialAmount = $bankAccount->initial_balance ?? 0;
+        $currentBalance = $initialAmount + $totalDeposit - $totalWithdraw;
+
+        return view('bank.bank_accounts.bankbookreport', compact(
+            'bankAccount',
+            'transactions',
+            'totalDeposit',
+            'totalWithdraw',
+            'initialAmount',
+            'currentBalance',
+            'startDate',
+            'endDate'
+        ));
+    }
 }

@@ -34,6 +34,9 @@ class IncomeController extends Controller
 
     public static function report()
     {
+        if(Auth::user()->access->income == 3 ){
+            return redirect()->route('admin.dashboard')->with('error', 'You do not have permission to access this page.');
+        }
         $incomes = Income::all();
         $firstDate = $incomes->min('date');
         $lastDate = $incomes->max('date');

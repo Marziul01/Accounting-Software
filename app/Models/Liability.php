@@ -32,4 +32,9 @@ class Liability extends Model
     {
         return $this->belongsTo(LiabilitySubSubCategory::class , 'subsubcategory_id');
     }
+
+    public function transactions()
+    {
+        return $this->hasMany(LiabilityTransaction::class, 'liability_id');
+    }
 }

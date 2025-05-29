@@ -7,8 +7,8 @@
             <div class="card-header d-flex justify-content-between align-items-center border-bottom-1 mb-0 pb-0">
                 <h5 class="mb-0">Expense Report</h5>
             </div>
-            <div class="card-header d-flex justify-content-between align-items-center border-bottom-1">
-                <div class="d-flex align-items-end gap-2">
+            <div class="card-header d-flex justify-content-between align-items-start border-bottom-1 flex-column flex-md-row gap-2 align-items-md-center">
+                <div class="d-flex align-items-start gap-2 flex-column flex-md-row align-items-md-end">
                     <div class="form-group">
                         <label class="form-label" for="start_date">Select Start Date:</label>
                         <input type="date" class="form-control" id="start_date" name="start_date"

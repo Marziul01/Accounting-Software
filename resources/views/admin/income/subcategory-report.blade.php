@@ -5,8 +5,10 @@
   <title>উপ-বিভাগ আয়ের রিপোর্ট - {{ $subcategory->name ?? 'প্রযোজ্য নয়' }}</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Tiro+Bangla:ital@0;1&display=swap');
     body {
-      font-family: 'SolaimanLipi', sans-serif;
+      font-family: "Hind Siliguri", sans-serif;
       background-color: #f1f3f6;
     }
 
@@ -75,22 +77,28 @@
       border-bottom: 2px solid #000;
       margin-bottom: 20px;
     }
-    
+    .tiro-font {
+      font-family: 'Tiro Bangla', serif;
+    }
+    table tbody tr td{
+      background-color: transparent !important;
+    }
+    table.table tbody tr:nth-of-type(odd) {
+      background-color: #d4edda !important;
+    }
+
+    table.table tbody tr:nth-of-type(even) {
+      background-color: #fff3cd !important;
+    }
   </style>
 </head>
 <body>
-
-<div class="container-fluid my-4">
-    <div class="report-header">
-    <h2>রাসেল বুক</h2>
-    <h4>আয় বিবরণী</h4>
-    <p>{{ $startDate }} থেকে {{ $endDate }} পর্যন্ত</p>
-  </div>
-  @php
+@php
     function bn_number($number) {
-      $eng = ['0','1','2','3','4','5','6','7','8','9'];
-      $bang = ['০','১','২','৩','৪','৫','৬','৭','৮','৯'];
-      return str_replace($eng, $bang, $number);
+        $eng = ['0','1','2','3','4','5','6','7','8','9'];
+        $bang = ['০','১','২','৩','৪','৫','৬','৭','৮','৯'];
+        $converted = str_replace($eng, $bang, $number);
+        return '<span class="tiro-font">'.$converted.'</span>';
     }
 
     $subTotal = $incomes->sum('amount');
@@ -98,6 +106,13 @@
     $dateFrom = bn_number(optional($incomes->min('date'))->format('d-m-Y'));
     $dateTo = bn_number(optional($incomes->max('date'))->format('d-m-Y'));
   @endphp
+<div class="container-fluid my-4">
+    <div class="report-header">
+    <h2>রাসেল বুক</h2>
+    <h4>আয় বিবরণী - ({{ $subcategory->name ?? 'প্রযোজ্য নয়' }})</h4>
+    <p>{!! bn_number($startDate) !!} থেকে {!! bn_number($endDate) !!} পর্যন্ত</p>
+  </div>
+  
 
 
   <!-- Report Metadata -->
@@ -121,10 +136,10 @@
           <tbody>
             @forelse($incomes->sortBy('date') as $income)
               <tr>
-                <td>{{ bn_number($income->date) }}</td>
+                <td>{!! bn_number($income->date) !!}</td>
                 <td>{{ $income->name }}</td>
                 <td>{{ $income->description }}</td>
-                <td class="text-end">{{ bn_number(number_format($income->amount, 2)) }}</td>
+                <td class="text-end">{!! bn_number(number_format($income->amount, 2)) !!} টাকা</td>
               </tr>
             @empty
               <tr>
@@ -139,12 +154,22 @@
   </div>
 
   <div class="card-footer text-center bg-success text-white fw-bold p-3 mt-2">
-      বিভাগ মোট: {{ bn_number(number_format($subTotal, 2)) }} টাকা
+      {{ $subcategory->name ?? 'প্রযোজ্য নয়' }} মোট: {!! bn_number(number_format($subTotal, 2)) !!} টাকা
     </div>
 
-  <div class="report-meta mt-2">
-    <p><strong>মোট এন্ট্রি:</strong> {{ bn_number($entryCount) }} টি</p>
-    <p><strong>মোট আয়:</strong> {{ bn_number(number_format($subTotal, 2)) }} টাকা</p>
+  <div class="d-flex justify-content-center mt-4">
+    <table class="table table-bordered w-auto text-center align-middle" style="background: #fff3cd; border-left: 5px solid #ffc107;">
+      <tbody>
+        <tr>
+          <th class="bg-warning-subtle">মোট এন্ট্রি</th>
+          <td>{!! bn_number($entryCount) !!} টি</td>
+        </tr>
+        <tr>
+          <th class="bg-warning-subtle">মোট আয়</th>
+          <td>{!! bn_number(number_format($subTotal, 2)) !!} টাকা</td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 
   <!-- Print Button -->

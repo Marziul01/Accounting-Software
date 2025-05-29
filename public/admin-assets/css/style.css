@@ -293,7 +293,22 @@ table tbody tr:nth-child(odd) {
 table tbody tr:nth-child(even) {
     background-color: var(--table-even-row); /* Light yellow-orange */
 }
-
+.table tbody tr{
+  font-size: 13px !important;
+}
+.table tbody tr td {
+  padding: 8px 10px !important;
+}
+.table thead tr th {
+  padding: 15px 10px !important;
+}
+.table tbody tr td a , .table tbody tr td button {
+  padding: 5px 15px !important;
+  font-size: 12px !important;
+}
+.table tbody tr td a i ,  .table tbody tr td button i{
+  font-size: 12px !important;
+}
 
 @media screen and (max-width: 768px) {
   .dt-buttons, div.dataTables_wrapper div.dataTables_info{

@@ -20,6 +20,6 @@ class BankTransaction extends Model
     // Define any relationships or additional methods here
     public function bankAccount()
     {
-        return $this->belongsTo(BankAccount::class);
+        return $this->belongsTo(BankAccount::class , 'bank_account_id');
     }
 }

@@ -32,4 +32,8 @@ class Asset extends Model
     {
         return $this->belongsTo(AssetSubSubCategory::class , 'subsubcategory_id');
     }
+    public function transactions()
+    {
+        return $this->hasMany(AssetTransaction::class, 'asset_id');
+    }
 }

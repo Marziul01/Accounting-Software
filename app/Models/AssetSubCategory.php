@@ -28,4 +28,9 @@ class AssetSubCategory extends Model
     {
         return 'slug';
     }
+
+    public function assetSubSubCategories()
+    {
+        return $this->hasMany(AssetSubSubCategory::class);
+    }
 }

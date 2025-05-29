@@ -6,13 +6,15 @@
   <title>আয় বিবরণী</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Tiro+Bangla:ital@0;1&display=swap');
     @media print {
       .no-print { display: none !important; }
       .page-break { page-break-after: always; }
       body { -webkit-print-color-adjust: exact !important; }
     }
     body {
-      font-family: 'SolaimanLipi', sans-serif;
+      font-family: "Hind Siliguri", sans-serif;
       
     }
     .report-header, .report-footer {
@@ -34,26 +36,40 @@
       font-weight: bold;
       background-color: #f2f2f2;
     }
+    .tiro-font {
+      font-family: 'Tiro Bangla', serif;
+    }
+    table tbody tr td{
+      background-color: transparent !important;
+    }
+    table.table tbody tr:nth-of-type(odd) {
+      background-color: #d4edda !important;
+    }
+
+    table.table tbody tr:nth-of-type(even) {
+      background-color: #fff3cd !important;
+    }
   </style>
 </head>
 <body>
-
-<div class="container-fluid my-4">
-  <div class="report-header">
-    <h2>রাসেল বুক</h2>
-    <h4>আয় বিবরণী</h4>
-    <p>{{ $startDate }} থেকে {{ $endDate }} পর্যন্ত</p>
-  </div>
-
-  @php
+@php
     function bn_number($number) {
         $eng = ['0','1','2','3','4','5','6','7','8','9'];
         $bang = ['০','১','২','৩','৪','৫','৬','৭','৮','৯'];
-        return str_replace($eng, $bang, $number);
+        $converted = str_replace($eng, $bang, $number);
+        return '<span class="tiro-font">'.$converted.'</span>';
     }
 
     $grandTotal = 0;
   @endphp
+<div class="container-fluid my-4">
+  <div class="report-header">
+    <h2>রাসেল বুক</h2>
+    <h4>আয় বিবরণী</h4>
+    <p>{!! bn_number($startDate) !!} থেকে {!! bn_number($endDate) !!} পর্যন্ত</p>
+  </div>
+
+  
 
   @foreach($incomeCategories as $category)
     @if($category->status == 1)
@@ -95,15 +111,15 @@
               <tbody>
                 @foreach($subIncomes->sortBy('date') as $income)
                 <tr>
-                  <td>{{ bn_number($income->date) }}</td>
-                  <td>{{ $income->name }}</td>
-                  <td>{{ $income->description }}</td>
-                  <td>{{ bn_number(number_format($income->amount, 2)) }} টাকা</td>
+                  <td>{!! bn_number($income->date) !!}</td>
+                  <td>{!! $income->name !!}</td>
+                  <td>{!! $income->description !!}</td>
+                  <td>{!! bn_number(number_format($income->amount, 2)) !!} টাকা</td>
                 </tr>
                 @endforeach
                 <tr class="category-total">
-                  <td colspan="3" class="text-end">উপ-বিভাগ মোট:</td>
-                  <td>{{ bn_number(number_format($subTotal, 2)) }} টাকা</td>
+                  <td colspan="3" class="text-end">{{ $subcategory->name ?? 'প্রযোজ্য নয়' }} মোট:</td>
+                  <td>{!! bn_number(number_format($subTotal, 2)) !!} টাকা</td>
                 </tr>
               </tbody>
             </table>
@@ -111,7 +127,7 @@
         @endforeach
 
         <div class="text-end p-3 bg-light fw-bold">
-          বিভাগ "{{ $category->name }}" মোট: {{ bn_number(number_format($categoryTotal, 2)) }} টাকা
+          {{ $category->name }} মোট: {!! bn_number(number_format($categoryTotal, 2)) !!} টাকা
         </div>
       </div>
     </div>
@@ -120,12 +136,12 @@
 
   <div class="card mb-4">
     <div class="card-body bg-success text-white">
-      <h5 class="mb-0 text-center">সর্বমোট আয়: {{ bn_number(number_format($grandTotal, 2)) }} টাকা</h5>
+      <h5 class="mb-0 text-center">সর্বমোট আয়: {!! bn_number(number_format($grandTotal, 2)) !!} টাকা</h5>
     </div>
   </div>
 
   <div class="report-footer">
-    <p>রাসেল বুক দ্বারা প্রস্তুতকৃত - {{ bn_number(now()->format('d M, Y H:i A')) }}</p>
+    <p>রাসেল বুক দ্বারা প্রস্তুতকৃত - {!! bn_number(now()->format('d M, Y H:i A')) !!}</p>
   </div>
 
   <div class="text-center mt-3 no-print">

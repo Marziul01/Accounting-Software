@@ -26,7 +26,7 @@ class LiabilitySubSubCategory extends Model
 
     public function liabilities()
     {
-        return $this->hasMany(Liability::class);
+        return $this->hasMany(Liability::class , 'subsubcategory_id', 'id');
     }
 
 

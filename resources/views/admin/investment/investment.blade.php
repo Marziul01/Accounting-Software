@@ -19,7 +19,8 @@
                                 
                                 <th>Name</th>
                                 <th>Description</th>
-                                <th>Amount</th>
+                                <th>Initial Investment</th>
+                                <th>Investment Condition</th>
                                 <th>Investment Date</th>
                                 <th>Actions</th>
                             </tr>
@@ -33,8 +34,31 @@
                                 
                                 <td>{{ $investment->name }}</td>
                                 <td>{{ $investment->description ?? 'N/A' }}</td>
-                                <td>{{ $investment->amount ?? 'N/A' }}</td> <!-- ✅ Amount -->
-                                <td>{{ \Carbon\Carbon::parse($investment->income_date)->format('d M, Y') ?? 'N/A' }}</td> <!-- ✅ Income Date -->
+                                @php
+                                    $currentAmount = $investment->amount;
+                                    $transactions = $investmentTransactions->where('investment_id', $investment->id);
+
+                                    $totalDeposits = $transactions->where('transaction_type', 'Deposit')->sum('amount');
+                                    $totalWithdrawals = $transactions->where('transaction_type', 'Withdraw')->sum('amount');
+
+                                    $initialAmount = $currentAmount - $totalDeposits + $totalWithdrawals;
+                                @endphp
+
+                                <td>{{ number_format($initialAmount, 2) }} Tk</td>
+                                <td>
+                                    @if ($currentAmount < 0)
+                                        <span class="badge bg-success">Gain: {{ number_format(abs($currentAmount), 2) }} Tk</span>
+                                    @elseif ($currentAmount > 0)
+                                        <span class="badge bg-danger">Loss: {{ number_format($currentAmount, 2) }} Tk</span>
+                                    @else
+                                        <span class="badge bg-secondary">Break-even</span>
+                                    @endif
+
+                                </td>
+
+
+
+                                <td>{{ \Carbon\Carbon::parse($investment->date)->format('d M, Y') ?? 'N/A' }}</td> <!-- ✅ Income Date -->
                                 <td>
                                     <div class="d-flex align-items-center gap-1 cursor-pointer">
                                         <a class=" btn btn-sm btn-primary {{ Auth::user()->access->investment == 1 ? 'disabled' : '' }}" href="" data-bs-toggle="modal"

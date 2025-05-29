@@ -30,4 +30,8 @@ class Investment extends Model
     {
         return 'slug';
     }
+    public function transactions()
+    {
+        return $this->hasMany(InvestmentTransaction::class);
+    }
 }

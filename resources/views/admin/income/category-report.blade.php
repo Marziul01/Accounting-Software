@@ -6,8 +6,10 @@
   <title>আয় রিপোর্ট - {{ $category->name }}</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Tiro+Bangla:ital@0;1&display=swap');
     body {
-      font-family: 'SolaimanLipi', sans-serif;
+      font-family: "Hind Siliguri", sans-serif;
       background-color: #f8f9fa;
     }
 
@@ -47,17 +49,42 @@
     .summary-box {
       background: #fff3cd;
       padding: 15px;
-      border-left: 5px solid #ffc107;
+      
+    }
+    .tiro-font {
+      font-family: 'Tiro Bangla', serif;
+    }
+    table tbody tr td{
+      background-color: transparent !important;
+    }
+    table.table tbody tr:nth-of-type(odd) {
+      background-color: #d4edda !important;
+    }
+
+    table.table tbody tr:nth-of-type(even) {
+      background-color: #fff3cd !important;
     }
   </style>
 </head>
 <body>
+@php
+    function bn_number($number) {
+        $eng = ['0','1','2','3','4','5','6','7','8','9'];
+        $bang = ['০','১','২','৩','৪','৫','৬','৭','৮','৯'];
+        $converted = str_replace($eng, $bang, $number);
+        return '<span class="tiro-font">'.$converted.'</span>';
+    }
 
+    $categoryTotal = 0;
+    $grandTotal = 0;
+    $categoryIncomes = $incomes->where('income_category_id', $category->id);
+    $subcategories = $categoryIncomes->groupBy('income_sub_category_id');
+  @endphp
 <div class="container-fluid my-4">
   <div class="report-header">
     <h2>রাসেল বুক</h2>
-    <h4>আয় বিবরণী</h4>
-    <p>{{ $startDate }} থেকে {{ $endDate }} পর্যন্ত</p>
+    <h4>আয় বিবরণী - ({{ $category->name }})</h4>
+    <p>{!! bn_number($startDate) !!} থেকে {!! bn_number($endDate) !!} পর্যন্ত</p>
   </div>
   @php
   
@@ -70,18 +97,7 @@
 
   $groupedBySubcategory = $categoryIncomes->groupBy('income_sub_category_id');
 @endphp
-  @php
-    function bn_number($number) {
-        $eng = ['0','1','2','3','4','5','6','7','8','9'];
-        $bang = ['০','১','২','৩','৪','৫','৬','৭','৮','৯'];
-        return str_replace($eng, $bang, $number);
-    }
-
-    $categoryTotal = 0;
-    $grandTotal = 0;
-    $categoryIncomes = $incomes->where('income_category_id', $category->id);
-    $subcategories = $categoryIncomes->groupBy('income_sub_category_id');
-  @endphp
+  
 
   <!-- Category Header -->
   <div class="card mb-4">
@@ -115,15 +131,15 @@
             <tbody>
               @foreach($subIncomes->sortBy('date') as $income)
                 <tr>
-                  <td>{{ bn_number($income->date) }}</td>
+                  <td>{!! bn_number($income->date) !!}</td>
                   <td>{{ $income->name }}</td>
                   <td>{{ $income->description }}</td>
-                  <td class="text-end">{{ bn_number(number_format($income->amount, 2)) }} টাকা</td>
+                  <td class="text-end">{!! bn_number(number_format($income->amount, 2)) !!} টাকা</td>
                 </tr>
               @endforeach
               <tr class="category-total">
-                <td colspan="3" class="text-end">উপ-বিভাগ মোট:</td>
-                <td class="text-end">{{ bn_number(number_format($subTotal, 2)) }} টাকা</td>
+                <td colspan="3" class="text-end">{{ $subcategory->name ?? 'প্রযোজ্য নয়' }} মোট:</td>
+                <td class="text-end">{!! bn_number(number_format($subTotal, 2)) !!} টাকা</td>
               </tr>
             </tbody>
           </table>
@@ -133,21 +149,46 @@
 
     <!-- Category Total -->
     <div class="card-footer text-center bg-success text-white fw-bold">
-      বিভাগ মোট: {{ bn_number(number_format($categoryTotal, 2)) }} টাকা
+      {{ $category->name }} মোট: {!! bn_number(number_format($categoryTotal, 2)) !!} টাকা
     </div>
   </div>
 
-  <div class="summary-box mt-4">
-    <h5 class="mb-3">সারাংশ</h5>
-    <p><strong>মোট আয়ের উৎস:</strong> {{ bn_number($totalSources) }}</p>
-    <p><strong>প্রতি উৎসে গড় আয়:</strong> {{ bn_number(number_format($averageIncome, 2)) }} টাকা</p>
-    <p><strong>সর্বোচ্চ একক আয়:</strong> {{ bn_number(number_format($maxIncome, 2)) }} টাকা</p>
-    <p><strong>সর্বনিম্ন একক আয়:</strong> {{ bn_number(number_format($minIncome, 2)) }} টাকা</p>
-    <p><strong>সর্বমোট আয়:</strong> {{ bn_number(number_format($categoryTotal, 2)) }} টাকা</p>
+  <div class="d-flex justify-content-center mt-4">
+    <div class="summary-box p-0" style="width: 400px;">
+      <table class="table table-bordered mb-0 text-center align-middle">
+        <thead class="table-warning">
+          <tr>
+            <th colspan="2" class="h5 mb-0">সারাংশ</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>মোট আয়ের উৎস</strong></td>
+            <td>{!! bn_number($totalSources) !!}</td>
+          </tr>
+          <tr>
+            <td><strong>প্রতি উৎসে গড় আয়</strong></td>
+            <td>{!! bn_number(number_format($averageIncome, 2)) !!} টাকা</td>
+          </tr>
+          <tr>
+            <td><strong>সর্বোচ্চ একক আয়</strong></td>
+            <td>{!! bn_number(number_format($maxIncome, 2)) !!} টাকা</td>
+          </tr>
+          <tr>
+            <td><strong>সর্বনিম্ন একক আয়</strong></td>
+            <td>{!! bn_number(number_format($minIncome, 2)) !!} টাকা</td>
+          </tr>
+          <tr>
+            <td><strong>সর্বমোট আয়</strong></td>
+            <td>{!! bn_number(number_format($categoryTotal, 2)) !!} টাকা</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 
   <div class="report-footer mt-4">
-    <p>রাসেল বুক দ্বারা প্রস্তুতকৃত - {{ bn_number(now()->format('d M, Y H:i A')) }}</p>
+    <p>রাসেল বুক দ্বারা প্রস্তুতকৃত - {!! bn_number(now()->format('d M, Y H:i A')) !!}</p>
   </div>
   <!-- Print Button -->
   <div class="text-center no-print">

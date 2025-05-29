@@ -16,6 +16,7 @@
                                                 <thead>
                                                     <tr>
                                                         <th>Sl</th>
+                                                        <th>Bank Name</th>
                                                         <th>Transaction Name</th>
                                                         <th>Transaction Id</th>
                                                         <th>Amount</th>
@@ -30,7 +31,7 @@
                                                     @foreach ($banktransactions as $transaction )
                                                     <tr>
                                                         <td>{{ $loop->iteration }}</td>
-                                                        
+                                                        <td>{{ $transaction->bankAccount->bank_name }}</td>
                                                         <td>{{ $transaction->name }}</td>
                                                         <td>{{ $transaction->transaction_id }}</td> <!-- ✅ Transaction ID -->
                                                         <td>{{ $transaction->amount ?? 'N/A' }}</td> <!-- ✅ Amount -->

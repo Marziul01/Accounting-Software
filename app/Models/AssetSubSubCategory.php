@@ -22,7 +22,7 @@ class AssetSubSubCategory extends Model
 
     public function assets()
     {
-        return $this->hasMany(Asset::class);
+        return $this->hasMany(Asset::class , 'subsubcategory_id');
     }
     public function assetCategory()
     {

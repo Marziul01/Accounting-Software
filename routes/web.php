@@ -99,6 +99,38 @@ Route::prefix('admin')->middleware(['auth:admin', 'admin.only'])->group(function
     
     Route::resource('investmenttransaction', InvestmentTransactionController::class);
     Route::get('/investments/report', [InvestmentController::class, 'report'])->name('investment.report');
+    Route::get('/admin/investments/filter', [InvestmentController::class, 'filterInvestments'])->name('admin.filteredInvestments');
+    Route::get('/admin/investment/subcategories/{category_id}', [InvestmentController::class, 'getSubcategories']);
+    Route::get('/admin/report/category/{slug}', [InvestmentController::class, 'categoryReport'])->name('admin.report.category');
+    Route::get('/admin/report/subcategory/{slug}', [InvestmentController::class, 'subcategoryReport'])->name('admin.report.subcategory');
+    Route::get('/admin/report/investment/{slug}', [InvestmentController::class, 'singleInvestmentReport'])->name('admin.report.investment');
+    Route::get('/admin/report/fullinvestment', [InvestmentController::class, 'fullReport'])->name('admin.report.fullinvestment');
 
+
+    Route::get('/assets/report', [AssetController::class, 'report'])->name('assets.report');
+    Route::get('/assets/get-subcategories/{id}', [AssetController::class, 'getSubcategories'])->name('subcategories.byCategory');
+    Route::get('/assets/get-subsubcategories/{id}', [AssetController::class, 'getSubSubcategories'])->name('subsubcategories.bySubCategory');
+    Route::get('/admin/assets/filter', [AssetController::class, 'filterasset'])->name('admin.filteredAssets');
+    Route::get('/admin/report/assetcategory/{slug}', [AssetController::class, 'categoryReport'])->name('admin.asset.categoryReport');
+    Route::get('/admin/report/assetsubcategory/{slug}', [AssetController::class, 'subcategoryReport'])->name('admin.asset.subcategoryReport');
+    Route::get('/admin/report/assetsubsubcategory/{slug}', [AssetController::class, 'subsubcategoryReport'])->name('admin.asset.subsubcategoryReport');
+    Route::get('/admin/report/assetreport/{slug}', [AssetController::class, 'singleassetReport'])->name('admin.asset.assetreport');
+    Route::get('/admin/report/fullasset', [AssetController::class, 'fullAssetReport'])->name('admin.asset.fullreport');
+
+
+    Route::get('/liabilities/report', [LiabilityController::class, 'report'])->name('liability.report');
+    Route::get('/liabilities/get-subcategories/{id}', [LiabilityController::class, 'getSubcategories'])->name('liabilitysubcategories.byCategory');
+    Route::get('/liabilities/get-subsubcategories/{id}', [LiabilityController::class, 'getSubSubcategories'])->name('liabilitysubsubcategories.bySubCategory');
+    Route::get('/admin/liabilities/filter', [LiabilityController::class, 'filterliability'])->name('admin.filteredLiabilities');
+    Route::get('/admin/report/liabilitycategory/{slug}', [LiabilityController::class, 'categoryReport'])->name('admin.liability.categoryReport');
+    Route::get('/admin/report/liabilitysubcategory/{slug}', [LiabilityController::class, 'subcategoryReport'])->name('admin.liability.subcategoryReport');
+    Route::get('/admin/report/liabilitysubsubcategory/{slug}', [LiabilityController::class, 'subsubcategoryReport'])->name('admin.liability.subsubcategoryReport');
+    Route::get('/admin/report/liabilityreport/{slug}', [LiabilityController::class, 'singleliabilityReport'])->name('admin.liability.liabilityreport');
+    Route::get('/admin/report/fullliability', [LiabilityController::class, 'fullLiabilityReport'])->name('admin.liability.fullreport');
+
+
+    Route::get('/bankbooks/report', [BankAccountController::class, 'report'])->name('bankbook.report');
+    Route::get('/bankbooks/filter', [BankAccountController::class, 'filter'])->name('admin.filteredBankTransactions');
+    Route::get('/admin/bankbook/fullreport', [BankAccountController::class, 'bankbookreport'])->name('admin.report.bankaccount');
 });
 

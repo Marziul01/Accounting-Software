@@ -1,5 +1,6 @@
 @if ($expenseCategories->isNotEmpty())
-    <ul class="nav nav-tabs" id="bankAccountTabs" role="tablist">
+    <ul class="nav nav-tabs" id="bankAccountTabs" role="tablist" style="overflow-x: auto;">
+        {{-- Loop through each expense category to create tabs --}}
         @foreach ($expenseCategories as $index => $expenseCategory)
             <li class="nav-item" role="presentation">
                 <button class="nav-link {{ $index === 0 ? 'active' : '' }}"
@@ -22,16 +23,16 @@
                  role="tabpanel"
                  aria-labelledby="tab-{{ $expenseCategory->id }}">
 
-                <div class="card-header d-flex justify-content-between align-items-center border-bottom-1 px-0 pt-0">
+                <div class="card-header d-flex justify-content-between align-items-start border-bottom-1 px-0 pt-0 flex-column flex-md-row gap-2 align-items-md-center">
                     <h5 class="mb-0">{{ $expenseCategory->name }} Reports</h5>
 
                     <a class="btn btn-primary"
-                       href="{{ url('/admin/expenses/category/report') }}?slug={{ $expenseCategory->slug }}&start_date={{ $startDate }}&end_date={{ $endDate }}" target="_blank"> 
+                       href="{{ url('/admin/expenses/category/report') }}?slug={{ $expenseCategory->slug }}&start_date={{ $startDate }}&end_date={{ $endDate }}"> 
                         View Full {{ $expenseCategory->name }} Category expense Report
                     </a>
                 </div>
 
-                <div class="card-body text-nowrap px-0">
+                <div class="card-body text-nowrap px-0 table-responsive">
                     <table class="table" id="myTable{{ $expenseCategory->id }}">
                         <thead>
                             <tr>
@@ -58,7 +59,7 @@
                                         <td>{{ $totalexpense }}</td>
                                         <td>
                                             <a class="btn btn-sm btn-outline-secondary"
-                                               href="{{ route('admin.expensesubcategoryReport', ['slug' => $expenseSubCategory->slug, 'start_date' => $startDate, 'end_date' => $endDate]) }}" target="_blank">
+                                               href="{{ route('admin.expensesubcategoryReport', ['slug' => $expenseSubCategory->slug, 'start_date' => $startDate, 'end_date' => $endDate]) }}">
                                                 <i class="bx bx-edit-alt me-1"></i> View Report
                                             </a>
                                         </td>

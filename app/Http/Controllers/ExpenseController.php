@@ -30,6 +30,9 @@ class ExpenseController extends Controller
 
     public static function report()
     {
+        if (Auth::user()->access->expense == 3) {
+            return redirect()->route('admin.dashboard')->with('error', 'You do not have permission to access this page.');
+        }
         $expense = Expense::all();
         $firstDate = $expense->min('date');
         $lastDate = $expense->max('date');

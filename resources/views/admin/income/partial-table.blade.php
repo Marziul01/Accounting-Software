@@ -1,5 +1,5 @@
 @if ($incomeCategories->isNotEmpty())
-    <ul class="nav nav-tabs" id="bankAccountTabs" role="tablist">
+    <ul class="nav nav-tabs" id="bankAccountTabs" role="tablist" style="overflow-x: auto;">
         @foreach ($incomeCategories as $index => $incomeCategory)
             <li class="nav-item" role="presentation">
                 <button class="nav-link {{ $index === 0 ? 'active' : '' }}"
@@ -22,16 +22,16 @@
                  role="tabpanel"
                  aria-labelledby="tab-{{ $incomeCategory->id }}">
 
-                <div class="card-header d-flex justify-content-between align-items-center border-bottom-1 px-0 pt-0">
+                <div class="card-header d-flex justify-content-between align-items-start border-bottom-1 px-0 pt-0 flex-column flex-md-row gap-2 align-items-md-center">
                     <h5 class="mb-0">{{ $incomeCategory->name }} Reports</h5>
 
                     <a class="btn btn-primary"
-                       href="{{ url('/admin/incomes/category/report') }}?slug={{ $incomeCategory->slug }}&start_date={{ $startDate }}&end_date={{ $endDate }}" target="_blank"> 
+                       href="{{ url('/admin/incomes/category/report') }}?slug={{ $incomeCategory->slug }}&start_date={{ $startDate }}&end_date={{ $endDate }}"> 
                         View Full {{ $incomeCategory->name }} Category Income Report
                     </a>
                 </div>
 
-                <div class="card-body text-nowrap px-0">
+                <div class="card-body text-nowrap px-0 table-responsive">
                     <table class="table" id="myTable{{ $incomeCategory->id }}">
                         <thead>
                             <tr>
@@ -58,7 +58,7 @@
                                         <td>{{ $totalIncome }}</td>
                                         <td>
                                             <a class="btn btn-sm btn-outline-secondary"
-                                               href="{{ route('admin.IncomesubcategoryReport', ['slug' => $incomeSubCategory->slug, 'start_date' => $startDate, 'end_date' => $endDate]) }}" target="_blank">
+                                               href="{{ route('admin.IncomesubcategoryReport', ['slug' => $incomeSubCategory->slug, 'start_date' => $startDate, 'end_date' => $endDate]) }}" >
                                                 <i class="bx bx-edit-alt me-1"></i> View Report
                                             </a>
                                         </td>

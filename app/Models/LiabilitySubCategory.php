@@ -19,10 +19,18 @@ class LiabilitySubCategory extends Model
         return $this->belongsTo(LiabilityCategory::class);
     }
 
+    public function liabilitySubSubCategories()
+    {
+        return $this->hasMany(LiabilitySubSubCategory::class);
+    }
+
     public function liabilities()
     {
         return $this->hasMany(Liability::class);
     }
+
+
+
 
     public function getRouteKeyName()
     {
