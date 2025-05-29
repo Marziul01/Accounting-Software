@@ -108,7 +108,7 @@
     <div class="card-body p-0">
       @foreach($subcategories as $subCatId => $subexpenses)
         @php
-          $subcategory = \App\Models\expenseSubCategory::find($subCatId);
+          $subcategory = \App\Models\ExpenseSubCategory::find($subCatId);
           $subTotal = $subexpenses->sum('amount');
           $categoryTotal += $subTotal;
           $grandTotal += $subTotal;
