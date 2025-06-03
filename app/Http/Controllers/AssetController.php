@@ -394,7 +394,7 @@ class AssetController extends Controller
 
         // Default category, subcategory, sub-subcategory
         $defaultCategory = $categories->first();
-        $defaultSubcategory = $defaultCategory->assetSubCategories->where('status', 1)->first() ?? null;
+        $defaultSubcategory = $defaultCategory->assetSubCategories->where('status', 1)->first();
         $defaultSubsubcategory = $defaultSubcategory?->assetSubSubCategories->where('status', 1)->first();
 
         // Fetch assets under default selection
