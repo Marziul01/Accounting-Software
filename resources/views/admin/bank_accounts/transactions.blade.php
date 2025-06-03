@@ -31,7 +31,7 @@
                                                     @foreach ($banktransactions as $transaction )
                                                     <tr>
                                                         <td>{{ $loop->iteration }}</td>
-                                                        <td>{{ $transaction->bankAccount->bank_name }}</td>
+                                                        <td>{{ $transaction->bankAccount->bank_name ?? 'Bank has been deleted' }}</td>
                                                         <td>{{ $transaction->name }}</td>
                                                         <td>{{ $transaction->transaction_id }}</td> <!-- ✅ Transaction ID -->
                                                         <td>{{ $transaction->amount ?? 'N/A' }}</td> <!-- ✅ Amount -->

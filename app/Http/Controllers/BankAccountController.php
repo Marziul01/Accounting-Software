@@ -136,7 +136,7 @@ class BankAccountController extends Controller
         $bankAccounts = BankAccount::all();
 
         // Get selected bank account or default to first
-        $selectedBankAccount = $request->get('bank_account_id', $bankAccounts->first()?->id);
+        $selectedBankAccount = $request->get('bank_account_id', $bankAccounts->first()?->id) ?? null;
 
         // Fetch transactions for selected bank account and date range
         $filteredTransactions = [];
