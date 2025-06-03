@@ -5,9 +5,9 @@
         <!-- Basic Bootstrap Table -->
         <div class="card ">
             <div class="card-header d-flex justify-content-between align-items-center border-bottom-1">
-                <h5 class="mb-0">Asset Sub Sub Category</h5>
+                <h5 class="mb-0">Asset {{ $categorysettings->asset_category == 2 ? 'Sub' : '' }} {{ $categorysettings->asset_subcategory == 2 ? 'Sub' : '' }} Category</h5>
                 <button type="button" class="btn btn-primary {{ Auth::user()->access->asset == 1 ? 'disabled' : '' }}" data-bs-toggle="modal"
-                    data-bs-target="#addmodals">Add Asset Sub Sub Category</button>
+                    data-bs-target="#addmodals">Add Asset {{ $categorysettings->asset_category == 2 ? 'Sub' : '' }} {{ $categorysettings->asset_subcategory == 2 ? 'Sub' : '' }} Category</button>
             </div>
             <div class="card-body  text-nowrap">
                 <div class="table-responsive">
@@ -70,7 +70,7 @@
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Add Asset Sub Sub Category</h5>
+                    <h5 class="modal-title" id="exampleModalLabel">Add Asset {{ $categorysettings->asset_category == 2 ? 'Sub' : '' }} {{ $categorysettings->asset_subcategory == 2 ? 'Sub' : '' }} Category</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form id="addIncomeCategoryForms">
@@ -82,7 +82,7 @@
                             <input type="text" class="form-control name-input" id="name" name="name"  required>
                            
                         </div>
-                        <div class="mb-3">
+                        <div class="mb-3 d-none">
                             <label for="slug" class="form-label">Slug</label>
                             <input type="text" class="form-control slug-output" id="slug" name="slug"  readonly>
                         </div>
@@ -127,7 +127,7 @@
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalLabel">Edit Asset Sub Sub Category</h5>
+                        <h5 class="modal-title" id="exampleModalLabel">Edit Asset {{ $categorysettings->asset_category == 2 ? 'Sub' : '' }} {{ $categorysettings->asset_subcategory == 2 ? 'Sub' : '' }} Category</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <form id="editIncomeCategoryForms{{ $assetsubsubcategory->id }}" action="{{ route('assetsubsubcategory.update', $assetsubsubcategory->id) }}">
@@ -140,7 +140,7 @@
                                 <input type="text" class="form-control name-input" id="name" name="name" value="{{ $assetsubsubcategory->name }}" required>
                                
                             </div>
-                            <div class="mb-3">
+                            <div class="mb-3 d-none">
                                 <label for="slug" class="form-label">Slug</label>
                                 <input type="text" class="form-control slug-output" id="slug" name="slug" value="{{ $assetsubsubcategory->slug }}" readonly>
                             </div>

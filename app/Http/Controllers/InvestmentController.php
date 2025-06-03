@@ -173,17 +173,32 @@ class InvestmentController extends Controller
         if (auth()->user()->access->investment == 3) {
             return redirect()->route('admin.dashboard')->with('error', 'You do not have permission to access this page.');
         }
+
+        $firstest = Investment::min('date');
+        $latest = Investment::max('date');
+        $firstesttransactions = InvestmentTransaction::min('transaction_date');
+        $latesttransactions = InvestmentTransaction::max('transaction_date');
+        $minDate = min(array_filter([$firstest, $firstesttransactions]));
+        $maxDate = max(array_filter([$latest, $latesttransactions]));
+
+        $allinvestments = InvestmentTransaction::all();
         // Fetch all investment categories from the database
-         $categories = InvestmentCategory::all();
-        $subcategories = InvestmentSubCategory::all();
+         $categories = InvestmentCategory::where('status',1)->get();
+        $subcategories = InvestmentSubCategory::where('status',1)->get();
 
         // Default filter values
         $selectedCategoryId = $request->input('category_id', $categories->first()->id ?? null);
         $selectedSubcategoryId = $request->input('subcategory_id', '');
-        $startDate = $request->input('start_date', Carbon::now()->startOfMonth()->toDateString());
-        $endDate = $request->input('end_date', Carbon::now()->toDateString());
+        $startDate = $minDate ? Carbon::parse($minDate)->toDateString() : Carbon::now()->toDateString();
+        $endDate = $maxDate ? Carbon::parse($maxDate)->toDateString() : Carbon::now()->toDateString();
 
-        // Fetch filtered investments
+        if ($request->has('start_date')) {
+            $startDate = $request->input('start_date');
+        }
+        if ($request->has('end_date')) {
+            $endDate = $request->input('end_date');
+        }
+
         $query = Investment::query();
 
         if ($selectedCategoryId) {
@@ -194,11 +209,14 @@ class InvestmentController extends Controller
             $query->where('investment_sub_category_id', $selectedSubcategoryId);
         }
 
-        if ($startDate && $endDate) {
-            $query->whereBetween('date', [$startDate, $endDate]);
-        }
+        // Eager load only transactions within the date range
+        $query->with(['transactions' => function ($q) use ($startDate, $endDate) {
+            if ($startDate && $endDate) {
+                $q->whereBetween('transaction_date', [$startDate, $endDate]);
+            }
+        }]);
 
-        $filteredInvestments = $query->with(['investmentCategory', 'investmentSubCategory'])->latest()->get();
+        $filteredInvestments = $query->orderBy('date', 'desc')->get();
 
         return view('admin.investment.investment-report', [
             'categories' => $categories,
@@ -222,7 +240,30 @@ class InvestmentController extends Controller
     
     public function filterInvestments(Request $request)
     {
+        // $query = Investment::with(['investmentCategory', 'investmentSubCategory']);
+
+        // if ($request->category_id) {
+        //     $query->where('investment_category_id', $request->category_id);
+        // }
+
+        // if ($request->subcategory_id) {
+        //     $query->where('investment_sub_category_id', $request->subcategory_id);
+        // }
+
+        // if ($request->start_date) {
+        //     $query->whereDate('date', '>=', $request->start_date);
+        // }
+
+        // if ($request->end_date) {
+        //     $query->whereDate('date', '<=', $request->end_date);
+        // }
+
+        // $investments = $query->orderBy('date', 'desc')->get();
+
+
         $query = Investment::with(['investmentCategory', 'investmentSubCategory']);
+        $startDate = $request->start_date ;
+        $endDate = $request->end_date ;
 
         if ($request->category_id) {
             $query->where('investment_category_id', $request->category_id);
@@ -232,30 +273,66 @@ class InvestmentController extends Controller
             $query->where('investment_sub_category_id', $request->subcategory_id);
         }
 
-        if ($request->start_date) {
-            $query->whereDate('date', '>=', $request->start_date);
-        }
-
-        if ($request->end_date) {
-            $query->whereDate('date', '<=', $request->end_date);
-        }
+        // Eager load only transactions within the date range
+        $query->with(['transactions' => function ($q) use ($startDate, $endDate) {
+            if ($startDate && $endDate) {
+                $q->whereBetween('transaction_date', [$startDate, $endDate]);
+            }
+        }]);
 
         $investments = $query->orderBy('date', 'desc')->get();
 
         // Only return JSON for AJAX
         if ($request->ajax()) {
             return response()->json(
-                $investments->map(function ($investment) {
+                $investments->map(function ($investment) use ($startDate, $endDate) {
+                    // Sum filtered transactions
+                    $depositInRange = $investment->transactions->where('transaction_type', 'Deposit')->sum('amount');
+                    $withdrawInRange = $investment->transactions->where('transaction_type', 'Withdraw')->sum('amount');
+                    $currentAmount = $depositInRange - $withdrawInRange;
+
+                    // Sum all transactions
+                    $totalDeposits = $investment->allTransactions->where('transaction_type', 'Deposit')->sum('amount');
+                    $totalWithdrawals = $investment->allTransactions->where('transaction_type', 'Withdraw')->sum('amount');
+                    $initialAmount = $investment->amount - $totalDeposits + $totalWithdrawals;
+
+                    
+                    
+
+                    if ($startDate <= $investment->date ) {
+                        // Start date is before investment, or no previous transactions, so no previous amount
+                        $currentAmount += $initialAmount;
+                        $depositInRange += $initialAmount;
+                        $previousAmount = null;
+                    } else {
+                        // Start date is on or after investment date, so calculate previous
+                        $depositBeforeStart = $investment->allTransactions
+                            ->where('transaction_type', 'Deposit')
+                            ->where('transaction_date', '<', $startDate)
+                            ->sum('amount');
+
+                        $withdrawBeforeStart = $investment->allTransactions
+                            ->where('transaction_type', 'Withdraw')
+                            ->where('transaction_date', '<', $startDate)
+                            ->sum('amount');
+
+                        $previousAmount = $initialAmount + $depositBeforeStart - $withdrawBeforeStart;
+                    }
+
+
+
                     return [
                         'id' => $investment->id,
                         'name' => $investment->name,
                         'description' => $investment->description,
-                        'amount' => $investment->amount,
+                        'amount' => $currentAmount ?? 'No Transactions',
                         'date' => $investment->date,
                         'formatted_date' => \Carbon\Carbon::parse($investment->date)->format('d M, Y'),
                         'category_name' => $investment->investmentCategory->name ?? 'N/A',
                         'subcategory_name' => $investment->investmentSubCategory->name ?? 'N/A',
                         'slug' => $investment->slug ?? '',
+                        'start_date' => $startDate,
+                        'end_date' => $endDate,
                     ];
                 })
             );
@@ -269,22 +346,26 @@ class InvestmentController extends Controller
     public function categoryReport(Request $request, $slug)
     {
         $category = InvestmentCategory::where('slug', $slug)->firstOrFail();
+        $query = Investment::with(['investmentCategory', 'investmentSubCategory']);
+        $startDate = $request->start_date ;
+        $endDate = $request->end_date ;
 
-        $startDate = $request->start_date;
-        $endDate = $request->end_date;
-
-        $query = Investment::with('investmentSubCategory')
-            ->where('investment_category_id', $category->id);
-
-        if ($startDate && $endDate) {
-            $query->whereBetween('date', [$startDate, $endDate]);
+        if ($request->category_id) {
+            $query->where('investment_category_id', $category->id);
         }
 
-        $investments = $query->get()->groupBy('investment_sub_category_id');
-        $investmentTransactions = InvestmentTransaction::all();
+        // Eager load only transactions within the date range
+        $query->with(['transactions' => function ($q) use ($startDate, $endDate) {
+            if ($startDate && $endDate) {
+                $q->whereBetween('transaction_date', [$startDate, $endDate]);
+            }
+        }]);
 
-        return view('admin.investment.category-report', compact('category', 'investments', 'startDate', 'endDate' , 'investmentTransactions'));
+        $investments = $query->orderBy('date', 'desc')->get();
+
+        return view('admin.investment.category-report', compact('category', 'investments', 'startDate', 'endDate'));
     }
+
 
     public function subcategoryReport($slug, Request $request)
     {
@@ -292,41 +373,52 @@ class InvestmentController extends Controller
         $endDate = $request->end_date ?? now()->format('Y-m-d');
 
         $subcategory = InvestmentSubCategory::where('slug', $slug)->firstOrFail();
+        $query = Investment::with(['investmentCategory', 'investmentSubCategory']);
+        if ($request->category_id) {
+            $query->where('investment_sub_category_id', $subcategory->id);
+        }
+        $query->with(['transactions' => function ($q) use ($startDate, $endDate) {
+            if ($startDate && $endDate) {
+                $q->whereBetween('transaction_date', [$startDate, $endDate]);
+            }
+        }]);
 
-        $investments = Investment::with('transactions')
-            ->where('investment_sub_category_id', $subcategory->id)
-            ->when($startDate, fn($q) => $q->where('date', '>=', $startDate))
-            ->where('date', '<=', $endDate)
-            ->get();
-
-        $transactions = InvestmentTransaction::whereIn('investment_id', $investments->pluck('id'))->get();
+        $investments = $query->orderBy('date', 'desc')->get();
 
         return view('admin.investment.subcategory-report', [
             'subcategory' => $subcategory,
             'investments' => $investments,
-            'investmentTransactions' => $transactions,
             'startDate' => $startDate,
             'endDate' => $endDate,
         ]);
     }
-    public function singleInvestmentReport($slug)
+    public function singleInvestmentReport(Request $request, $slug)
     {
-        $investment = Investment::with(['transactions', 'investmentSubCategory.investmentCategory'])->where('slug', $slug)->firstOrFail();
+        $investment = Investment::with(['investmentSubCategory.investmentCategory'])->where('slug', $slug)->firstOrFail();
 
-        $transactions = $investment->transactions;
+        // Fetch only the transactions within the date range using the database query
+        $transactions = $investment->transactions()
+            ->whereBetween('transaction_date', [$request->start_date, $request->end_date])
+            ->orderBy('transaction_date')
+            ->get();
 
         $totalInvested = $transactions->sum('investment_amount');
         $totalReturned = $transactions->sum('return_amount');
         $profitOrLoss = $totalReturned - $totalInvested;
+        $startDate = $request->start_date;
+        $endDate = $request->end_date ;
 
         return view('admin.investment.single_report', compact(
             'investment',
             'transactions',
             'totalInvested',
             'totalReturned',
-            'profitOrLoss'
+            'profitOrLoss',
+            'startDate',
+            'endDate',
         ));
     }
+
 
     public function fullReport(Request $request)
     {
@@ -334,16 +426,20 @@ class InvestmentController extends Controller
         $endDate = $request->end_date;
 
         // Fetch all categories
-        $categories = InvestmentCategory::with(['investmentSubCategories.investments' => function ($query) use ($startDate, $endDate) {
+        $query = Investment::with(['investmentCategory', 'investmentSubCategory']);
+        
+        $query->with(['transactions' => function ($q) use ($startDate, $endDate) {
             if ($startDate && $endDate) {
-                $query->whereBetween('date', [$startDate, $endDate]);
+                $q->whereBetween('transaction_date', [$startDate, $endDate]);
             }
-        }])->get();
+        }]);
 
-        // Get all investment transactions
-        $investmentTransactions = InvestmentTransaction::all();
+        $investments = $query->orderBy('date', 'desc')->get();
 
-        return view('admin.investment.full-report', compact('categories', 'startDate', 'endDate', 'investmentTransactions'));
+        // Fetch all categories
+        $categories = InvestmentCategory::where('status',1)->get();
+
+        return view('admin.investment.full-report', compact('categories', 'startDate', 'endDate', 'investments'));
     }
 
 

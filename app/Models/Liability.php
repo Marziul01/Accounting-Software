@@ -37,4 +37,9 @@ class Liability extends Model
     {
         return $this->hasMany(LiabilityTransaction::class, 'liability_id');
     }
+
+    public function allTransactions()
+    {
+        return $this->hasMany(LiabilityTransaction::class, 'liability_id');
+    }
 }

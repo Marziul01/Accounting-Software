@@ -9,7 +9,7 @@
                 <button type="button" class="btn btn-primary {{ Auth::user()->access->bankbook == 1 ? 'disabled' : '' }}" data-bs-toggle="modal" data-bs-target="#addmodals">Add New
                     BankBook</button>
             </div>
-            <div class="card-body row text-nowrap gap-3">
+            <div class="card-body row text-nowrap gap-3 m-0">
                 @if ($bankbooks->isNotEmpty())
                     @foreach ($bankbooks as $bankbook)
                         <div class="card contact-card col-md-3">
@@ -25,6 +25,7 @@
                                 </form>
                             </div>
                             <div class="card-body">
+                                <p class="position-absolute badge bg-success" style="top: -10px; left: -5px;">{{ $loop->iteration }}</p>
                                 <div>
                                     <div class="d-flex align-items-center justify-content-between gap-2 mb-3">
                                         <i class="bx bx-wallet bx-lg text-info bank_card_icon"></i>

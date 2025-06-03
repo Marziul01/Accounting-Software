@@ -15,8 +15,15 @@
                         <thead>
                             <tr>
                                 <th>Sl</th>
+
+                                @if($categorysettings->asset_category_table == 2)
                                 <th>Asset Category</th>
+                                @endif
+
+                                @if($categorysettings->asset_name_table == 2)
                                 <th>Asset Name</th>
+                                @endif
+
                                 <th>Assets Issued Name </th>
                                 <th>Amount</th>
                                 <th>Description</th>
@@ -29,10 +36,25 @@
                             @foreach ($assets as $asset )
                             <tr>
                                 <td>{{ $loop->iteration }}</td>
+                                
+                                @if($categorysettings->asset_category_table == 2)
                                 <td>{{ $asset->category->name ?? 'Asset Category Not Assigned' }} - ( {{ $asset->subcategory->name ?? 'Asset Category Not Assigned' }} ) - ( {{ $asset->subsubcategory->name ?? 'Asset Sub Category not Assigned' }} )</td>
+                                @endif
+                                
+                                @if($categorysettings->asset_name_table == 2)
                                 <td>{{ $asset->name }}</td>
+                                @endif
+
                                 <td>{{ $asset->user_name }} </td>
-                                <td> {{ $asset->amount }} </td>
+                                <td>
+                                    @if ($asset->amount < 0)
+                                    <span class="badge bg-danger">Sale of Asset  : {{ number_format(abs($asset->amount), 2) }} Tk</span>
+                                @elseif ($asset->amount > 0)
+                                    <span class="badge bg-success">Asset: {{ number_format($asset->amount, 2) }} Tk</span>
+                                @else
+                                    <span class="badge bg-warning">No Transactions / Asset Completed</span>
+                                @endif
+                                </td>
                                 <td>{{ $asset->description ?? 'N/A' }}</td>
                                 
                                 <td>
@@ -95,7 +117,7 @@
                                 <input type="text" name="name" class="form-control name-input" required>
                             </div>
                 
-                            <div class="col-6 mb-3">
+                            <div class="col-6 mb-3 d-none">
                                 <label>Slug</label>
                                 <input type="text" name="slug" class="form-control slug-output" required>
                             </div>
@@ -106,7 +128,7 @@
                             </div>
                             <div class="col-6 mb-3">
                                 <label>Entry Date</label>
-                                <input type="date" name="entry_date" class="form-control" required>
+                                <input type="date" name="entry_date" class="form-control" value="{{ date('Y-m-d') }}" required>
                             </div>
 
                             
@@ -154,7 +176,16 @@
                                             value="{{ $user->id }}" 
                                             data-name="{{ $user->name }}" 
                                             data-mobile="{{ $user->mobile_number }}" 
-                                            data-email="{{ $user->email }}">
+                                            data-email="{{ $user->email }}"
+                                            data-national_id="{{ $user->national_id ?? '' }}"
+                                            data-father_name="{{ $user->father_name ?? '' }}"
+                                            data-father_mobile="{{ $user->father_mobile ?? '' }}"
+                                            data-mother_name="{{ $user->mother_name ?? '' }}"
+                                            data-mother_mobile="{{ $user->mother_mobile ?? '' }}"
+                                            data-spouse_name="{{ $user->spouse_name ?? '' }}"
+                                            data-spouse_mobile="{{ $user->spouse_mobile ?? '' }}"
+                                            data-present_address="{{ $user->present_address ?? '' }}"
+                                            data-permanent_address="{{ $user->permanent_address ?? '' }}">
                                             {{ $user->name }}
                                         </option>
                                         @endforeach
@@ -237,7 +268,7 @@
                                             <input type="text" name="name" class="form-control name-input" required value="{{ $asset->name }}">
                                         </div>
                             
-                                        <div class="col-6 mb-3">
+                                        <div class="col-6 mb-3 d-none">
                                             <label>Slug</label>
                                             <input type="text" name="slug" class="form-control slug-output" required value="{{ $asset->slug }}" >
                                         </div>
@@ -305,7 +336,17 @@
                                                         value="{{ $user->id }}" 
                                                         data-name="{{ $user->name }}" 
                                                         data-mobile="{{ $user->mobile_number }}" 
-                                                        data-email="{{ $user->email }}" {{ $asset->contact_id == $user->id ? 'selected' : '' }} >
+                                                        data-email="{{ $user->email }}" 
+                                                        data-national_id="{{ $user->national_id ?? '' }}"
+                                                        data-father_name="{{ $user->father_name ?? '' }}"
+                                                        data-father_mobile="{{ $user->father_mobile ?? '' }}"
+                                                        data-mother_name="{{ $user->mother_name ?? '' }}"
+                                                        data-mother_mobile="{{ $user->mother_mobile ?? '' }}"
+                                                        data-spouse_name="{{ $user->spouse_name ?? '' }}"
+                                                        data-spouse_mobile="{{ $user->spouse_mobile ?? '' }}"
+                                                        data-present_address="{{ $user->present_address ?? '' }}"
+                                                        data-permanent_address="{{ $user->permanent_address ?? '' }}"
+                                                        {{ $asset->contact_id == $user->id ? 'selected' : '' }} >
                                                         {{ $user->name }}
                                                     </option>
                                                     @endforeach
@@ -479,7 +520,12 @@
                                     
                                         <div class="col-12 mb-3">
                                             <label>Transaction Date</label>
-                                            <input type="date" name="transaction_date" class="form-control" required >
+                                            <input type="date" name="transaction_date" class="form-control" required value="{{ date('Y-m-d') }}">
+                                        </div>
+
+                                        <div class="col-12 mb-3">
+                                            <label>Description</label>
+                                            <textarea name="description" class="form-control"> </textarea>
                                         </div>
     
                                         <div class="col-12 mb-3">
@@ -516,6 +562,7 @@
                                             <th>Transaction Type</th>
                                             <th>Amount</th>
                                             <th>Transaction Date </th>
+                                            <th>Description</th>
                                             <th>Actions</th>
                                         </tr>
                                     </thead>
@@ -527,7 +574,7 @@
                                             <td>{{ $assetTransaction->transaction_type }}</td>
                                             <td>{{ $assetTransaction->amount }}</td>
                                             <td>{{ $assetTransaction->transaction_date }} </td>
-                                            
+                                            <td>{{ $assetTransaction->description }} </td>
                                             
                                             <td>
                                                 <div class="d-flex align-items-center gap-1 cursor-pointer">
@@ -591,6 +638,11 @@
                                     <label>Transaction Date</label>
                                     <input type="date" name="transaction_date" class="form-control" required value="{{ $assetTransaction->transaction_date }}" >
                                 </div>
+
+                                <div class="col-12 mb-3">
+                                            <label>Description</label>
+                                            <textarea name="description" class="form-control"> {{ $assetTransaction->description }} </textarea>
+                                        </div>
 
                                 <div class="col-12 mb-3">
                                     <button type="submit" class="btn btn-primary">Submit</button>
@@ -1033,11 +1085,31 @@
             const name = selectedOption.dataset.name || '';
             const mobile = selectedOption.dataset.mobile || '';
             const email = selectedOption.dataset.email || '';
+
+            const nationalId = selectedOption.dataset.national_id || '';
+            const fatherName = selectedOption.dataset.father_name || '';
+            const fatherMobile = selectedOption.dataset.father_mobile || '';
+            const motherName = selectedOption.dataset.mother_name || '';
+            const motherMobile = selectedOption.dataset.mother_mobile || '';
+            const spouseName = selectedOption.dataset.spouse_name || '';
+            const spouseMobile = selectedOption.dataset.spouse_mobile || '';
+            const presentAddress = selectedOption.dataset.present_address || '';
+            const permanentAddress = selectedOption.dataset.permanent_address || '';
     
             const userNameInput = form.querySelector('input[name="user_name"]');
             const mobileInput = form.querySelector('input[name="mobile"]');
             const emailInput = form.querySelector('input[name="email"]');
             const photoInput = form.querySelector('input[name="photo"]');
+
+            const nationalIdInput = form.querySelector('input[name="national_id"]');
+            const fatherNameInput = form.querySelector('input[name="father_name"]');
+            const fatherMobileInput = form.querySelector('input[name="father_mobile"]');
+            const motherNameInput = form.querySelector('input[name="mother_name"]');
+            const motherMobileInput = form.querySelector('input[name="mother_mobile"]');
+            const spouseNameInput = form.querySelector('input[name="spouse_name"]');
+            const spouseMobileInput = form.querySelector('input[name="spouse_mobile"]');
+            const presentAddressInput = form.querySelector('input[name="present_address"]');
+            const permanentAddressInput = form.querySelector('input[name="permanent_address"]');
     
             if (this.value && name && mobile && email) {
                 userNameInput.value = name;
@@ -1053,6 +1125,52 @@
                     photoInput.disabled = true;
                     photoInput.value = ''; // Optional: for browsers that allow resetting
                 }
+
+                if(nationalId){
+                    nationalIdInput.value = nationalId;
+                    nationalIdInput.readOnly = true;
+                }
+                
+                if(fatherName){
+                fatherNameInput.value = fatherName;
+                fatherNameInput.readOnly = true;
+                }
+
+                if(fatherMobile){
+                fatherMobileInput.value = fatherMobile;
+                fatherMobileInput.readOnly = true;
+                }
+
+                if(motherName){
+                motherNameInput.value = motherName;
+                motherNameInput.readOnly = true;
+                }
+
+                if(motherMobile){
+                motherMobileInput.value = motherMobile;
+                motherMobileInput.readOnly = true;
+                }
+
+                if(spouseName){
+                spouseNameInput.value = spouseName;
+                spouseNameInput.readOnly = true;
+                }
+
+                if(spouseMobile){
+                spouseMobileInput.value = spouseMobile;
+                spouseMobileInput.readOnly = true;
+                }
+
+                if(permanentAddress){
+                presentAddressInput.value = permanentAddress;
+                presentAddressInput.readOnly = true;
+                }
+
+                if(permanentAddress){
+                permanentAddressInput.value = permanentAddress;
+                permanentAddressInput.readOnly = true;
+                }
+
             } else {
                 userNameInput.value = '';
                 userNameInput.readOnly = false;
@@ -1066,6 +1184,33 @@
                 if (photoInput) {
                     photoInput.disabled = false;
                 }
+
+                nationalIdInput.value = '';
+                nationalIdInput.readOnly = false;
+
+                fatherNameInput.value = '';
+                fatherNameInput.readOnly = false;
+
+                fatherMobileInput.value = '';
+                fatherMobileInput.readOnly = false;
+
+                motherNameInput.value = '';
+                motherNameInput.readOnly = false;
+
+                motherMobileInput.value = '';
+                motherMobileInput.readOnly = false;
+
+                spouseNameInput.value = '';
+                spouseNameInput.readOnly = false;
+
+                spouseMobileInput.value = '';
+                spouseMobileInput.readOnly = false;
+
+                presentAddressInput.value = '';
+                presentAddressInput.readOnly = false;
+
+                permanentAddressInput.value = '';
+                permanentAddressInput.readOnly = false;
             }
         });
     });

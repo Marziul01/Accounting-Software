@@ -23,6 +23,7 @@ use App\Http\Controllers\AssetSubSubCategoryController;
 use App\Http\Controllers\AssetTransactionController;
 use App\Http\Controllers\BankAccountController;
 use App\Http\Controllers\BankTransactionController;
+use App\Http\Controllers\CategoryTableSettings;
 use App\Http\Controllers\InvestmentCategoryController;
 use App\Http\Controllers\InvestmentController;
 use App\Http\Controllers\InvestmentSubCategoryController;
@@ -132,5 +133,9 @@ Route::prefix('admin')->middleware(['auth:admin', 'admin.only'])->group(function
     Route::get('/bankbooks/report', [BankAccountController::class, 'report'])->name('bankbook.report');
     Route::get('/bankbooks/filter', [BankAccountController::class, 'filter'])->name('admin.filteredBankTransactions');
     Route::get('/admin/bankbook/fullreport', [BankAccountController::class, 'bankbookreport'])->name('admin.report.bankaccount');
+
+    Route::get('/admin/category/table/settings', [CategoryTableSettings::class, 'categoryTableSettings'])->name('admin.categoryTableSettings');
+    Route::post('/admin/settings/updateCategoryField', [CategoryTableSettings::class, 'updateCategoryField'])->name('admin.settings.updateCategoryField');
+
 });
 

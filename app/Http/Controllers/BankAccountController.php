@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\BankAccount;
+use App\Models\BankTransaction;
 
 class BankAccountController extends Controller
 {
@@ -128,20 +129,19 @@ class BankAccountController extends Controller
             return redirect()->route('admin.dashboard')->with('error', 'You do not have permission to access this page.');
         }
 
+        $startDate = BankTransaction::min('transaction_date');
+        $endDate = BankTransaction::max('transaction_date');
+        
         // Fetch all bank accounts
         $bankAccounts = BankAccount::all();
 
         // Get selected bank account or default to first
         $selectedBankAccount = $request->get('bank_account_id', $bankAccounts->first()?->id);
 
-        // Date range
-        $startDate = $request->get('start_date', now()->startOfMonth()->toDateString());
-        $endDate = $request->get('end_date', now()->toDateString());
-
         // Fetch transactions for selected bank account and date range
         $filteredTransactions = [];
         if ($selectedBankAccount) {
-            $filteredTransactions = \App\Models\BankTransaction::where('bank_account_id', $selectedBankAccount)
+            $filteredTransactions = BankTransaction::where('bank_account_id', $selectedBankAccount)
                 ->whereBetween('transaction_date', [$startDate, $endDate])
                 ->orderBy('transaction_date', 'desc')
                 ->get();
@@ -162,7 +162,7 @@ class BankAccountController extends Controller
         $startDate = $request->input('start_date');
         $endDate = $request->input('end_date');
 
-        $query = \App\Models\BankTransaction::query();
+        $query = BankTransaction::query();
 
         if ($bankAccountId) {
             $query->where('bank_account_id', $bankAccountId);
@@ -192,8 +192,8 @@ class BankAccountController extends Controller
 
     public function bankbookreport(Request $request)
     {
-        $startDate = \Carbon\Carbon::parse($request->start_date)->startOfDay();
-        $endDate = \Carbon\Carbon::parse($request->end_date)->endOfDay();
+        $startDate = $request->start_date;
+        $endDate = $request->end_date;
 
         $bankAccount = BankAccount::with(['transactions' => function ($query) use ($startDate, $endDate) {
             $query->whereBetween('transaction_date', [$startDate, $endDate])

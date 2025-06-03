@@ -21,6 +21,8 @@ class ExpenseController extends Controller
         // Fetch all expenses from the database
         $expenses = Expense::all();
 
+
+
         return view('admin.expense.expense', [
             'expenses' => $expenses,
             'expenseCategories' => ExpenseCategory::where('status', 1)->get(),
@@ -36,12 +38,14 @@ class ExpenseController extends Controller
         $expense = Expense::all();
         $firstDate = $expense->min('date');
         $lastDate = $expense->max('date');
+        $expenseCategory = ExpenseCategory::where('status', 1)->first();
         return view('admin.expense.report', [
             'expenses' => Expense::all(),
             'expenseCategories' => ExpenseCategory::where('status', 1)->get(),
             'expenseSubCategories' => ExpenseSubCategory::where('status', 1)->get(),
             'firstDate' => $firstDate,
             'lastDate' => $lastDate,    
+            'expenseCategory' => $expenseCategory,
         ]);
     }
 
@@ -195,12 +199,15 @@ class ExpenseController extends Controller
     {
         $startDate = $request->start_date;
         $endDate = $request->end_date;
+        $categoryId = $request->category;
+        $expenseCategory = ExpenseCategory::findOrFail($categoryId);
 
         $expenseCategories = ExpenseCategory::all();
         $expenses = Expense::whereBetween('date', [$startDate, $endDate])->get();
+        $expenses = $expenses->where('expense_category_id', $request->category);
 
         return response()->json([
-            'html' => view('admin.expense.partial-table', compact('expenseCategories', 'expenses', 'startDate', 'endDate'))->render()
+            'html' => view('admin.expense.partial-table', compact('expenseCategories', 'expenses', 'startDate', 'endDate', 'expenseCategory'))->render()
         ]);
     }
 

@@ -8,8 +8,10 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&family=Tiro+Bangla&display=swap');
         body { font-family: "Hind Siliguri", sans-serif; background-color: #f8f9fa; }
-        .tiro { font-family: "Tiro Bangla", serif; }
-        @media print { .no-print { display: none !important; } body { -webkit-print-color-adjust: exact !important; } }
+        .tiro-font { font-family: "Tiro Bangla", serif; }
+        @media print { .no-print { display: none !important; } body { -webkit-print-color-adjust: exact !important; } .img {
+                width: 15% !important;
+            } }
         .report-header, .report-footer { text-align: center; padding: 10px 0; }
         .report-header { border-bottom: 2px solid #000; margin-bottom: 20px; }
         .card-header { background-color: #343a40; color: white; }
@@ -19,44 +21,57 @@
         table tbody tr td { background-color: transparent !important; font-size: 12px; }
         table.table tbody tr:nth-of-type(odd) { background-color: #d4edda !important; }
         table.table tbody tr:nth-of-type(even) { background-color: #fff3cd !important; }
+        .last-row td {
+            border-bottom: 2px solid #00a652 !important;
+        }
+
+        .report-footer .text-center p {
+            margin-bottom: 5px;
+            font-weight: 500;
+            font-size: 16px !important;
+        }
+
+        .img {
+            width: 6%;
+        }
     </style>
 </head>
 <body>
 
 @php
-        function bn_number($number) {
-                $eng = ['0','1','2','3','4','5','6','7','8','9'];
-                $bang = ['০','১','২','৩','৪','৫','৬','৭','৮','৯'];
-                return str_replace($eng, $bang, $number);
+        function bn_number($number)
+        {
+            $eng = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+            $bang = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
+            return '<span class="tiro-font">' . str_replace($eng, $bang, $number) . '</span>';
         }
 
-        $grandTotal = 0;
-@endphp
+        $categorytotal = 0;
+        
+    @endphp
 
 <div class="container-fluid my-4">
     <div class="report-header text-center border-bottom mb-4">
-        <h2>রাসেল বুক</h2>
-        <h4>{{ $category->name }} দায় রিপোর্ট</h4>
-        <p class="tiro">{{ bn_number($startDate ? $startDate->format('Y-m-d') : 'সর্বপ্রথম') }} থেকে {{ bn_number($endDate ? $endDate->format('Y-m-d') : now()->format('Y-m-d')) }} পর্যন্ত</p>
+        <img src="{{ asset($setting->site_logo) }}" height="100%" class="img" alt="">
+            <h2>{{ $setting->site_name_bangla }}</h2>
+        <h4>{{ $category->name }} এর দায় রিপোর্ট</h4>
+        <p class=""> {!! bn_number($startDate ?? 'সর্বপ্রথম') !!} থেকে {!! bn_number($endDate ?? now()->format('Y-m-d')) !!} পর্যন্ত </p>
     </div>
 
     @if($category->liabilitySubCategories->count())
-        @php $categoryTotal = 0; @endphp
+       
 
         @foreach($category->liabilitySubCategories as $subcategory)
-            @php $subcategoryTotal = 0; @endphp
+            @php
+                  $subcategoryTotal = 0;
+                @endphp
             @if($subcategory->liabilitySubSubCategories->count())
                 @foreach($subcategory->liabilitySubSubCategories as $subsubcategory)
                     @php
-                        $liabilities = $subsubcategory->liabilities->filter(function ($liability) use ($startDate, $endDate) {
-                                $date = \Carbon\Carbon::parse($liability->entry_date);
-                                return (!$startDate || $date >= $startDate) && (!$endDate || $date <= $endDate);
-                        });
-                        $subSubTotal = $liabilities->sum('amount');
-                        $subcategoryTotal += $subSubTotal;
-                        $categoryTotal += $subSubTotal;
-                        $grandTotal += $subSubTotal;
-                    @endphp
+                            $subsubdeposit = 0;
+                            $subsubwithdraw = 0;
+                            $subsubtotal = 0;
+                        @endphp
 
                     @if($liabilities->count())
                         <div class="card mb-4">
@@ -67,36 +82,102 @@
                                 <div class="table-responsive">
                                     <table class="table table-bordered m-0">
                                         <thead class="table-light">
-                                            <tr>
-                                                    <th>তারিখ</th>
-                                                    <th>নাম</th>
-                                                    <th class="text-end">প্রারম্ভিক দায়</th>
-                                                    <th class="text-end">অতিরিক্ত দায়</th>
-                                                    <th class="text-end">মোট পরিশোধ</th>
-                                                    <th class="text-end">পরিমাণ</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @foreach($liabilities->sortBy('entry_date') as $liability)
-                                                @php
-                                                    $totalIncrease = $liability->transactions->where('transaction_type', 'Increase')->sum('amount');
-                                                    $totalPayment = $liability->transactions->where('transaction_type', 'Payment')->sum('amount');
-                                                    $initialLiability = $liability->amount - $totalIncrease + $totalPayment;
-                                                @endphp
-                                                <tr>
-                                                    <td class="tiro">{{ bn_number(\Carbon\Carbon::parse($liability->entry_date)->format('Y-m-d')) }}</td>
-                                                    <td>{{ $liability->name }}</td>
-                                                    <td class="text-end tiro">{{ bn_number(number_format($initialLiability, 2)) }} টাকা</td>
-                                                    <td class="text-end tiro">{{ bn_number(number_format($totalIncrease, 2)) }} টাকা</td>
-                                                    <td class="text-end tiro">{{ bn_number(number_format($totalPayment, 2)) }} টাকা</td>
-                                                    <td class="text-end tiro">{{ bn_number(number_format($liability->amount, 2)) }} টাকা</td>
-                                                </tr>
-                                            @endforeach
-                                            <tr class="subsubcategory-total">
-                                                <td colspan="5" class="text-end"><strong>{{ $subsubcategory->name }} টোটাল:</strong></td>
-                                                <td class="text-end tiro"><strong>{{ bn_number(number_format($subSubTotal, 2)) }} টাকা</strong></td>
-                                            </tr>
-                                        </tbody>
+                                <tr>
+                                    <th>ক্রমিক নম্বর</th>
+                                    <th>তারিখ</th>
+                                    <th>নাম</th>
+                                    <th class="text-end">প্রারম্ভিক জমা / পূর্বের ব্যালেন্স</th>
+                                    <th class="text-end">মোট জমা</th>
+                                    <th class="text-end">মোট উত্তোলন</th>
+                                    <th class="text-end">পরিমাণ</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($liabilities->where('subsubcategory_id' , $subsubcategory->id ) as $liability)
+                                    @php
+                                        $totalDeposits = $liability->allTransactions
+                                            ->where('transaction_type', 'Deposit')
+                                            ->sum('amount');
+                                        $totalWithdrawals = $liability->allTransactions
+                                            ->where('transaction_type', 'Withdraw')
+                                            ->sum('amount');
+                                        $initialAmount = $liability->amount - $totalDeposits + $totalWithdrawals;
+
+                                        // 2. Filtered transactions (between start and end)
+                                        $depositInRange = $liability->transactions
+                                            ->where('transaction_type', 'Deposit')
+                                            ->sum('amount');
+                                        $withdrawInRange = $liability->transactions
+                                            ->where('transaction_type', 'Withdraw')
+                                            ->sum('amount');
+                                        $currentAmount = $depositInRange - $withdrawInRange;
+
+                                        if ($startDate <= $liability->entry_date) {
+                                            // Start date is before investment was created, so only show current with initial
+                                            $currentAmount += $initialAmount;
+                                            $depositInRange += $initialAmount;
+                                            $previousAmount = null;
+                                        } else {
+                                            // Start date is on or after investment date
+                                            $depositBeforeStart = $liability->allTransactions
+                                                ->where('transaction_type', 'Deposit')
+                                                ->where('transaction_date', '<', $startDate)
+                                                ->sum('amount');
+
+                                            $withdrawBeforeStart = $liability->allTransactions
+                                                ->where('transaction_type', 'Withdraw')
+                                                ->where('transaction_date', '<', $startDate)
+                                                ->sum('amount');
+
+                                            $previousAmount =
+                                                $initialAmount + $depositBeforeStart - $withdrawBeforeStart;
+                                        }
+
+                                        $subsubdeposit += $depositInRange;
+                                        $subsubwithdraw += $withdrawInRange;
+                                        $subsubtotal = $subsubdeposit - $subsubwithdraw;
+                                    @endphp
+                                    @php $isLast = $loop->last; @endphp
+                                    <tr class="{{ $isLast ? 'last-row' : '' }}">
+                                        <td>{!! bn_number($loop->iteration) !!}</td>
+                                        <td>{!! bn_number(\Carbon\Carbon::parse($liability->entry_date)->format('d-m-y')) !!}</td>
+                                        <td>{{ $liability->name }}</td>
+                                        <td class="text-end tiro">{!! $previousAmount ? bn_number(number_format($previousAmount, 2)) : bn_number(number_format($initialAmount, 2)) !!} টাকা</td>
+                                        <td class="text-end tiro">{!! bn_number(number_format($depositInRange, 2)) !!} টাকা</td>
+                                        <td class="text-end tiro">{!! bn_number(number_format($withdrawInRange, 2)) !!} টাকা</td>
+                                        <td class="text-end tiro">
+                                            @if ($currentAmount < 0)
+                                    <span class="text-danger">অতিরিক্ত প্রদান  : {!! bn_number(number_format(abs($currentAmount)), 2) !!} Tk</span>
+                                @elseif ($currentAmount > 0)
+                                    <span class="text-danger">দায়: {!! bn_number(number_format($currentAmount, 2)) !!} Tk</span>
+                                @else
+                                    <span class="text-warning">পরিশোধিত </span>
+                                @endif
+                                        </td>
+                                    </tr>
+                                @endforeach
+                                @php
+                                            $subcategoryTotal += $subsubtotal;
+                                        @endphp
+                                        <tr class="subsubcategory-total">
+                                            <td colspan="6" class="text-end"><strong>{{ $subsubcategory->name }}
+                                                    মোট:</strong></td>
+                                            <td class="text-end text-success">
+                                                <strong>
+                                                    @if ($subsubtotal < 0)
+                                                        <span class="text-danger">অতিরিক্ত প্রদান:
+                                                            {!! bn_number(number_format(abs($subsubtotal), 2)) !!}
+                                                            টাকা</span>
+                                                    @elseif ($subsubtotal > 0)
+                                                        <span class="text-danger">দায়: {!! bn_number(number_format(abs($subsubtotal), 2)) !!}
+                                                            টাকা</span>
+                                                    @else
+                                                        <span class="text-secondary">পরিশোধিত</span>
+                                                    @endif
+                                                </strong>
+                                            </td>
+                                        </tr>
+                            </tbody>
                                     </table>
                                 </div>
                             </div>
@@ -106,10 +187,26 @@
                     @endif
                 @endforeach
 
-                <div class="text-end mb-2 pe-3 subcategory-total">
-                    <strong>{{ $subcategory->name }} মোট:</strong>
-                    <span class="tiro">{{ bn_number(number_format($subcategoryTotal, 2)) }} টাকা</span>
-                </div>
+                @php
+                                
+                                $categorytotal += $subcategoryTotal;
+                              @endphp
+                    <div class="text-end mb-2 pe-3 subcategory-total">
+                        <strong>{{ $subcategory->name }} মোট:</strong>
+                        <span class="tiro">
+                            @if ($subcategoryTotal < 0)
+                                <span class="text-danger">অতিরিক্ত প্রদান:
+                                    {!! bn_number(number_format(abs($subcategoryTotal), 2)) !!}
+                                    টাকা</span>
+                            @elseif ($subcategoryTotal > 0)
+                                <span class="text-danger">দায়:
+                                    {!! bn_number(number_format(abs($subcategoryTotal), 2)) !!}
+                                    টাকা</span>
+                            @else
+                                <span class="text-secondary">পরিশোধিত</span>
+                            @endif
+                        </span>
+                    </div>
             @endif
         @endforeach
     @else
@@ -125,16 +222,91 @@
             </thead>
             <tbody>
                 <tr class="grand-total">
-                    <td><strong>সর্বমোট {{ $category->name }} দায়</strong></td>
-                    <td class="tiro"><strong>{{ bn_number(number_format($grandTotal, 2)) }} টাকা</strong></td>
+                    <td><strong>{{ $category->name }} সর্বমোট </strong></td>
+                    <td class="tiro"><strong>@if ($categorytotal < 0)
+                                <span class="text-danger">অতিরিক্ত প্রদান:
+                                    {!! bn_number(number_format(abs($categorytotal), 2)) !!}
+                                    টাকা</span>
+                            @elseif ($categorytotal > 0)
+                                <span class="text-danger">দায়:
+                                    {!! bn_number(number_format(abs($categorytotal), 2)) !!}
+                                    টাকা</span>
+                            @else
+                                <span class="text-secondary">পরিশোধিত</span>
+                            @endif</strong></td>
                 </tr>
             </tbody>
         </table>
     </div>
 
-    <div class="report-footer mt-4 text-center">
-        <p class="tiro">রাসেল বুক দ্বারা প্রস্তুতকৃত - {{ bn_number(now()->format('d M, Y h:i A')) }}</p>
-    </div>
+    <div class="report-footer mt-4">
+            <div class="text-center">
+                <p class="bangla-text">{{ $setting->site_name_bangla }}</p>
+
+                <p class="bangla-text">
+                    ঠিকানা: {!! preg_replace_callback(
+                        '/[০-৯]+/u',
+                        function ($m) {
+                            return '<span class="tiro-font">' . $m[0] . '</span>';
+                        },
+                        e($setting->site_address),
+                    ) !!}
+                </p>
+
+                <p class="bangla-text">
+                    ইমেইল: {!! preg_replace_callback(
+                        '/[০-৯]+/u',
+                        function ($m) {
+                            return '<span class="tiro-font">' . $m[0] . '</span>';
+                        },
+                        e($setting->site_email),
+                    ) !!}
+                </p>
+
+                <p class="bangla-text">
+                    ওয়েবসাইট : {!! preg_replace_callback(
+                        '/[০-৯]+/u',
+                        function ($m) {
+                            return '<span class="tiro-font">' . $m[0] . '</span>';
+                        },
+                        e($setting->site_website ?? 'www.example.com'),
+                    ) !!}
+                </p>
+
+            </div>
+
+            @php
+                use Illuminate\Support\Carbon;
+
+                $banglaMonths = [
+                    'January' => 'জানুয়ারি',
+                    'February' => 'ফেব্রুয়ারি',
+                    'March' => 'মার্চ',
+                    'April' => 'এপ্রিল',
+                    'May' => 'মে',
+                    'June' => 'জুন',
+                    'July' => 'জুলাই',
+                    'August' => 'আগস্ট',
+                    'September' => 'সেপ্টেম্বর',
+                    'October' => 'অক্টোবর',
+                    'November' => 'নভেম্বর',
+                    'December' => 'ডিসেম্বর',
+                ];
+
+                $banglaMeridiem = ['AM' => 'পূর্বাহ্ণ', 'PM' => 'অপরাহ্ণ'];
+
+                $now = Carbon::now();
+                $formatted = $now->format('d F, Y h:i A'); // Example: 31 May, 2025 09:45 PM
+
+                // Translate English month and AM/PM to Bangla
+                $formatted = str_replace(array_keys($banglaMonths), array_values($banglaMonths), $formatted);
+                $formatted = str_replace(array_keys($banglaMeridiem), array_values($banglaMeridiem), $formatted);
+
+                $banglaDateTime = bn_number($formatted);
+            @endphp
+
+            <p class="mt-4">রাসেল বুক দ্বারা প্রস্তুতকৃত - {!! $banglaDateTime !!} </p>
+        </div>
 
     <div class="text-center no-print">
         <button onclick="window.print()" class="btn btn-primary mt-3">প্রিন্ট করুন</button>

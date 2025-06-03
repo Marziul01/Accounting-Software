@@ -18,6 +18,7 @@ class UserAccess extends Model
         'liability',
         'bankbook',
         'accounts',
+        'asset_category_table', 'asset_name_table', 'asset_category', 'asset_subcategory' , 'liability_category_table', 'liability_name_table', 'liability_category', 'liability_subcategory' , 'income_category' , 'expense_category', 'investments_category'
     ];
 
     public function user()

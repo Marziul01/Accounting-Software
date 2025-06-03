@@ -12,6 +12,7 @@
       .no-print { display: none !important; }
       .page-break { page-break-after: always; }
       body { -webkit-print-color-adjust: exact !important; }
+      .img{ width: 15% !important;}
     }
     body {
       font-family: "Hind Siliguri", sans-serif;
@@ -31,6 +32,7 @@
     }
     table th, table td {
       white-space: nowrap;
+      font-size: 12px;
     }
     .category-total {
       font-weight: bold;
@@ -41,6 +43,7 @@
     }
     table tbody tr td{
       background-color: transparent !important;
+      font-size: 12px;
     }
     table.table tbody tr:nth-of-type(odd) {
       background-color: #d4edda !important;
@@ -48,6 +51,17 @@
 
     table.table tbody tr:nth-of-type(even) {
       background-color: #fff3cd !important;
+    }
+    .last-row td{
+      border-bottom: 2px solid #00a652 !important;
+    }
+    .report-footer .text-center p{
+      margin-bottom: 5px;
+      font-weight: 500;
+      font-size: 16px !important;
+    }
+    .img{
+      width: 6%;
     }
   </style>
 </head>
@@ -65,9 +79,10 @@
 
 <div class="container-fluid my-4">
   <div class="report-header">
-    <h2>রাসেল বুক</h2>
+    <img src="{{ asset($setting->site_logo) }}"  height="100%" class="img"  alt="">
+    <h2>{{ $setting->site_name_bangla }}</h2>
     <h4>ব্যয়  বিবরণী</h4>
-    <p> {!! bn_number($startDate) !!} থেকে {!! bn_number($endDate) !!} পর্যন্ত</p>
+    <p>{!! bn_number(\Carbon\Carbon::parse($startDate)->format('d-m-y')) !!} থেকে {!! bn_number(\Carbon\Carbon::parse($endDate)->format('d-m-y')) !!} পর্যন্ত</p>
   </div>
 
   
@@ -98,29 +113,32 @@
             <table class="table table-bordered m-0">
               <thead class="table-primary">
                 <tr>
-                  <th colspan="4">
+                  <th colspan="5">
                     উপ-বিভাগ: {{ $subcategory->name ?? 'প্রযোজ্য নয়' }}
                   </th>
                 </tr>
                 <tr class="table-light">
+                  <th>ক্রমিক নম্বর</th>
                   <th>তারিখ</th>
                   <th>নাম</th>
                   <th>বিবরণ</th>
-                  <th>পরিমাণ</th>
+                  <th class="text-end">পরিমাণ</th>
                 </tr>
               </thead>
               <tbody>
                 @foreach($subexpenses->sortBy('date') as $expense)
-                <tr>
-                  <td>{!! bn_number($expense->date) !!}</td>
+                @php $isLast = $loop->last; @endphp
+                <tr class="{{ $isLast ? 'last-row' : '' }}">
+                  <td>{!! bn_number($loop->iteration) !!}</td>
+                  <td>{!! bn_number(\Carbon\Carbon::parse($expense->date)->format('d-m-y')) !!}</td>
                   <td>{{ $expense->name }}</td>
                   <td>{{ $expense->description }}</td>
-                  <td>{!! bn_number(number_format($expense->amount, 2)) !!} টাকা</td>
+                  <td class="text-end">{!! bn_number(number_format($expense->amount, 2)) !!} টাকা</td>
                 </tr>
                 @endforeach
                 <tr class="category-total">
-                  <td colspan="3" class="text-end">উপ-বিভাগ মোট:</td>
-                  <td>{!! bn_number(number_format($subTotal, 2)) !!} টাকা</td>
+                  <td colspan="4" class="text-end">উপ-বিভাগ মোট:</td>
+                  <td class="text-end">{!! bn_number(number_format($subTotal, 2)) !!} টাকা</td>
                 </tr>
               </tbody>
             </table>
@@ -141,8 +159,46 @@
     </div>
   </div>
 
-  <div class="report-footer">
-    <p>রাসেল বুক দ্বারা প্রস্তুতকৃত - {!! bn_number(now()->format('d M, Y H:i A')) !!}</p>
+  <div class="report-footer mt-4">
+    <div class="text-center">
+      <p>{{ $setting->site_name_bangla }}</p>
+      <p class="bangla-text">
+        ঠিকানা: {!! preg_replace_callback('/[০-৯]+/u', function($m) { return '<span class="tiro-font">'.$m[0].'</span>'; }, e($setting->site_address)) !!}
+      </p>
+
+      <p class="bangla-text">
+        ইমেইল: {!! preg_replace_callback('/[০-৯]+/u', function($m) { return '<span class="tiro-font">'.$m[0].'</span>'; }, e($setting->site_email)) !!}
+      </p>
+
+      <p class="bangla-text">
+        ওয়েবসাইট : {!! preg_replace_callback('/[০-৯]+/u', function($m) { return '<span class="tiro-font">'.$m[0].'</span>'; }, e($setting->site_website ?? 'www.example.com')) !!}
+      </p>
+      
+    </div>
+
+    @php
+        use Illuminate\Support\Carbon;
+
+        $banglaMonths = [
+            'January' => 'জানুয়ারি', 'February' => 'ফেব্রুয়ারি', 'March' => 'মার্চ',
+            'April' => 'এপ্রিল', 'May' => 'মে', 'June' => 'জুন',
+            'July' => 'জুলাই', 'August' => 'আগস্ট', 'September' => 'সেপ্টেম্বর',
+            'October' => 'অক্টোবর', 'November' => 'নভেম্বর', 'December' => 'ডিসেম্বর'
+        ];
+
+        $banglaMeridiem = ['AM' => 'পূর্বাহ্ণ', 'PM' => 'অপরাহ্ণ'];
+
+        $now = Carbon::now();
+        $formatted = $now->format('d F, Y h:i A'); // Example: 31 May, 2025 09:45 PM
+
+        // Translate English month and AM/PM to Bangla
+        $formatted = str_replace(array_keys($banglaMonths), array_values($banglaMonths), $formatted);
+        $formatted = str_replace(array_keys($banglaMeridiem), array_values($banglaMeridiem), $formatted);
+
+        $banglaDateTime = bn_number($formatted);
+    @endphp
+
+    <p class="mt-4">রাসেল বুক দ্বারা প্রস্তুতকৃত - {!! $banglaDateTime !!}</p>
   </div>
 
   <div class="text-center mt-3 no-print">

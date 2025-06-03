@@ -122,6 +122,15 @@ class AssetController extends Controller
                 if ($photoPath) {
                     $contact->image = $photoPath;
                 }
+                $contact->national_id = $request->national_id;
+                $contact->father_name = $request->father_name;
+                $contact->father_mobile = $request->father_mobile;
+                $contact->mother_name = $request->mother_name;
+                $contact->mother_mobile = $request->mother_mobile;
+                $contact->spouse_name = $request->spouse_name;
+                $contact->spouse_mobile = $request->spouse_mobile;
+                $contact->present_address = $request->present_address;
+                $contact->permanent_address = $request->permanent_address;
                 $contact->save();
                 $data['contact_id'] = $contact->id;
             }
@@ -243,6 +252,15 @@ class AssetController extends Controller
                 if ($photoPath) {
                     $contact->image = $photoPath;
                 }
+                $contact->national_id = $request->national_id;
+                $contact->father_name = $request->father_name;
+                $contact->father_mobile = $request->father_mobile;
+                $contact->mother_name = $request->mother_name;
+                $contact->mother_mobile = $request->mother_mobile;
+                $contact->spouse_name = $request->spouse_name;
+                $contact->spouse_mobile = $request->spouse_mobile;
+                $contact->present_address = $request->present_address;
+                $contact->permanent_address = $request->permanent_address;
                 $contact->save();
 
                 $data['contact_id'] = $contact->id;
@@ -354,23 +372,41 @@ class AssetController extends Controller
             return redirect()->route('admin.dashboard');
         }
 
-        $categories = AssetCategory::with('assetSubCategories.assetSubSubCategories')->get();
+        $firstest = Asset::min('entry_date');
+        $latest = Asset::max('entry_date');
+        $firstesttransactions = AssetTransaction::min('transaction_date');
+        $latesttransactions = AssetTransaction::max('transaction_date');
+        $minDate = min(array_filter([$firstest, $firstesttransactions]));
+        $maxDate = max(array_filter([$latest, $latesttransactions]));
+
+        $categories = AssetCategory::with('assetSubCategories.assetSubSubCategories')->where('status',1)->get();
         $subSubcategories = AssetSubSubCategory::all();
 
-        $startDate = $request->get('start_date', now()->startOfMonth()->toDateString());
-        $endDate = $request->get('end_date', now()->toDateString());
+        $startDate = $minDate ? Carbon::parse($minDate)->toDateString() : Carbon::now()->toDateString();
+        $endDate = $maxDate ? Carbon::parse($maxDate)->toDateString() : Carbon::now()->toDateString();
+
+        if ($request->has('start_date')) {
+            $startDate = $request->input('start_date');
+        }
+        if ($request->has('end_date')) {
+            $endDate = $request->input('end_date');
+        }
 
         // Default category, subcategory, sub-subcategory
         $defaultCategory = $categories->first();
-        $defaultSubcategory = $defaultCategory->assetSubCategories->first() ?? null;
-        $defaultSubsubcategory = $defaultSubcategory?->assetSubSubCategories->first();
+        $defaultSubcategory = $defaultCategory->assetSubCategories->where('status', 1)->first() ?? null;
+        $defaultSubsubcategory = $defaultSubcategory?->assetSubSubCategories->where('status', 1)->first();
 
         // Fetch assets under default selection
         $filteredAssets = Asset::query()
-            ->when($defaultCategory, fn($q) => $q->where('category_id', $defaultCategory->id))
-            ->when($defaultSubcategory, fn($q) => $q->where('subcategory_id', $defaultSubcategory->id))
-            ->when($defaultSubsubcategory, fn($q) => $q->where('subsubcategory_id', $defaultSubsubcategory->id))
-            ->whereBetween('entry_date', [$startDate, $endDate])
+            ->where('category_id', $defaultCategory->id)
+            ->where('subcategory_id', $defaultSubcategory->id)
+            ->where('subsubcategory_id', $defaultSubsubcategory->id)
+            ->with(['transactions' => function ($q) use ($startDate, $endDate) {
+            if ($startDate && $endDate) {
+                    $q->whereBetween('transaction_date', [$startDate, $endDate]);
+                }
+            }])
             ->get();
 
         return view('admin.asset.report', [
@@ -411,118 +447,156 @@ class AssetController extends Controller
             $query->where('subsubcategory_id', $subsubcategoryId);
         }
 
-        if ($startDate) {
-            $query->whereDate('entry_date', '>=', $startDate);
-        }
-
-        if ($endDate) {
-            $query->whereDate('entry_date', '<=', $endDate);
-        }
+        $query->with(['transactions' => function ($q) use ($startDate, $endDate) {
+            if ($startDate && $endDate) {
+                $q->whereBetween('transaction_date', [$startDate, $endDate]);
+            }
+        }]);
 
         // Get filtered data
         $assets = $query->get();
 
         // Return as JSON (for AJAX)
-        return response()->json($assets->map(function ($asset) {
+        return response()->json($assets->map(function ($asset) use ($startDate, $endDate) {
+                    // Sum filtered transactions
+                    $depositInRange = $asset->transactions->where('transaction_type', 'Deposit')->sum('amount');
+                    $withdrawInRange = $asset->transactions->where('transaction_type', 'Withdraw')->sum('amount');
+                    $currentAmount = $depositInRange - $withdrawInRange;
+
+                    // Sum all transactions
+                    $totalDeposits = $asset->allTransactions->where('transaction_type', 'Deposit')->sum('amount');
+                    $totalWithdrawals = $asset->allTransactions->where('transaction_type', 'Withdraw')->sum('amount');
+                    $initialAmount = $asset->amount - $totalDeposits + $totalWithdrawals;
+
+                    
+                    
+
+                    if ($startDate <= $asset->entry_date ) {
+                        // Start date is before investment, or no previous transactions, so no previous amount
+                        $currentAmount += $initialAmount;
+                        $depositInRange += $initialAmount;
+                        $previousAmount = null;
+                    } else {
+                        // Start date is on or after investment date, so calculate previous
+                        $depositBeforeStart = $asset->allTransactions
+                            ->where('transaction_type', 'Deposit')
+                            ->where('transaction_date', '<', $startDate)
+                            ->sum('amount');
+
+                        $withdrawBeforeStart = $asset->allTransactions
+                            ->where('transaction_type', 'Withdraw')
+                            ->where('transaction_date', '<', $startDate)
+                            ->sum('amount');
+
+                        $previousAmount = $initialAmount + $depositBeforeStart - $withdrawBeforeStart;
+                    }
             return [
                 'slug' => $asset->slug,
                 'category_name' => $asset->category->name ?? 'N/A',
                 'subcategory_name' => $asset->subcategory->name ?? 'N/A',
                 'name' => $asset->name,
                 'description' => $asset->description,
-                'value' => $asset->amount,
+                'value' => $currentAmount,
                 'formatted_date' => \Carbon\Carbon::parse($asset->entry_date)->format('d M, Y'),
+                'start_date' => $startDate,
+                'end_date' => $endDate,
             ];
         }));
     }
 
     public function fullAssetReport(Request $request)
     {
-        $startDate = $request->start_date ? Carbon::parse($request->start_date)->startOfDay() : null;
-        $endDate = $request->end_date ? Carbon::parse($request->end_date)->endOfDay() : null;
+        $startDate = $request->start_date;
+        $endDate = $request->end_date;
 
-        $categories = AssetCategory::with([
-            'assetSubCategories.assetSubSubCategories.assets' => function ($query) use ($startDate, $endDate) {
-                if ($startDate) {
-                    $query->whereDate('entry_date', '>=', $startDate);
-                }
-                if ($endDate) {
-                    $query->whereDate('entry_date', '<=', $endDate);
-                }
+        $categories = AssetCategory::where('status', 1)->get();
+
+        $query = Asset::with(['category', 'subcategory','subsubcategory']);
+        
+        $query->with(['transactions' => function ($q) use ($startDate, $endDate) {
+            if ($startDate && $endDate) {
+                $q->whereBetween('transaction_date', [$startDate, $endDate]);
             }
-        ])->get();
+        }]);
 
-        return view('admin.asset.full_report', compact('categories', 'startDate', 'endDate'));
+        $assets = $query->orderBy('entry_date', 'desc')->get();
+
+        return view('admin.asset.full_report', compact('categories', 'startDate', 'endDate' , 'assets'));
     }
 
     public function categoryReport(Request $request, $slug)
     {
-        $startDate = $request->start_date ? Carbon::parse($request->start_date)->startOfDay() : null;
-        $endDate = $request->end_date ? Carbon::parse($request->end_date)->endOfDay() : null;
+        $startDate = $request->start_date;
+        $endDate = $request->end_date ;
 
-        $category = AssetCategory::where('slug', $slug)->with([
-            'assetSubCategories.assetSubSubCategories.assets' => function ($query) use ($startDate, $endDate) {
-                if ($startDate) {
-                    $query->whereDate('entry_date', '>=', $startDate);
-                }
-                if ($endDate) {
-                    $query->whereDate('entry_date', '<=', $endDate);
-                }
+        $category = AssetCategory::where('slug', $slug)->firstOrFail();
+
+        $query = Asset::where('category_id', $category->id);
+        
+        $query->with(['transactions' => function ($q) use ($startDate, $endDate) {
+            if ($startDate && $endDate) {
+                $q->whereBetween('transaction_date', [$startDate, $endDate]);
             }
-        ])->firstOrFail();
+        }]);
 
-        return view('admin.asset.category_report', compact('category', 'startDate', 'endDate'));
+        $assets = $query->orderBy('entry_date', 'desc')->get();
+
+        return view('admin.asset.category_report', compact('category', 'startDate', 'endDate' ,'assets'));
     }
 
     public function subcategoryReport(Request $request, $slug)
     {
-        $startDate = $request->start_date ? Carbon::parse($request->start_date)->startOfDay() : null;
-        $endDate = $request->end_date ? Carbon::parse($request->end_date)->endOfDay() : null;
+        $startDate = $request->start_date ;
+        $endDate = $request->end_date;
 
-        $subcategory = AssetSubCategory::where('slug', $slug)->with([
-            'assetSubSubCategories.assets' => function ($query) use ($startDate, $endDate) {
-                if ($startDate) {
-                    $query->whereDate('entry_date', '>=', $startDate);
-                }
-                if ($endDate) {
-                    $query->whereDate('entry_date', '<=', $endDate);
-                }
+        $subcategory = AssetSubCategory::where('slug', $slug)->firstOrFail();
+
+        $query = Asset::where('subcategory_id', $subcategory->id);
+        
+        $query->with(['transactions' => function ($q) use ($startDate, $endDate) {
+            if ($startDate && $endDate) {
+                $q->whereBetween('transaction_date', [$startDate, $endDate]);
             }
-        ])->firstOrFail();
+        }]);
 
-        return view('admin.asset.subcategory_report', compact('subcategory', 'startDate', 'endDate'));
+        $assets = $query->orderBy('entry_date', 'desc')->get();
+
+        return view('admin.asset.subcategory_report', compact('subcategory', 'startDate', 'endDate' , 'assets'));
     }
 
     public function subsubcategoryReport(Request $request, $slug)
     {
-        $startDate = $request->start_date ? Carbon::parse($request->start_date)->startOfDay() : null;
-        $endDate = $request->end_date ? Carbon::parse($request->end_date)->endOfDay() : null;
+        $startDate = $request->start_date;
+        $endDate = $request->end_date ;
 
-        $subsubcategory = AssetSubSubCategory::where('slug', $slug)->with([
-            'assets' => function ($query) use ($startDate, $endDate) {
-                if ($startDate) {
-                    $query->whereDate('entry_date', '>=', $startDate);
-                }
-                if ($endDate) {
-                    $query->whereDate('entry_date', '<=', $endDate);
-                }
+        $subsubcategory = AssetSubSubCategory::where('slug', $slug)->firstOrFail();
+
+        $query = Asset::where('subsubcategory_id', $subsubcategory->id);
+        
+        $query->with(['transactions' => function ($q) use ($startDate, $endDate) {
+            if ($startDate && $endDate) {
+                $q->whereBetween('transaction_date', [$startDate, $endDate]);
             }
-        ])->firstOrFail();
+        }]);
 
-        return view('admin.asset.sub_subcategory_report', compact('subsubcategory', 'startDate', 'endDate'));
+        $assets = $query->orderBy('entry_date', 'desc')->get();
+
+        return view('admin.asset.sub_subcategory_report', compact('subsubcategory', 'startDate', 'endDate' , 'assets'));
     }
 
-    public function singleassetReport($slug)
+    public function singleassetReport(Request $request ,$slug)
     {
         $asset = Asset::with(['transactions', 'subsubcategory.assetSubCategory.assetCategory'])->where('slug', $slug)->firstOrFail();
 
-        // Calculations
-        $totalDeposit = $asset->transactions->where('transaction_type', 'Deposit')->sum('amount');
-        $totalWithdraw = $asset->transactions->where('transaction_type', 'Withdraw')->sum('amount');
-        $initialAmount = $asset->amount - $totalDeposit + $totalWithdraw;
-        $currentBalance = $asset->amount;
+        $transactions = $asset->transactions()
+            ->whereBetween('transaction_date', [$request->start_date, $request->end_date])
+            ->orderBy('transaction_date')
+            ->get();
 
-        return view('admin.asset.asset_report', compact('asset', 'totalDeposit', 'totalWithdraw', 'initialAmount', 'currentBalance'));
+        $startDate = $request->start_date;
+        $endDate = $request->end_date ;
+
+        return view('admin.asset.asset_report', compact('asset', 'startDate', 'endDate', 'transactions' ));
     }
 
 

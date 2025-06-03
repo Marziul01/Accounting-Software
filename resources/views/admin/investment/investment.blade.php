@@ -111,7 +111,7 @@
                             <input type="text" class="form-control name-input" id="name" name="name"  required>
                            
                         </div>
-                        <div class="mb-3">
+                        <div class="mb-3 d-none" >
                             <label for="slug" class="form-label">Slug</label>
                             <input type="text" class="form-control slug-output" id="slug" name="slug"  readonly>
                         </div>
@@ -137,7 +137,7 @@
                         </div>
                         <div class="mb-3">
                             <label for="income_date" class="form-label">investment Date</label>
-                            <input type="date" class="form-control" id="income_date" name="date" required>
+                            <input type="date" class="form-control" id="income_date" name="date" value="{{ date('Y-m-d') }}" required>
                         </div>
                         
                         <div class="mb-3">
@@ -179,7 +179,7 @@
                                 <input type="text" class="form-control name-input" id="name" name="name" value="{{ $investment->name }}" required>
                                
                             </div>
-                            <div class="mb-3">
+                            <div class="mb-3 d-none">
                                 <label for="slug" class="form-label">Slug</label>
                                 <input type="text" class="form-control slug-output" id="slug" name="slug" value="{{ $investment->slug }}" readonly>
                             </div>
@@ -265,7 +265,12 @@
                                     
                                         <div class="col-12 mb-3">
                                             <label>Transaction Date</label>
-                                            <input type="date" name="transaction_date" class="form-control" required >
+                                            <input type="date" name="transaction_date" class="form-control" value="{{ date('Y-m-d') }}" required >
+                                        </div>
+
+                                        <div class="col-12 mb-3">
+                                            <label>Description</label>
+                                            <textarea name="description" class="form-control"> </textarea>
                                         </div>
     
                                         <div class="col-12 mb-3">
@@ -377,6 +382,11 @@
                                     <label>Transaction Date</label>
                                     <input type="date" name="transaction_date" class="form-control" required value="{{ $investmentTransaction->transaction_date }}" >
                                 </div>
+
+                                <div class="col-12 mb-3">
+                                            <label>Description</label>
+                                            <textarea name="description" class="form-control"> {{ $investmentTransaction->description }} </textarea>
+                                        </div>
 
                                 <div class="col-12 mb-3">
                                     <button type="submit" class="btn btn-primary">Submit</button>

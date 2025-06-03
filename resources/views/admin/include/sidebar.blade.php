@@ -34,6 +34,13 @@
                         <div class="text-truncate" data-i18n="Analytics">Control Panel</div>
                     </a>
                 </li>
+
+                <li class="menu-item {{ Route::currentRouteName() == 'admin.categoryTableSettings' ? 'active' : '' }}">
+                    <a href="{{ route('admin.categoryTableSettings') }}" class="menu-link">
+                        <div class="text-truncate" data-i18n="Analytics">Category & Table </div>
+                    </a>
+                </li>
+
                 <li class="menu-item ">
                     <a href=""
                         class="menu-link">
@@ -98,15 +105,17 @@
                 <div class="text-truncate" data-i18n="Dashboards">Incomes Managment</div>
             </a>
             <ul class="menu-sub">
+                @if($categorysettings->income_category == 2)
                 <li class="menu-item {{ Route::currentRouteName() == 'incomecategory.index' ? 'active' : '' }}">
                     <a href="{{ route('incomecategory.index') }}" class="menu-link">
                         <div class="text-truncate" data-i18n="Analytics">Incomes Category</div>
                     </a>
                 </li>
+                @endif
                 <li class="menu-item {{ Route::currentRouteName() == 'incomesubcategory.index' ? 'active' : '' }}">
                     <a href="{{ route('incomesubcategory.index') }}"
                         class="menu-link">
-                        <div class="text-truncate" data-i18n="CRM">Incomes Sub Category</div>
+                        <div class="text-truncate" data-i18n="CRM">Incomes {{ $categorysettings->income_category == 2 ? 'Sub' : '' }}  Category</div>
                     </a>
                 </li>
                 <li class="menu-item {{ Route::currentRouteName() == 'income.index' ? 'active' : '' }}">
@@ -134,15 +143,17 @@
                 <div class="text-truncate" data-i18n="Dashboards">Expenses Managment</div>
             </a>
             <ul class="menu-sub">
+                @if($categorysettings->expense_category == 2)
                 <li class="menu-item {{ Route::currentRouteName() == 'expensecategory.index' ? 'active' : '' }}">
                     <a href="{{ route('expensecategory.index') }}" class="menu-link">
                         <div class="text-truncate" data-i18n="Analytics">Expenses Category</div>
                     </a>
                 </li>
+                @endif
                 <li class="menu-item {{ Route::currentRouteName() == 'expensesubcategory.index' ? 'active' : '' }}">
                     <a href="{{ route('expensesubcategory.index') }}"
                          class="menu-link">
-                        <div class="text-truncate" data-i18n="CRM">Expenses Sub Category</div>
+                        <div class="text-truncate" data-i18n="CRM">Expenses {{ $categorysettings->expense_category == 2 ? 'Sub' : '' }} Category</div>
                     </a>
                 </li>
                 <li class="menu-item {{ Route::currentRouteName() == 'expense.index' ? 'active' : '' }}">
@@ -170,14 +181,16 @@
                 <div class="text-truncate" data-i18n="Dashboards">Investments Management</div>
             </a>
             <ul class="menu-sub">
+                @if($categorysettings->investments_category == 2)
                 <li class="menu-item {{ Route::currentRouteName() == 'investmentcategory.index' ? 'active' : '' }}">
                     <a href="{{ route('investmentcategory.index') }}" class="menu-link">
                         <div class="text-truncate" data-i18n="Analytics">Investments Category</div>
                     </a>
                 </li>
+                @endif
                 <li class="menu-item {{ Route::currentRouteName() == 'investmentsubcategory.index' ? 'active' : '' }}">
                     <a href="{{ route('investmentsubcategory.index') }}" class="menu-link">
-                        <div class="text-truncate" data-i18n="CRM">Investments Sub Category</div>
+                        <div class="text-truncate" data-i18n="CRM">Investments {{ $categorysettings->investments_category == 2 ? 'Sub' : '' }} Category</div>
                     </a>
                 </li>
                 <li class="menu-item {{ Route::currentRouteName() == 'investment.index' ? 'active' : '' }}">
@@ -203,19 +216,23 @@
                 <div class="text-truncate" data-i18n="Dashboards">Assets Management</div>
             </a>
             <ul class="menu-sub">
+                @if($categorysettings->asset_category == 2)
                 <li class="menu-item {{ Route::currentRouteName() == 'assetcategory.index' ? 'active' : '' }}">
                     <a href="{{ route('assetcategory.index') }}" class="menu-link">
                         <div class="text-truncate" data-i18n="Analytics">Assets Category</div>
                     </a>
                 </li>
+                @endif
+                @if($categorysettings->asset_subcategory == 2)
                 <li class="menu-item {{ Route::currentRouteName() == 'assetsubcategory.index' ? 'active' : '' }}">
                     <a href="{{ route('assetsubcategory.index') }}" class="menu-link">
-                        <div class="text-truncate" data-i18n="CRM">Assets Sub Category</div>
+                        <div class="text-truncate" data-i18n="CRM">Assets {{ $categorysettings->asset_category == 2 ? 'Sub' : '' }} Category</div>
                     </a>
                 </li>
+                @endif
                 <li class="menu-item {{ Route::currentRouteName() == 'assetsubsubcategory.index' ? 'active' : '' }}">
                     <a href="{{ route('assetsubsubcategory.index') }}" class="menu-link">
-                        <div class="text-truncate" data-i18n="CRM">Assets Sub Sub Category</div>
+                        <div class="text-truncate" data-i18n="CRM">Assets {{ $categorysettings->asset_category == 2 ? 'Sub' : '' }} {{ $categorysettings->asset_subcategory == 2 ? 'Sub' : '' }} Category</div>
                     </a>
                 </li>
                 <li class="menu-item {{ Route::currentRouteName() == 'asset.index' ? 'active' : '' }}">
@@ -245,19 +262,23 @@
                 <div class="text-truncate" data-i18n="Dashboards">Liabilities Management</div>
             </a>
             <ul class="menu-sub">
+                @if($categorysettings->liability_category == 2)
                 <li class="menu-item {{ Route::currentRouteName() == 'liabilitycategory.index' ? 'active' : '' }}">
                     <a href="{{ route('liabilitycategory.index') }}" class="menu-link">
                         <div class="text-truncate" data-i18n="Analytics">Liabilities Category</div>
                     </a>
                 </li>
+                @endif
+                @if($categorysettings->liability_subcategory == 2)
                 <li class="menu-item {{ Route::currentRouteName() == 'liabilitysubcategory.index' ? 'active' : '' }}">
                     <a href="{{ route('liabilitysubcategory.index') }}" class="menu-link">
-                        <div class="text-truncate" data-i18n="CRM">Liabilities Sub Category</div>
+                        <div class="text-truncate" data-i18n="CRM">Liabilities {{ $categorysettings->liability_category == 2 ? 'Sub' : '' }} Category</div>
                     </a>
                 </li>
+                @endif
                 <li class="menu-item {{ Route::currentRouteName() == 'liabilitysubsubcategory.index' ? 'active' : '' }}">
                     <a href="{{ route('liabilitysubsubcategory.index') }}" class="menu-link">
-                        <div class="text-truncate" data-i18n="CRM">Liabilities Sub Sub Category</div>
+                        <div class="text-truncate" data-i18n="CRM">Liabilities {{ $categorysettings->liability_category == 2 ? 'Sub' : '' }} {{ $categorysettings->liability_subcategory == 2 ? 'Sub' : '' }} Category</div>
                     </a>
                 </li>
                 <li class="menu-item {{ Route::currentRouteName() == 'liability.index' ? 'active' : '' }}">

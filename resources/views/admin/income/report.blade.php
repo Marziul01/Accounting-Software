@@ -7,33 +7,48 @@
             <div class="card-header d-flex justify-content-between align-items-center border-bottom-1 mb-0 pb-0">
                 <h5 class="mb-0">Income Report</h5>
             </div>
-            <div class="card-header d-flex flex-column justify-content-between align-items-start border-bottom-1 flex-md-row gap-2 align-items-md-center" >
-                <div class="d-flex align-items-start justify-content-start gap-2 flex-column flex-md-row align-items-md-end">
-                    <div class="form-group">
+            <div class="card-header d-flex flex-column justify-content-between align-items-start border-bottom-1 flex-md-row gap-2 align-items-md-center">
+                <div class="d-flex align-items-start justify-content-start gap-2 flex-column flex-md-row align-items-md-end mobile-reports-filter">
+                    <div class="form-group mobile-reports-filter-group">
                         <label class="form-label" for="start_date">Select Start Date:</label>
                         <input type="date" class="form-control" id="start_date" name="start_date"
                             value="{{ request('start_date') ?? $firstDate }}">
                     </div>
 
-                    <div class="form-group">
+                    <div class="form-group mobile-reports-filter-group">
                         <label class="form-label" for="end_date">Select End Date:</label>
                         <input type="date" class="form-control" id="end_date" name="end_date"
                             value="{{ request('end_date') ?? $lastDate }}">
                     </div>
 
-                    <button type="button" id="filterBtn" class="btn btn-secondary">Filter</button>
+                    <div class="form-group mobile-reports-filter-group1">
+                        <label class="form-label" for="category">Select Category:</label>
+                        <select class="form-select" id="category" name="category">
+                            
+                            @foreach ($incomeCategories as $category)
+                                <option value="{{ $category->id }}" {{ $incomeCategory->id == $category->id ? 'selected' : '' }}>{{ $category->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
 
+                    
                 </div>
-                <button type="button"  class="btn btn-primary {{ Auth::user()->access->income == 1 ? 'disabled' : '' }}" onclick="viewFullReport()">
-                    View Full Income Report
-                </button>
+                <div class="d-flex mt-2 gap-2 align-items-md-end justify-content-md-end form-group mobile-reports-filter-btns">
+                    <button type="button" id="filterBtn" class="btn btn-secondary">Filter</button>
+                    <button type="button" class="btn btn-primary {{ Auth::user()->access->income == 1 ? 'disabled' : '' }}"
+                        onclick="viewFullReport()">
+                        View Full Income Report
+                    </button>
+                </div>
+                
             </div>
+
         </div>
         <div class="card ">
             <div class="card-body" id="incomeTableContent">
                 {{-- This is where filtered HTML will be injected --}}
                 @include('admin.income.partial-table', [
-                    'incomeCategories' => $incomeCategories,
+                    'incomeCategory' => $incomeCategory,
                     'incomes' => $incomes,
                     'startDate' => $firstDate,
                     'endDate' => $lastDate,
@@ -69,6 +84,7 @@
     document.getElementById('filterBtn').addEventListener('click', function () {
         let startDate = document.getElementById('start_date').value;
         let endDate = document.getElementById('end_date').value;
+        let categoryId = document.getElementById('category').value;
 
         if (!startDate || !endDate) {
             toastr.error("Please select both start and end dates.");
@@ -79,7 +95,7 @@
         let loader = `<div class="text-center my-4"><div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div></div>`;
         document.getElementById('incomeTableContent').innerHTML = loader;
 
-        fetch(`{{ route('admin.incomeReport.filter') }}?start_date=${startDate}&end_date=${endDate}`)
+        fetch(`{{ route('admin.incomeReport.filter') }}?start_date=${startDate}&end_date=${endDate}&category_id=${categoryId}`)
             .then(response => response.json())
             .then(data => {
                 document.getElementById('incomeTableContent').innerHTML = data.html;
@@ -89,6 +105,7 @@
                 console.error(error);
             });
     });
+
 </script>
 
 <script>

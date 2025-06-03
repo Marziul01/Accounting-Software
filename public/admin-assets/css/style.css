@@ -309,10 +309,27 @@ table tbody tr:nth-child(even) {
 .table tbody tr td a i ,  .table tbody tr td button i{
   font-size: 12px !important;
 }
+.badge.bg-success{
+  color: black !important;
+}
 
 @media screen and (max-width: 768px) {
   .dt-buttons, div.dataTables_wrapper div.dataTables_info{
     position: relative !important;
     margin-bottom: 15px !important;
+  }
+  .mobile-reports-filter{
+    flex-direction: row !important;
+    width: 100% !important;
+    flex-wrap: wrap !important;
+  }
+  .mobile-reports-filter-group{
+    width: 48% !important;
+  }
+  .mobile-reports-filter-group1{
+    width: 100% !important;
+  }
+  .mobile-reports-filter-btns{
+    overflow-x: auto !important;
   }
 }

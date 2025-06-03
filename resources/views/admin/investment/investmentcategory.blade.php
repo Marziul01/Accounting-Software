@@ -80,7 +80,7 @@
                             <input type="text" class="form-control name-input" id="name" name="name"  required>
                            
                         </div>
-                        <div class="mb-3">
+                        <div class="mb-3 d-none">
                             <label for="slug" class="form-label">Slug</label>
                             <input type="text" class="form-control slug-output" id="slug" name="slug"  readonly>
                         </div>
@@ -122,7 +122,7 @@
                                 <input type="text" class="form-control name-input" id="name" name="name" value="{{ $investmentCategory->name }}" required>
                                
                             </div>
-                            <div class="mb-3">
+                            <div class="mb-3 d-none">
                                 <label for="slug" class="form-label">Slug</label>
                                 <input type="text" class="form-control slug-output" id="slug" name="slug" value="{{ $investmentCategory->slug }}" readonly>
                             </div>

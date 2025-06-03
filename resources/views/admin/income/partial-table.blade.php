@@ -1,26 +1,7 @@
 @if ($incomeCategories->isNotEmpty())
-    <ul class="nav nav-tabs" id="bankAccountTabs" role="tablist" style="overflow-x: auto;">
-        @foreach ($incomeCategories as $index => $incomeCategory)
-            <li class="nav-item" role="presentation">
-                <button class="nav-link {{ $index === 0 ? 'active' : '' }}"
-                        id="tab-{{ $incomeCategory->id }}"
-                        data-bs-toggle="tab"
-                        data-bs-target="#content-{{ $incomeCategory->id }}"
-                        type="button" role="tab"
-                        aria-controls="content-{{ $incomeCategory->id }}"
-                        aria-selected="{{ $index === 0 ? 'true' : 'false' }}">
-                    {{ $incomeCategory->name }}
-                </button>
-            </li>
-        @endforeach
-    </ul>
 
-    <div class="tab-content px-0" id="bankAccountTabsContent">
-        @foreach ($incomeCategories as $index => $incomeCategory)
-            <div class="tab-pane fade {{ $index === 0 ? 'show active' : '' }}"
-                 id="content-{{ $incomeCategory->id }}"
-                 role="tabpanel"
-                 aria-labelledby="tab-{{ $incomeCategory->id }}">
+    <div>
+            <div >
 
                 <div class="card-header d-flex justify-content-between align-items-start border-bottom-1 px-0 pt-0 flex-column flex-md-row gap-2 align-items-md-center">
                     <h5 class="mb-0">{{ $incomeCategory->name }} Reports</h5>
@@ -78,7 +59,6 @@
                     </table>
                 </div>
             </div>
-        @endforeach
     </div>
 @else
     <div class="text-center">No Income Categories Found.</div>

@@ -4,15 +4,22 @@
     <div class="container-fluid flex-grow-1 container-p-y">
         <!-- Basic Bootstrap Table -->
         <div class="card ">
-            <div class="card-header d-flex justify-content-between align-items-center border-bottom-1">
-                <h5 class="mb-0">Contact</h5>
-                <button type="button" class="btn btn-primary {{ Auth::user()->access->contact == 1 ? 'disabled' : '' }}"  data-bs-toggle="modal" data-bs-target="#addmodals">Add New
-                    Contact</button>
+            <div class="card-header d-flex justify-content-between align-items-start border-bottom-1 flex-column flex-md-row gap-3 align-items-md-center">
+                <div class="">
+                    <h5 class="mb-0">Contact</h5>
+                </div>
+                <div class=" d-flex gap-3 align-items-start flex-column flex-md-row justify-content-md-end">
+                    <div class="">
+                        <input type="text" class="form-control" id="contactSearch" placeholder="Search by name, email, or number...">
+                    </div>
+                    <button type="button" class="btn btn-primary {{ Auth::user()->access->contact == 1 ? 'disabled' : '' }}"  data-bs-toggle="modal" data-bs-target="#addmodals">Add New Contact</button>
+                </div>
+                
             </div>
-            <div class="card-body row text-nowrap gap-3">
+            <div class="card-body row text-nowrap gap-3 m-0">
                 @if ($contacts->isNotEmpty())
                     @foreach ($contacts as $contact)
-                        <div class="card contact-card col-md-3">
+                        <div class="card contact-card col-md-3" data-name="{{ strtolower($contact->name) }}" data-email="{{ strtolower($contact->email) }}" data-number="{{ strtolower($contact->mobile_number) }}">
                             <div class="card-header d-flex justify-content-between">
                                 <a class=" btn btn-sm btn-outline-secondary {{ Auth::user()->access->contact == 1 ? 'disabled' : '' }} " href="" data-bs-toggle="modal"
                                     data-bs-target="#editModal{{ $contact->id }}"><i class="bx bx-edit-alt me-1"></i>
@@ -26,9 +33,13 @@
                             </div>
                             <div class="card-body">
                                 <div>
-                                    <img src="{{ $contact->image ? asset($contact->image) : asset('admin-assets/img/nophoto.jpg') }}"
-                                        width="150px" height="150px" style="object-fit: cover" alt="" class="my-2">
-                                    <h3>{{ $contact->name }}</h3>
+                                    <div class="d-flex flex-column align-items-center justify-content-center position-relative">
+                                        <img src="{{ $contact->image ? asset($contact->image) : asset('admin-assets/img/nophoto.jpg') }}"
+                                        width="150px" height="150px" style="object-fit: cover; border-radius: 50%" alt="" class="my-2">
+                                        <h3>{{ $contact->name }}</h3>
+                                    </div>
+                                    <p class="position-absolute badge bg-success" style="top: -10px; left: -5px;">{{ $loop->iteration }}</p>
+                                    
                                     <p>Mobile Number : {{ $contact->mobile_number }} </p>
                                     <p>Email : {{ $contact->email ?? 'N/A' }} </p>
                                     <p>Date of Birth : {{ $contact->date_of_birth ?? 'N/A' }} </p>
@@ -87,10 +98,19 @@
                                 id="sms_option">
                             <label class="form-check-label" for="sms_option">SMS Option</label>
                         </div>
-                        <div class="mb-3">
+                        {{-- <div class="mb-3">
                             <label for="income_date" class="form-label">Image</label>
                             <input type="file" accept="image/*" class="form-control" id="income_date" name="image"
                                 required>
+                        </div> --}}
+                        <div class="mb-3">
+                            <label class="form-label">Image</label>
+                            <!-- Image preview -->
+                            <div class="mb-2">
+                                <img class="preview-img" src="{{ isset($data->image) ? asset('storage/'.$data->image) : '' }}" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover;" />
+                                <button type="button" class="btn btn-sm btn-secondary crop-existing-btn mt-2" {{ isset($data->image) ? '' : 'style=display:none;' }}>Crop Existing Image</button>
+                            </div>
+                            <input type="file" accept="image/*" class="form-control image-input" name="image">
                         </div>
 
                     </div>
@@ -160,13 +180,22 @@
                                         id="sms_option" {{ $contact->sms_option == 1 ? 'checked' : '' }}>
                                     <label class="form-check-label" for="sms_option">SMS Option</label>
                                 </div>
-                                <div class="mb-3">
+                                {{-- <div class="mb-3">
                                     <label for="income_date" class="form-label">Image</label>
                                     <input type="file" accept="image/*" class="form-control" id="income_date"
                                         name="image" required>
                                     <p class="my-2">Previous Image</p>
                                     <img src="{{ asset($contact->image) }}" width="100px" height="100px"
                                         style="object-fit: fill" alt="">
+                                </div> --}}
+                                <div class="mb-3">
+                                    <label class="form-label">Image</label>
+                                    <!-- Image preview -->
+                                    <div class="mb-2">
+                                        <img class="preview-img" src="{{ isset($contact->image) ? asset($contact->image) : '' }}" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover;" />
+                                        <button type="button" class="btn btn-sm btn-secondary crop-existing-btn mt-2" {{ isset($contact->image) ? '' : 'style=display:none;' }}>Crop Existing Image</button>
+                                    </div>
+                                    <input type="file" accept="image/*" class="form-control image-input" name="image">
                                 </div>
 
                             </div>
@@ -197,6 +226,26 @@
             </div>
         </div>
     </div>
+
+    <div class="modal fade" id="imageCropModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Crop Image</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                <div style="max-height: 400px;">
+                <img id="cropper-image" style="max-width: 100%;" />
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="cropAndSave" class="btn btn-primary">Crop & Use</button>
+            </div>
+            </div>
+        </div>
+    </div>
+
 
 @endsection
 
@@ -443,4 +492,109 @@
             });
         });
     </script>
+
+    <script>
+$(document).ready(function () {
+    let cropper;
+    let activeInput = null;
+    let activePreview = null;
+    let currentImageURL = ''; // Used for existing image crop
+
+    // Show cropper when uploading new image
+    $(document).on('change', '.image-input', function (e) {
+        const file = e.target.files[0];
+        if (!file || !file.type.startsWith('image/')) return;
+
+        activeInput = this;
+        activePreview = $(this).closest('.mb-3').find('.preview-img')[0];
+
+        const reader = new FileReader();
+        reader.onload = function (event) {
+            $('#cropper-image').attr('src', event.target.result);
+            $('#imageCropModal').modal('show');
+        };
+        reader.readAsDataURL(file);
+    });
+
+    // Crop button for existing saved image
+    $(document).on('click', '.crop-existing-btn', function () {
+        activeInput = $(this).closest('.mb-3').find('.image-input')[0];
+        activePreview = $(this).closest('.mb-3').find('.preview-img')[0];
+        currentImageURL = $(activePreview).attr('src');
+
+        $('#cropper-image').attr('src', currentImageURL);
+        $('#imageCropModal').modal('show');
+    });
+
+    // Init cropper on modal open
+    $('#imageCropModal').on('shown.bs.modal', function () {
+        cropper = new Cropper(document.getElementById('cropper-image'), {
+            aspectRatio: 1,
+            viewMode: 1,
+            background: false,
+            ready() {
+                $('.cropper-view-box, .cropper-face').css({ borderRadius: '50%' });
+            }
+        });
+    }).on('hidden.bs.modal', function () {
+        cropper?.destroy();
+        cropper = null;
+    });
+
+    // Crop and use (with circle masking)
+    $('#cropAndSave').click(function () {
+        const croppedCanvas = cropper.getCroppedCanvas();
+
+        // Create a second canvas for circular mask
+        const size = Math.min(croppedCanvas.width, croppedCanvas.height);
+        const circleCanvas = document.createElement('canvas');
+        circleCanvas.width = size;
+        circleCanvas.height = size;
+
+        const ctx = circleCanvas.getContext('2d');
+
+        // Draw circle clipping path
+        ctx.beginPath();
+        ctx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2);
+        ctx.closePath();
+        ctx.clip();
+
+        // Draw the square cropped image inside the circular path
+        ctx.drawImage(croppedCanvas, 0, 0, size, size);
+
+        // Export as PNG (preserves transparent corners)
+        circleCanvas.toBlob(function (blob) {
+            const file = new File([blob], "cropped.png", { type: 'image/png' });
+
+            // Replace file input
+            const dt = new DataTransfer();
+            dt.items.add(file);
+            activeInput.files = dt.files;
+
+            // Show cropped preview
+            if (activePreview) {
+                activePreview.src = URL.createObjectURL(file);
+            }
+
+            $('#imageCropModal').modal('hide');
+        }, 'image/png');
+    });
+});
+</script>
+
+<script>
+    document.getElementById('contactSearch').addEventListener('input', function () {
+        const query = this.value.toLowerCase().trim();
+
+        document.querySelectorAll('.contact-card').forEach(function (card) {
+            const name = card.getAttribute('data-name');
+            const email = card.getAttribute('data-email');
+            const number = card.getAttribute('data-number');
+
+            const isVisible = name.includes(query) || email.includes(query) || number.includes(query);
+            card.style.display = isVisible ? 'block' : 'none';
+        });
+    });
+</script>
+
 @endsection

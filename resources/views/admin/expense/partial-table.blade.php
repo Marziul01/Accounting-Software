@@ -1,27 +1,9 @@
 @if ($expenseCategories->isNotEmpty())
-    <ul class="nav nav-tabs" id="bankAccountTabs" role="tablist" style="overflow-x: auto;">
-        {{-- Loop through each expense category to create tabs --}}
-        @foreach ($expenseCategories as $index => $expenseCategory)
-            <li class="nav-item" role="presentation">
-                <button class="nav-link {{ $index === 0 ? 'active' : '' }}"
-                        id="tab-{{ $expenseCategory->id }}"
-                        data-bs-toggle="tab"
-                        data-bs-target="#content-{{ $expenseCategory->id }}"
-                        type="button" role="tab"
-                        aria-controls="content-{{ $expenseCategory->id }}"
-                        aria-selected="{{ $index === 0 ? 'true' : 'false' }}">
-                    {{ $expenseCategory->name }}
-                </button>
-            </li>
-        @endforeach
-    </ul>
+    
 
-    <div class="tab-content px-0" id="bankAccountTabsContent">
-        @foreach ($expenseCategories as $index => $expenseCategory)
-            <div class="tab-pane fade {{ $index === 0 ? 'show active' : '' }}"
-                 id="content-{{ $expenseCategory->id }}"
-                 role="tabpanel"
-                 aria-labelledby="tab-{{ $expenseCategory->id }}">
+    <div >
+        
+            <div>
 
                 <div class="card-header d-flex justify-content-between align-items-start border-bottom-1 px-0 pt-0 flex-column flex-md-row gap-2 align-items-md-center">
                     <h5 class="mb-0">{{ $expenseCategory->name }} Reports</h5>
@@ -79,8 +61,8 @@
                     </table>
                 </div>
             </div>
-        @endforeach
+        
     </div>
 @else
-    <div class="text-center">No expense Categories Found.</div>
+    <div class="text-center">No expense Category Found.</div>
 @endif

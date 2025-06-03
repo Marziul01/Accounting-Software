@@ -8,16 +8,16 @@
         <div class="card-header d-flex justify-content-between align-items-center">
             <h5 class="mb-0">Assets Report</h5>
         </div>
-        <div class="card-body d-flex justify-content-between align-items-start gap-2 flex-column flex-md-row align-items-md-end ">
-            <div>
+        <div class="card-body d-flex justify-content-start align-items-start gap-2 flex-column flex-md-row align-items-md-end mobile-reports-filter">
+            <div class="mobile-reports-filter-group">
                 <label for="start_date">Start Date:</label>
                 <input type="date" id="start_date" class="form-control" value="{{ $startDate }}">
             </div>
-            <div>
+            <div class="mobile-reports-filter-group">
                 <label for="end_date">End Date:</label>
                 <input type="date" id="end_date" class="form-control" value="{{ $endDate }}">
             </div>
-            <div>
+            <div class="mobile-reports-filter-group">
                 <label for="asset_category">Category:</label>
                 <select class="form-select category-select" name="category_id" id="asset_category">
                     @foreach($categories as $category)
@@ -25,14 +25,14 @@
                     @endforeach
                 </select>
             </div>
-            <div>
+            <div class="mobile-reports-filter-group">   
                 <label for="asset_subcategory">Subcategory:</label>
                 <select class="form-select category-select" name="subcategory_id" id="asset_subcategory">
                     <option value="">Select Subcategory</option>
                 </select>
             </div>
 
-            <div>
+            <div class="mobile-reports-filter-group1">
                 <label for="asset_subsubcategory">Sub-subcategory:</label>
                 <select class="form-select category-select" name="subsubcategory_id" id="asset_subsubcategory">
                     <option value="">Select Sub-subcategory</option>
@@ -40,15 +40,16 @@
             </div>
 
 
-            <button id="filterButton" class="btn btn-primary"
+            
+        </div>
+
+        <div class="card-footer d-flex gap-2 w-100 mobile-reports-filter-btns">
+            <button id="filterButton" class="btn btn-secondary"
                 data-url="{{ route('admin.filteredAssets') }}">
                 Filter with Details
             </button>
 
             <button class="btn btn-primary {{ Auth::user()->access->asset == 1 ? 'disabled' : '' }}" onclick="viewFullAssetReport()">View Full Asset Report</button>
-        </div>
-
-        <div class="card-footer d-flex justify-content-end gap-2 flex-column flex-md-row align-items-md-end">
             <button
                 id="categoryReportBtn"
                 data-url="{{ route('admin.asset.categoryReport', ['slug' => 'CATEGORY_SLUG']) }}"
@@ -91,14 +92,55 @@
                     </thead>
                     <tbody>
                         @foreach ($filteredAssets as $asset)
+                        @php
+                            // 1. Total transactions (all time)
+                            $totalDeposits = $asset->allTransactions->where('transaction_type', 'Deposit')->sum('amount');
+                            $totalWithdrawals = $asset->allTransactions->where('transaction_type', 'Withdraw')->sum('amount');
+                            $initialAmount = $asset->amount - $totalDeposits + $totalWithdrawals;
+
+                            // 2. Filtered transactions (between start and end)
+                            $depositInRange = $asset->transactions->where('transaction_type', 'Deposit')->sum('amount');
+                            $withdrawInRange = $asset->transactions->where('transaction_type', 'Withdraw')->sum('amount');
+                            $currentAmount = $depositInRange - $withdrawInRange;
+
+                            
+
+                            if ($startDate <= $asset->entry_date ) {
+                                // Start date is before investment was created, so only show current with initial
+                                $currentAmount += $initialAmount;
+                                $depositInRange += $initialAmount;
+                                $previousAmount = null;
+                            } else {
+                                // Start date is on or after investment date
+                                $depositBeforeStart = $asset->allTransactions
+                                    ->where('transaction_type', 'Deposit')
+                                    ->where('transaction_date', '<', $startDate)
+                                    ->sum('amount');
+
+                                $withdrawBeforeStart = $asset->allTransactions
+                                    ->where('transaction_type', 'Withdraw')
+                                    ->where('transaction_date', '<', $startDate)
+                                    ->sum('amount');
+
+                                $previousAmount = $initialAmount + $depositBeforeStart - $withdrawBeforeStart;
+                            }
+                        @endphp
                         <tr>
                             <td>{{ $loop->iteration }}</td>
                             <td>{{ $asset->name }}</td>
                             <td>{{ $asset->description ?? 'N/A' }}</td>
-                            <td>{{ $asset->amount }}</td>
+                            <td>
+                                @if ($currentAmount < 0)
+                                    <span class="badge bg-success">Sale of Asset : {{ number_format(abs($currentAmount), 2) }} Tk</span>
+                                @elseif ($currentAmount > 0)
+                                    <span class="badge bg-success">Asset: {{ number_format($currentAmount, 2) }} Tk</span>
+                                @else
+                                    <span class="badge bg-warning">Break even</span>
+                                @endif
+                            </td>
                             <td>{{ \Carbon\Carbon::parse($asset->entry_date)->format('d M, Y') }}</td>
                             <td>
-                                <a href="{{ route('admin.asset.assetreport', $asset->slug) }}"
+                                <a href="{{ route('admin.asset.assetreport', ['slug' => $asset->slug, 'start_date' => $startDate, 'end_date' => $endDate]) }}"
                                    class="btn btn-sm btn-outline-secondary {{ Auth::user()->access->asset == 1 ? 'disabled' : '' }}">
                                    <i class="bx bx-edit-alt me-1"></i> View Report
                                 </a>
@@ -292,16 +334,27 @@ function fetchFilteredAssetData() {
         let rows = '';
         if (data.length > 0) {
             data.forEach((asset, index) => {
+
+                if (asset.value < 0) {
+                    badge = `<span class="badge bg-success">Sale of Asset : ${Math.abs(asset.value).toFixed(2)} Tk</span>`;
+                } else if (asset.value > 0) {
+                    badge = `<span class="badge bg-success">Asset: ${asset.value.toFixed(2)} Tk</span>`;
+                } else {
+                    badge = `<span class="badge bg-warning">Break Even</span>`;
+                }
+
+                const reportUrl = `${routeTemplate.replace('SLUG', asset.slug)}?start_date=${encodeURIComponent(asset.start_date)}&end_date=${encodeURIComponent(asset.end_date)}`;
+
                 rows += `
                     <tr>
                         <td>${index + 1}</td>
                         
                         <td>${asset.name}</td>
                         <td>${asset.description ?? 'N/A'}</td>
-                        <td>${asset.value}</td>
+                        <td>${badge}</td>
                         <td>${asset.formatted_date}</td>
                         <td>
-                            <a href="${routeTemplate.replace('SLUG', asset.slug)}" class="btn btn-sm btn-outline-secondary">
+                            <a href="${reportUrl}" class="btn btn-sm btn-outline-secondary">
                                 <i class="bx bx-edit-alt me-1"></i> View Report
                             </a>
                         </td>

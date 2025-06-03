@@ -43,7 +43,7 @@ class ContactController extends Controller
         }
 
         $request->validate([
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:512',
             'name' => 'required|string|max:255',
             'slug' => 'required|string|max:255',
             'mobile_number' => 'required|string|max:15|unique:contacts,mobile_number',
@@ -113,14 +113,14 @@ class ContactController extends Controller
         $contact = Contact::findOrFail($id);
 
         $request->validate([
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:512',
             'name' => 'required|string|max:255',
             'slug' => 'required|string|max:255',
             'mobile_number' => 'required|string|max:15|unique:contacts,mobile_number,' . $contact->id,
             'email' => 'nullable|email|max:255|unique:contacts,email,' . $contact->id,
             'date_of_birth' => 'nullable|date',
             'marriage_date' => 'nullable|date',
-            'sms_option' => 'required|boolean',
+            'sms_option' => 'nullable|boolean',
         ]);
 
         $data = $request->except('image');

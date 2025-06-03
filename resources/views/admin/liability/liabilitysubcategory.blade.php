@@ -5,9 +5,9 @@
         <!-- Basic Bootstrap Table -->
         <div class="card ">
             <div class="card-header d-flex justify-content-between align-items-center border-bottom-1">
-                <h5 class="mb-0">Liability Sub Category</h5>
+                <h5 class="mb-0">Liability {{ $categorysettings->liability_category == 2 ? 'Sub' : '' }} Category</h5>
                 <button type="button" class="btn btn-primary {{ Auth::user()->access->liability == 1 ? 'disabled' : '' }}" data-bs-toggle="modal"
-                    data-bs-target="#addmodals">Add Liability Sub Category</button>
+                    data-bs-target="#addmodals">Add Liability {{ $categorysettings->liability_category == 2 ? 'Sub' : '' }} Category</button>
             </div>
             <div class="card-body  text-nowrap">
                 <div class="table-responsive">
@@ -70,7 +70,7 @@
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Add Liability Sub Category</h5>
+                    <h5 class="modal-title" id="exampleModalLabel">Add Liability {{ $categorysettings->liability_category == 2 ? 'Sub' : '' }} Category</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form id="addIncomeCategoryForms">
@@ -82,7 +82,7 @@
                             <input type="text" class="form-control name-input" id="name" name="name"  required>
                            
                         </div>
-                        <div class="mb-3">
+                        <div class="mb-3 d-none">
                             <label for="slug" class="form-label">Slug</label>
                             <input type="text" class="form-control slug-output" id="slug" name="slug"  readonly>
                         </div>
@@ -122,7 +122,7 @@
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalLabel">Edit Liability Sub Category</h5>
+                        <h5 class="modal-title" id="exampleModalLabel">Edit Liability {{ $categorysettings->liability_category == 2 ? 'Sub' : '' }} Category</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <form id="editIncomeCategoryForms{{ $liabilitysubcategory->id }}" action="{{ route('liabilitysubcategory.update', $liabilitysubcategory->id) }}">
@@ -135,7 +135,7 @@
                                 <input type="text" class="form-control name-input" id="name" name="name" value="{{ $liabilitysubcategory->name }}" required>
                                
                             </div>
-                            <div class="mb-3">
+                            <div class="mb-3 d-none">
                                 <label for="slug" class="form-label">Slug</label>
                                 <input type="text" class="form-control slug-output" id="slug" name="slug" value="{{ $liabilitysubcategory->slug }}" readonly>
                             </div>

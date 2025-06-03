@@ -40,12 +40,14 @@ class IncomeController extends Controller
         $incomes = Income::all();
         $firstDate = $incomes->min('date');
         $lastDate = $incomes->max('date');
+        $incomeCategory = IncomeCategory::where('status', 1)->first();
         return view('admin.income.report', [
             'incomes' => Income::all(),
             'incomeCategories' => IncomeCategory::where('status', 1)->get(),
             'incomeSubCategories' => IncomeSubCategory::where('status', 1)->get(),
             'firstDate' => $firstDate,
             'lastDate' => $lastDate,
+            'incomeCategory' => $incomeCategory,
         ]);
     }
 
@@ -196,12 +198,16 @@ class IncomeController extends Controller
     {
         $startDate = $request->start_date;
         $endDate = $request->end_date;
+        $categoryId = $request->category_id;
+
+        $incomeCategory = IncomeCategory::findOrFail($categoryId);
 
         $incomeCategories = IncomeCategory::with('incomeSubCategories')->get();
         $incomes = Income::whereBetween('date', [$startDate, $endDate])->get();
+        $incomes = $incomes->where('income_category_id', $request->category_id);
 
         return response()->json([
-            'html' => view('admin.income.partial-table', compact('incomeCategories', 'incomes', 'startDate', 'endDate'))->render()
+            'html' => view('admin.income.partial-table', compact('incomeCategories', 'incomes', 'startDate', 'endDate' , 'incomeCategory'))->render()
         ]);
     }
 

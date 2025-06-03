@@ -11,6 +11,7 @@ use App\Models\LiabilityCategory;
 use App\Models\LiabilitySubSubCategory;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Carbon;
 
 class LiabilityController extends Controller
 {
@@ -66,7 +67,7 @@ class LiabilityController extends Controller
             'subcategory_id' => 'required',
             'subsubcategory_id' => 'required',
             'amount' => 'required|numeric',
-            'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:512',
             'user_name' => 'nullable|string',
             'mobile' => 'nullable|string',
             'email' => 'nullable|email',
@@ -121,6 +122,15 @@ class LiabilityController extends Controller
                 if ($photoPath) {
                     $contact->image = $photoPath;
                 }
+                $contact->national_id = $request->national_id;
+                $contact->father_name = $request->father_name;
+                $contact->father_mobile = $request->father_mobile;
+                $contact->mother_name = $request->mother_name;
+                $contact->mother_mobile = $request->mother_mobile;
+                $contact->spouse_name = $request->spouse_name;
+                $contact->spouse_mobile = $request->spouse_mobile;
+                $contact->present_address = $request->present_address;
+                $contact->permanent_address = $request->permanent_address;
                 $contact->save();
                 $data['contact_id'] = $contact->id;
             }
@@ -180,7 +190,7 @@ class LiabilityController extends Controller
             'subcategory_id' => 'required',
             'subsubcategory_id' => 'required',
             'amount' => 'required|numeric',
-            'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:512',
         ]);
 
         $asset = Liability::findOrFail($id);
@@ -237,6 +247,17 @@ class LiabilityController extends Controller
                 if ($photoPath) {
                     $contact->image = $photoPath;
                 }
+
+                $contact->national_id = $request->national_id;
+                $contact->father_name = $request->father_name;
+                $contact->father_mobile = $request->father_mobile;
+                $contact->mother_name = $request->mother_name;
+                $contact->mother_mobile = $request->mother_mobile;
+                $contact->spouse_name = $request->spouse_name;
+                $contact->spouse_mobile = $request->spouse_mobile;
+                $contact->present_address = $request->present_address;
+                $contact->permanent_address = $request->permanent_address;
+
                 $contact->save();
 
                 $data['contact_id'] = $contact->id;
@@ -345,23 +366,40 @@ class LiabilityController extends Controller
             return redirect()->route('admin.dashboard.dashboard')->with('error', 'You do not have permission to access this page.');
         }
 
-        $categories = LiabilityCategory::with('liabilitySubCategories.liabilitySubSubCategories')->get();
+        $firstest = Liability::min('entry_date');
+        $latest = Liability::max('entry_date');
+        $firstesttransactions = LiabilityTransaction::min('transaction_date');
+        $latesttransactions = LiabilityTransaction::max('transaction_date');
+        $minDate = min(array_filter([$firstest, $firstesttransactions]));
+        $maxDate = max(array_filter([$latest, $latesttransactions]));
+
+        $categories = LiabilityCategory::with('liabilitySubCategories.liabilitySubSubCategories')->where('status',1)->get();
         $subSubcategories = LiabilitySubSubCategory::all(); // If you have subsubcategories model, fetch here
 
-        $startDate = $request->get('start_date', now()->startOfMonth()->toDateString());
-        $endDate = $request->get('end_date', now()->toDateString());
+        $startDate = $minDate ? Carbon::parse($minDate)->toDateString() : Carbon::now()->toDateString();
+        $endDate = $maxDate ? Carbon::parse($maxDate)->toDateString() : Carbon::now()->toDateString();
 
+        if ($request->has('start_date')) {
+            $startDate = $request->input('start_date');
+        }
+        if ($request->has('end_date')) {
+            $endDate = $request->input('end_date');
+        }
         // Default category, subcategory, sub-subcategory
         $defaultCategory = $categories->first();
-        $defaultSubcategory = $defaultCategory?->liabilitySubCategories->first();
-        $defaultSubsubcategory = $defaultSubcategory?->liabilitySubSubCategories->first();
+        $defaultSubcategory = $defaultCategory?->liabilitySubCategories->where('status', 1)->first();
+        $defaultSubsubcategory = $defaultSubcategory?->liabilitySubSubCategories->where('status', 1)->first();
 
         // Fetch liabilities under default selection
         $filteredLiabilities = Liability::query()
-            ->when($defaultCategory, fn($q) => $q->where('category_id', $defaultCategory->id))
-            ->when($defaultSubcategory, fn($q) => $q->where('subcategory_id', $defaultSubcategory->id))
-            ->when($defaultSubsubcategory, fn($q) => $q->where('subsubcategory_id', $defaultSubsubcategory->id))
-            ->whereBetween('entry_date', [$startDate, $endDate])
+            ->where('category_id', $defaultCategory->id)
+            ->where('subcategory_id', $defaultSubcategory->id)
+            ->where('subsubcategory_id', $defaultSubsubcategory->id)
+            ->with(['transactions' => function ($q) use ($startDate, $endDate) {
+            if ($startDate && $endDate) {
+                    $q->whereBetween('transaction_date', [$startDate, $endDate]);
+                }
+            }])
             ->get();
 
         return view('admin.liability.report', [
@@ -376,6 +414,7 @@ class LiabilityController extends Controller
     public function filterliability(Request $request)
     {
         // Get all filters
+        $categoryId = $request->input('category_id');
         $subcategoryId = $request->input('subcategory_id');
         $subsubcategoryId = $request->input('subsubcategory_id');
         $startDate = $request->input('start_date');
@@ -388,6 +427,10 @@ class LiabilityController extends Controller
         $query->with(['subcategory']);
 
         // Apply filters
+        if ($categoryId) {
+            $query->where('category_id', $categoryId);
+        }
+
         if ($subcategoryId) {
             $query->where('subcategory_id', $subcategoryId);
         }
@@ -396,119 +439,154 @@ class LiabilityController extends Controller
             $query->where('subsubcategory_id', $subsubcategoryId);
         }
 
-        if ($startDate) {
-            $query->whereDate('entry_date', '>=', $startDate);
-        }
-
-        if ($endDate) {
-            $query->whereDate('entry_date', '<=', $endDate);
-        }
+        $query->with(['transactions' => function ($q) use ($startDate, $endDate) {
+            if ($startDate && $endDate) {
+                $q->whereBetween('transaction_date', [$startDate, $endDate]);
+            }
+        }]);
 
         // Get filtered data
         $liabilities = $query->get();
 
         // Return as JSON (for AJAX)
-        return response()->json($liabilities->map(function ($liability) {
+        return response()->json($liabilities->map(function ($liability) use ($startDate, $endDate)  {
+            // Sum filtered transactions
+                    $depositInRange = $liability->transactions->where('transaction_type', 'Deposit')->sum('amount');
+                    $withdrawInRange = $liability->transactions->where('transaction_type', 'Withdraw')->sum('amount');
+                    $currentAmount = $depositInRange - $withdrawInRange;
+
+                    // Sum all transactions
+                    $totalDeposits = $liability->allTransactions->where('transaction_type', 'Deposit')->sum('amount');
+                    $totalWithdrawals = $liability->allTransactions->where('transaction_type', 'Withdraw')->sum('amount');
+                    $initialAmount = $liability->amount - $totalDeposits + $totalWithdrawals;
+
+                    
+                    
+
+                    if ($startDate <= $liability->entry_date ) {
+                        // Start date is before investment, or no previous transactions, so no previous amount
+                        $currentAmount += $initialAmount;
+                        $depositInRange += $initialAmount;
+                        $previousAmount = null;
+                    } else {
+                        // Start date is on or after investment date, so calculate previous
+                        $depositBeforeStart = $liability->allTransactions
+                            ->where('transaction_type', 'Deposit')
+                            ->where('transaction_date', '<', $startDate)
+                            ->sum('amount');
+
+                        $withdrawBeforeStart = $liability->allTransactions
+                            ->where('transaction_type', 'Withdraw')
+                            ->where('transaction_date', '<', $startDate)
+                            ->sum('amount');
+
+                        $previousAmount = $initialAmount + $depositBeforeStart - $withdrawBeforeStart;
+                    }
             return [
                 'slug' => $liability->slug,
                 'subcategory_name' => $liability->subcategory->name ?? 'N/A',
                 'name' => $liability->name,
                 'description' => $liability->description,
-                'value' => $liability->amount,
+                'value' => $currentAmount,
                 'formatted_date' => \Carbon\Carbon::parse($liability->entry_date)->format('d M, Y'),
+                'start_date' => $startDate,
+                'end_date' => $endDate,
             ];
         }));
     }
 
     public function fullLiabilityReport(Request $request)
     {
-        $startDate = $request->start_date ? \Carbon\Carbon::parse($request->start_date)->startOfDay() : null;
-        $endDate = $request->end_date ? \Carbon\Carbon::parse($request->end_date)->endOfDay() : null;
+        $startDate = $request->start_date ;
+        $endDate = $request->end_date ;
 
-        $categories = LiabilityCategory::with([
-            'liabilitySubCategories.liabilitySubSubCategories.liabilities' => function ($query) use ($startDate, $endDate) {
-                if ($startDate) {
-                    $query->whereDate('entry_date', '>=', $startDate);
-                }
-                if ($endDate) {
-                    $query->whereDate('entry_date', '<=', $endDate);
-                }
+        $categories = LiabilityCategory::where('status', 1)->get();
+
+        $query = Liability::with(['category', 'subcategory','subsubcategory']);
+        
+        $query->with(['transactions' => function ($q) use ($startDate, $endDate) {
+            if ($startDate && $endDate) {
+                $q->whereBetween('transaction_date', [$startDate, $endDate]);
             }
-        ])->get();
+        }]);
 
-        return view('admin.liability.full_report', compact('categories', 'startDate', 'endDate'));
+        $liabilities = $query->orderBy('entry_date', 'desc')->get();
+
+        return view('admin.liability.full_report', compact('categories', 'startDate', 'endDate', 'liabilities'));
     }
 
     public function categoryReport(Request $request, $slug)
     {
-        $startDate = $request->start_date ? \Carbon\Carbon::parse($request->start_date)->startOfDay() : null;
-        $endDate = $request->end_date ? \Carbon\Carbon::parse($request->end_date)->endOfDay() : null;
+        $startDate = $request->start_date ;
+        $endDate = $request->end_date ;
 
-        $category = LiabilityCategory::where('slug', $slug)->with([
-            'liabilitySubCategories.liabilitySubSubCategories.liabilities' => function ($query) use ($startDate, $endDate) {
-                if ($startDate) {
-                    $query->whereDate('entry_date', '>=', $startDate);
-                }
-                if ($endDate) {
-                    $query->whereDate('entry_date', '<=', $endDate);
-                }
+        $category = LiabilityCategory::where('slug', $slug)->firstOrFail();
+
+        $query = Liability::where('category_id', $category->id);
+        
+        $query->with(['transactions' => function ($q) use ($startDate, $endDate) {
+            if ($startDate && $endDate) {
+                $q->whereBetween('transaction_date', [$startDate, $endDate]);
             }
-        ])->firstOrFail();
+        }]);
 
-        return view('admin.liability.category_report', compact('category', 'startDate', 'endDate'));
+        $liabilities = $query->orderBy('entry_date', 'desc')->get();
+
+        return view('admin.liability.category_report', compact('category', 'startDate', 'endDate','liabilities'));
     }
 
     public function subcategoryReport(Request $request, $slug)
     {
-        $startDate = $request->start_date ? \Carbon\Carbon::parse($request->start_date)->startOfDay() : null;
-        $endDate = $request->end_date ? \Carbon\Carbon::parse($request->end_date)->endOfDay() : null;
+        $startDate = $request->start_date ;
+        $endDate = $request->end_date ;
 
-        $subcategory = LiabilitySubCategory::where('slug', $slug)->with([
-            'liabilitySubSubCategories.liabilities' => function ($query) use ($startDate, $endDate) {
-                if ($startDate) {
-                    $query->whereDate('entry_date', '>=', $startDate);
-                }
-                if ($endDate) {
-                    $query->whereDate('entry_date', '<=', $endDate);
-                }
+        $subcategory = LiabilitySubCategory::where('slug', $slug)->firstOrFail();
+
+        $query = Liability::where('subcategory_id', $subcategory->id);
+        
+        $query->with(['transactions' => function ($q) use ($startDate, $endDate) {
+            if ($startDate && $endDate) {
+                $q->whereBetween('transaction_date', [$startDate, $endDate]);
             }
-        ])->firstOrFail();
+        }]);
 
-        return view('admin.liability.subcategory_report', compact('subcategory', 'startDate', 'endDate'));
+        $liabilities = $query->orderBy('entry_date', 'desc')->get();
+
+        return view('admin.liability.subcategory_report', compact('subcategory', 'startDate', 'endDate','liabilities'));
     }
 
     public function subsubcategoryReport(Request $request, $slug)
     {
-        $startDate = $request->start_date ? \Carbon\Carbon::parse($request->start_date)->startOfDay() : null;
-        $endDate = $request->end_date ? \Carbon\Carbon::parse($request->end_date)->endOfDay() : null;
+        $startDate = $request->start_date ;
+        $endDate = $request->end_date ;
 
-        $subsubcategory = null;
-        if (class_exists('\App\Models\LiabilitySubSubCategory')) {
-            $subsubcategory = \App\Models\LiabilitySubSubCategory::where('slug', $slug)->with([
-                'liabilities' => function ($query) use ($startDate, $endDate) {
-                    if ($startDate) {
-                        $query->whereDate('entry_date', '>=', $startDate);
-                    }
-                    if ($endDate) {
-                        $query->whereDate('entry_date', '<=', $endDate);
-                    }
-                }
-            ])->firstOrFail();
-        }
+        $subsubcategory = LiabilitySubSubCategory::where('slug', $slug)->firstOrFail();
 
-        return view('admin.liability.sub_subcategory_report', compact('subsubcategory', 'startDate', 'endDate'));
+        $query = Liability::where('subsubcategory_id', $subsubcategory->id);
+        
+        $query->with(['transactions' => function ($q) use ($startDate, $endDate) {
+            if ($startDate && $endDate) {
+                $q->whereBetween('transaction_date', [$startDate, $endDate]);
+            }
+        }]);
+
+        $liabilities = $query->orderBy('entry_date', 'desc')->get();
+
+        return view('admin.liability.sub_subcategory_report', compact('subsubcategory', 'startDate', 'endDate','liabilities'));
     }
 
-    public function singleliabilityReport($slug)
+    public function singleliabilityReport(Request $request, $slug)
     {
         $liability = Liability::with(['transactions', 'subsubcategory','subcategory' ,'category' ])->where('slug', $slug)->firstOrFail();
 
-        // Calculations
-        $totalDeposit = $liability->transactions->where('transaction_type', 'Deposit')->sum('amount');
-        $totalWithdraw = $liability->transactions->where('transaction_type', 'Withdraw')->sum('amount');
-        $initialAmount = $liability->amount - $totalDeposit + $totalWithdraw;
-        $currentBalance = $liability->amount;
+        $transactions = $liability->transactions()
+            ->whereBetween('transaction_date', [$request->start_date, $request->end_date])
+            ->orderBy('transaction_date')
+            ->get();
 
-        return view('admin.liability.liability_report', compact('liability', 'totalDeposit', 'totalWithdraw', 'initialAmount', 'currentBalance'));
+        $startDate = $request->start_date;
+        $endDate = $request->end_date ;
+
+        return view('admin.liability.liability_report', compact('liability', 'startDate', 'endDate', 'transactions'));
     }
 }

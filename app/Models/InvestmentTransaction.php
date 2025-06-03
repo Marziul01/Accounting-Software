@@ -11,6 +11,7 @@ class InvestmentTransaction extends Model
         'amount',
         'transaction_type',
         'transaction_date',
+        'description',
     ];
 
     public function investment()

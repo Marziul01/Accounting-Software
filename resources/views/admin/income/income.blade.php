@@ -79,7 +79,7 @@
                             <input type="text" class="form-control name-input" id="name" name="name"  required>
                            
                         </div>
-                        <div class="mb-3">
+                        <div class="mb-3 d-none">
                             <label for="slug" class="form-label">Slug</label>
                             <input type="text" class="form-control slug-output" id="slug" name="slug"  readonly>
                         </div>
@@ -104,7 +104,7 @@
                         </div>
                         <div class="mb-3">
                             <label for="income_date" class="form-label">Income Date</label>
-                            <input type="date" class="form-control" id="income_date" name="date" required>
+                            <input type="date" class="form-control" id="income_date" name="date" value="{{ date('Y-m-d') }}" required>
                         </div>
                         
                         <div class="mb-3">
@@ -146,7 +146,7 @@
                                 <input type="text" class="form-control name-input" id="name" name="name" value="{{ $income->name }}" required>
                                
                             </div>
-                            <div class="mb-3">
+                            <div class="mb-3 d-none">
                                 <label for="slug" class="form-label">Slug</label>
                                 <input type="text" class="form-control slug-output" id="slug" name="slug" value="{{ $income->slug }}" readonly>
                             </div>

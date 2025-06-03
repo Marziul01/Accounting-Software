@@ -8,16 +8,16 @@
         <div class="card-header d-flex justify-content-between align-items-center">
             <h5 class="mb-0">Investments Report</h5>
         </div>
-        <div class="card-body d-flex justify-content-between align-items-start gap-2 flex-column flex-md-row align-items-md-end ">
-            <div>
+        <div class="card-body d-flex justify-content-start align-items-start gap-2 flex-column flex-md-row align-items-md-end mobile-reports-filter">
+            <div class="mobile-reports-filter-group">
                 <label for="start_date">Start Date:</label>
                 <input type="date" id="start_date" class="form-control" value="{{ $startDate }}">
             </div>
-            <div>
+            <div class="mobile-reports-filter-group">
                 <label for="end_date">End Date:</label>
                 <input type="date" id="end_date" class="form-control" value="{{ $endDate }}">
             </div>
-            <div>
+            <div class="mobile-reports-filter-group">
                 <label for="investment_category">Category:</label>
                 <select class="form-select category-select" name="category_id" id="investment_category">
                     @foreach($categories as $category)
@@ -25,23 +25,24 @@
                     @endforeach
                 </select>
             </div>
-            <div>
+            <div class="mobile-reports-filter-group">
                 <label for="investment_subcategory">Subcategory:</label>
                 <select class="form-select category-select" name="subcategory_id" id="investment_subcategory">
                     <option value="">Select Subcategory</option>
                 </select>
             </div>
 
-            <button id="filterButton" class="btn btn-primary"
+            
+        </div>
+
+        {{-- Category/Subcategory Report Buttons --}}
+        <div class="card-footer d-flex gap-2 w-100 mobile-reports-filter-btns">
+            <button id="filterButton" class="btn btn-secondary"
                 data-url="{{ route('admin.filteredInvestments') }}">
                 Filter with Details
             </button>
 
             <button class="btn btn-primary {{ Auth::user()->access->income == 1 ? 'disabled' : '' }}" onclick="viewFullReport()">View Full Investment Report</button>
-        </div>
-
-        {{-- Category/Subcategory Report Buttons --}}
-        <div class="card-footer d-flex justify-content-end gap-2">
             <button
                 id="categoryReportBtn"
                 data-url="{{ route('admin.report.category', ['slug' => 'CATEGORY_SLUG']) }}"
@@ -80,18 +81,60 @@
                     <tbody>
                         {{-- To be populated dynamically based on filter --}}
                         @foreach ($filteredInvestments as $investment)
+                        @php
+                            // 1. Total transactions (all time)
+                            $totalDeposits = $investment->allTransactions->where('transaction_type', 'Deposit')->sum('amount');
+                            $totalWithdrawals = $investment->allTransactions->where('transaction_type', 'Withdraw')->sum('amount');
+                            $initialAmount = $investment->amount - $totalDeposits + $totalWithdrawals;
+
+                            // 2. Filtered transactions (between start and end)
+                            $depositInRange = $investment->transactions->where('transaction_type', 'Deposit')->sum('amount');
+                            $withdrawInRange = $investment->transactions->where('transaction_type', 'Withdraw')->sum('amount');
+                            $currentAmount = $depositInRange - $withdrawInRange;
+
+                            
+
+                            if ($startDate <= $investment->date ) {
+                                // Start date is before investment was created, so only show current with initial
+                                $currentAmount += $initialAmount;
+                                $depositInRange += $initialAmount;
+                                $previousAmount = null;
+                            } else {
+                                // Start date is on or after investment date
+                                $depositBeforeStart = $investment->allTransactions
+                                    ->where('transaction_type', 'Deposit')
+                                    ->where('transaction_date', '<', $startDate)
+                                    ->sum('amount');
+
+                                $withdrawBeforeStart = $investment->allTransactions
+                                    ->where('transaction_type', 'Withdraw')
+                                    ->where('transaction_date', '<', $startDate)
+                                    ->sum('amount');
+
+                                $previousAmount = $initialAmount + $depositBeforeStart - $withdrawBeforeStart;
+                            }
+                        @endphp
                         <tr>
                             <td>{{ $loop->iteration }}</td>
                             <td>{{ $investment->investmentCategory->name }} - ({{ $investment->investmentSubCategory->name }})</td>
                             <td>{{ $investment->name }}</td>
                             <td>{{ $investment->description ?? 'N/A' }}</td>
-                            <td>{{ $investment->amount }}</td>
-                            <td>{{ \Carbon\Carbon::parse($investment->income_date)->format('d M, Y') }}</td>
+                             <td> {{--{{ $investment->currentAmount ?? 'No Transactions' }} --}}
+                                @if ($currentAmount < 0)
+                                        <span class="badge bg-success">Gain: {{ number_format(abs($currentAmount), 2) }} Tk</span>
+                                    @elseif ($currentAmount > 0)
+                                        <span class="badge bg-danger">Loss: {{ number_format($currentAmount, 2) }} Tk</span>
+                                    @else
+                                        <span class="badge bg-warning">No Transactions / Break Even</span>
+                                    @endif
+                            </td>
+                            <td>{{ \Carbon\Carbon::parse($investment->date)->format('d M, Y') }}</td>
                             <td>
-                                <a href="{{ route('admin.report.investment', $investment->slug) }}"
-                                   class="btn btn-sm btn-outline-secondary {{ Auth::user()->access->income == 1 ? 'disabled' : '' }}">
-                                   <i class="bx bx-edit-alt me-1"></i> View Report
+                                <a href="{{ route('admin.report.investment', ['slug' => $investment->slug, 'start_date' => $startDate, 'end_date' => $endDate]) }}"
+                                class="btn btn-sm btn-outline-secondary {{ Auth::user()->access->income == 1 ? 'disabled' : '' }}">
+                                    <i class="bx bx-edit-alt me-1"></i> View Report
                                 </a>
+
                             </td>
                         </tr>
                         @endforeach
@@ -233,22 +276,35 @@ function fetchFilteredData() {
         let rows = '';
         if (data.length > 0) {
             data.forEach((investment, index) => {
+                let badge = '';
+
+                if (investment.amount < 0) {
+                    badge = `<span class="badge bg-success">Gain: ${Math.abs(investment.amount).toFixed(2)} Tk</span>`;
+                } else if (investment.amount > 0) {
+                    badge = `<span class="badge bg-danger">Loss: ${investment.amount.toFixed(2)} Tk</span>`;
+                } else {
+                    badge = `<span class="badge bg-warning">No Transactions / Break Even</span>`;
+                }
+
+                const reportUrl = `${routeTemplate.replace('SLUG', investment.slug)}?start_date=${encodeURIComponent(investment.start_date)}&end_date=${encodeURIComponent(investment.end_date)}`;
+
                 rows += `
                     <tr>
                         <td>${index + 1}</td>
                         <td>${investment.category_name} - (${investment.subcategory_name})</td>
                         <td>${investment.name}</td>
                         <td>${investment.description ?? 'N/A'}</td>
-                        <td>${investment.amount}</td>
+                        <td>${badge}</td>
                         <td>${investment.formatted_date}</td>
                         <td>
-                            <a href="${routeTemplate.replace('SLUG', investment.slug)}" class="btn btn-sm btn-outline-secondary">
+                            <a href="${reportUrl}" class="btn btn-sm btn-outline-secondary">
                                 <i class="bx bx-edit-alt me-1"></i> View Report
                             </a>
                         </td>
                     </tr>
                 `;
             });
+
         } else {
             rows = `<tr><td colspan="7" class="text-center">No Investment found.</td></tr>`;
         }
