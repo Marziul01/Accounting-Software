@@ -139,7 +139,7 @@ class BankAccountController extends Controller
         $selectedBankAccount = $request->get('bank_account_id', $bankAccounts->first()?->id) ?? null;
 
         // Fetch transactions for selected bank account and date range
-        $filteredTransactions = [];
+        $filteredTransactions = collect();
         if ($selectedBankAccount) {
             $filteredTransactions = BankTransaction::where('bank_account_id', $selectedBankAccount)
                 ->whereBetween('transaction_date', [$startDate, $endDate])
