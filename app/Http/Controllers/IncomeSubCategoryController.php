@@ -135,9 +135,7 @@ class IncomeSubCategoryController extends Controller
         $incomeSubCategory->delete();
 
         // Redirect back to the index with a success message
-        return response()->json([
-            'message' => 'Income subcategory deleted successfully!',
-        ]);
+        return back()->with('success', 'Income sub category deleted successfully!');
     }
 
     public function getByCategory($category_id)
