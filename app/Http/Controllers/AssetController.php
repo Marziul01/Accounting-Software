@@ -393,12 +393,12 @@ class AssetController extends Controller
         }
 
         // Default category, subcategory, sub-subcategory
-        $defaultCategory = $categories->first();
+        $defaultCategory = $categories->first() ?? null;
         if($defaultCategory && $defaultCategory->assetSubCategories){
-            $defaultSubcategory = $defaultCategory->assetSubCategories->where('status', 1)->first();
+            $defaultSubcategory = $defaultCategory->assetSubCategories->where('status', 1)->first() ?? null;
         }
         if($defaultCategory && $defaultSubcategory && $defaultSubcategory->assetSubSubCategories){
-            $defaultSubsubcategory = $defaultSubcategory->assetSubSubCategories->where('status', 1)->first();
+            $defaultSubsubcategory = $defaultSubcategory->assetSubSubCategories->where('status', 1)->first() ?? null;
         }
         
 
