@@ -404,9 +404,9 @@ class AssetController extends Controller
 
         // Fetch assets under default selection
         $filteredAssets = Asset::query()
-            ->where('category_id', $defaultCategory->id)
-            ->where('subcategory_id', $defaultSubcategory->id)
-            ->where('subsubcategory_id', $defaultSubsubcategory->id)
+            ->where('category_id', $defaultCategory->id ?? null )
+            ->where('subcategory_id', $defaultSubcategory->id ?? null)
+            ->where('subsubcategory_id', $defaultSubsubcategory->id ?? null)
             ->with(['transactions' => function ($q) use ($startDate, $endDate) {
             if ($startDate && $endDate) {
                     $q->whereBetween('transaction_date', [$startDate, $endDate]);
