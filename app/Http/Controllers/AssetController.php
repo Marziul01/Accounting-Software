@@ -397,7 +397,7 @@ class AssetController extends Controller
         if($defaultCategory && $defaultCategory->assetSubCategories){
             $defaultSubcategory = $defaultCategory->assetSubCategories->where('status', 1)->first();
         }
-        if($defaultSubcategory && $defaultSubcategory->assetSubSubCategories){
+        if($defaultCategory && $defaultSubcategory && $defaultSubcategory->assetSubSubCategories){
             $defaultSubsubcategory = $defaultSubcategory->assetSubSubCategories->where('status', 1)->first();
         }
         
