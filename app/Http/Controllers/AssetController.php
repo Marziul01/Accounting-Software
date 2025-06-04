@@ -376,8 +376,12 @@ class AssetController extends Controller
         $latest = Asset::max('entry_date');
         $firstesttransactions = AssetTransaction::min('transaction_date');
         $latesttransactions = AssetTransaction::max('transaction_date');
-        $minDate = min(array_filter([$firstest, $firstesttransactions]));
-        $maxDate = max(array_filter([$latest, $latesttransactions]));
+        // Filter out nulls
+        $minDates = array_filter([$firstest, $firstesttransactions]);
+        $maxDates = array_filter([$latest, $latesttransactions]);
+
+        $minDate = !empty($minDates) ? min($minDates) : null;
+        $maxDate = !empty($maxDates) ? max($maxDates) : null;
 
         $categories = AssetCategory::with('assetSubCategories.assetSubSubCategories')->where('status',1)->get();
         $subSubcategories = AssetSubSubCategory::all();
