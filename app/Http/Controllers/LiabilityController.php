@@ -370,8 +370,12 @@ class LiabilityController extends Controller
         $latest = Liability::max('entry_date');
         $firstesttransactions = LiabilityTransaction::min('transaction_date');
         $latesttransactions = LiabilityTransaction::max('transaction_date');
-        $minDate = min(array_filter([$firstest, $firstesttransactions]));
-        $maxDate = max(array_filter([$latest, $latesttransactions]));
+         // Filter out nulls
+        $minDates = array_filter([$firstest, $firstesttransactions]);
+        $maxDates = array_filter([$latest, $latesttransactions]);
+
+        $minDate = !empty($minDates) ? min($minDates) : null;
+        $maxDate = !empty($maxDates) ? max($maxDates) : null;
 
         $categories = LiabilityCategory::with('liabilitySubCategories.liabilitySubSubCategories')->where('status',1)->get();
         $subSubcategories = LiabilitySubSubCategory::all(); // If you have subsubcategories model, fetch here
