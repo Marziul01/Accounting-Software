@@ -33,7 +33,7 @@
                                                         <td>{{ $loop->iteration }}</td>
                                                         <td>{{ $transaction->bankAccount->bank_name ?? 'Bank has been deleted' }}</td>
                                                         <td>{{ $transaction->name }}</td>
-                                                        <td>{{ $transaction->transaction_id }}</td> <!-- ✅ Transaction ID -->
+                                                        <td>{{ $transaction->transaction_id ?? 'N/A' }}</td> <!-- ✅ Transaction ID -->
                                                         <td>{{ $transaction->amount ?? 'N/A' }}</td> <!-- ✅ Amount -->
                                                         <td>{{ \Carbon\Carbon::parse($transaction->transaction_date)->format('d M, Y') ?? 'N/A' }}</td> <!-- ✅ Income Date -->
                                                         <td>

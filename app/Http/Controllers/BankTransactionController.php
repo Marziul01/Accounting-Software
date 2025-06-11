@@ -52,7 +52,6 @@ class BankTransactionController extends Controller
             'bank_account_id' => 'required|exists:bank_accounts,id',
             'transaction_type' => 'required|in:credit,debit',
             'name' => 'required|string|max:255',
-            'transaction_id' => 'required|string|max:255|unique:bank_transactions,transaction_id',
             'slug' => 'required|string|max:255',
         ]);
 
@@ -112,7 +111,7 @@ class BankTransactionController extends Controller
             'bank_account_id' => 'required|exists:bank_accounts,id',
             'transaction_type' => 'required|in:credit,debit',
             'name' => 'required|string|max:255',
-            'transaction_id' => 'required|string|max:255|unique:bank_transactions,transaction_id,' . $id,
+
             'slug' => 'required|string|max:255',
         ]);
 

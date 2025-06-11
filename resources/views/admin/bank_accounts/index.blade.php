@@ -96,13 +96,14 @@
                         <div class="mb-3">
                             <label for="name" class="form-label">Account Type</label>
                             <select name="account_type" id="" class="form-select" required>
-                                <option value="">Select Account Type</option>
-                                <option value="Savings Account">Savings Account</option>
-                                <option value="Current Account">Current Account</option>
-                                <option value="Monthly DPS Account">Monthly DPS Account</option>
-                                <option value="Fixed Deposit Account">Fixed Deposit Account</option>
-                                <option value="Sanchaypatra Account">Sanchaypatra Account</option>
+                                <option value="">হিসাবের ধরন নির্বাচন করুন</option>
+                                <option value="সঞ্চয় হিসাব">সঞ্চয় হিসাব</option>
+                                <option value="চলতি হিসাব">চলতি হিসাব</option>
+                                <option value="মাসিক ডিপিএস হিসাব">মাসিক ডিপিএস হিসাব</option>
+                                <option value="মেয়াদী আমানত হিসাব">মেয়াদী আমানত হিসাব</option>
+                                <option value="সঞ্চয়পত্র হিসাব">সঞ্চয়পত্র হিসাব</option>
                             </select>
+
                         </div>
 
                     </div>
@@ -162,13 +163,14 @@
                                 <div class="mb-3">
                                     <label for="name" class="form-label">Account Type</label>
                                     <select name="account_type" id="" class="form-select" required>
-                                        <option value="">Select Account Type</option>
-                                        <option value="Savings Account" {{ $bankbook->account_type == 'Savings Account' ? 'selected' : '' }}>Savings Account</option>
-                                        <option value="Current Account" {{ $bankbook->account_type == 'Current Account' ? 'selected' : '' }}>Current Account</option>
-                                        <option value="Monthly DPS Account" {{ $bankbook->account_type == 'Monthly DPS Account' ? 'selected' : '' }}>Monthly DPS Account</option>
-                                        <option value="Fixed Deposit Account" {{ $bankbook->account_type == 'Fixed Deposit Account' ? 'selected' : '' }}>Fixed Deposit Account</option>
-                                        <option value="Sanchaypatra Account" {{ $bankbook->account_type == 'Sanchaypatra Account' ? 'selected' : '' }}>Sanchaypatra Account</option>
+                                        <option value="">হিসাবের ধরন নির্বাচন করুন</option>
+                                        <option value="সঞ্চয় হিসাব" {{ $bankbook->account_type == 'সঞ্চয় হিসাব' ? 'selected' : '' }}>সঞ্চয় হিসাব</option>
+                                        <option value="চলতি হিসাব" {{ $bankbook->account_type == 'চলতি হিসাব' ? 'selected' : '' }}>চলতি হিসাব</option>
+                                        <option value="মাসিক ডিপিএস হিসাব" {{ $bankbook->account_type == 'মাসিক ডিপিএস হিসাব' ? 'selected' : '' }}>মাসিক ডিপিএস হিসাব</option>
+                                        <option value="মেয়াদী আমানত হিসাব" {{ $bankbook->account_type == 'মেয়াদী আমানত হিসাব' ? 'selected' : '' }}>মেয়াদী আমানত হিসাব</option>
+                                        <option value="সঞ্চয়পত্র হিসাব" {{ $bankbook->account_type == 'সঞ্চয়পত্র হিসাব' ? 'selected' : '' }}>সঞ্চয়পত্র হিসাব</option>
                                     </select>
+
                                 </div>
 
                             </div>
