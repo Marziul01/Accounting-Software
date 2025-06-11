@@ -286,12 +286,12 @@
                 </li> --}}
                 <li class="menu-item {{ Route::currentRouteName() == 'liability.index' ? 'active' : '' }}">
                     <a href="{{ route('liability.index') }}" class="menu-link">
-                        <div class="text-truncate" data-i18n="eCommerce">Long Term Liabilities</div>
+                        <div class="text-truncate" data-i18n="eCommerce"> Short Term Liabilities</div>
                     </a>
                 </li>
                 <li class="menu-item {{ Route::currentRouteName() == 'liabilityFixed' ? 'active' : '' }}">
                     <a href="{{ route('liabilityFixed') }}" class="menu-link">
-                        <div class="text-truncate" data-i18n="eCommerce">Short Term Liabilities</div>
+                        <div class="text-truncate" data-i18n="eCommerce">Long Term Liabilities</div>
                     </a>
                 </li>
                 <li class="menu-item {{ Route::currentRouteName() == 'liability.report' ? 'active' : '' }}">

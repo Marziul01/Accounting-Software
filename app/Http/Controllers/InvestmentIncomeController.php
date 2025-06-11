@@ -23,7 +23,7 @@ class InvestmentIncomeController extends Controller
         // 🔐 permission gate
         if (auth()->user()->access->investment == 3) {
             return response()->json(
-                ['message' => 'You have no permission to view investment income'],
+                ['message' => 'You have no permission to view investment gains'],
                 403
             );
         }
@@ -58,7 +58,7 @@ class InvestmentIncomeController extends Controller
         // 🔐 permission gate
         if (auth()->user()->access->investment != 2) {
             return response()->json(
-                ['message' => 'You have no permission to create investment income'],
+                ['message' => 'You have no permission to create investment Gains'],
                 403
             );
         }
@@ -117,7 +117,7 @@ class InvestmentIncomeController extends Controller
 
             });
 
-            return response()->json(['message' => 'Income recorded successfully!']);
+            return response()->json(['message' => 'Gain recorded successfully!']);
         } catch (\Throwable $e) {
             // any failure rolls everything back
             return response()->json(
@@ -150,7 +150,7 @@ class InvestmentIncomeController extends Controller
     {
         if (auth()->user()->access->investment != 2) {
             return response()->json(
-                ['message' => 'You have no permission to update investment income'],
+                ['message' => 'You have no permission to update investment Gain'],
                 403
             );
         }
@@ -192,10 +192,10 @@ class InvestmentIncomeController extends Controller
                 }
             });
 
-            return response()->json(['message' => 'Income updated successfully!']);
+            return response()->json(['message' => 'Gain updated successfully!']);
         } catch (\Throwable $e) {
             return response()->json([
-                'message' => 'Error updating income.',
+                'message' => 'Error updating Gain.',
                 'error' => $e->getMessage(),
             ], 500);
         }
@@ -210,7 +210,7 @@ class InvestmentIncomeController extends Controller
         // 🔐 permission gate
         if (auth()->user()->access->investment != 2) {
             return response()->json(
-                ['message' => 'You have no permission to delete investment income'],
+                ['message' => 'You have no permission to delete investment Gain'],
                 403
             );
         }
@@ -228,9 +228,9 @@ class InvestmentIncomeController extends Controller
                 $investmentIncome->delete();
             });
 
-            return back()->with('success', 'Investment income deleted successfully!');
+            return back()->with('success', 'Investment Gain deleted successfully!');
         } catch (\Throwable $e) {
-            return back()->with('error', 'Error deleting investment income: ' . $e->getMessage());
+            return back()->with('error', 'Error deleting investment Gain: ' . $e->getMessage());
         }
     }
 }

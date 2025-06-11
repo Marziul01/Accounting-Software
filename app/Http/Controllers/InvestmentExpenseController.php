@@ -41,7 +41,7 @@ class InvestmentExpenseController extends Controller
         // 🔐 permission gate
         if (auth()->user()->access->investment != 2) {
             return response()->json(
-                ['message' => 'You have no permission to create investment expense'],
+                ['message' => 'You have no permission to create investment loss'],
                 403
             );
         }
@@ -99,7 +99,7 @@ class InvestmentExpenseController extends Controller
 
             });
 
-            return response()->json(['message' => 'expense recorded successfully!']);
+            return response()->json(['message' => 'loss recorded successfully!']);
         } catch (\Throwable $e) {
             // any failure rolls everything back
             return response()->json(
@@ -132,7 +132,7 @@ class InvestmentExpenseController extends Controller
     {
         if (auth()->user()->access->investment != 2) {
             return response()->json(
-                ['message' => 'You have no permission to update investment expense'],
+                ['message' => 'You have no permission to update investment loss'],
                 403
             );
         }
@@ -174,10 +174,10 @@ class InvestmentExpenseController extends Controller
                 }
             });
 
-            return response()->json(['message' => 'expense updated successfully!']);
+            return response()->json(['message' => 'loss updated successfully!']);
         } catch (\Throwable $e) {
             return response()->json([
-                'message' => 'Error updating expense.',
+                'message' => 'Error updating loss.',
                 'error' => $e->getMessage(),
             ], 500);
         }
@@ -190,7 +190,7 @@ class InvestmentExpenseController extends Controller
     {
         if (auth()->user()->access->investment != 2) {
             return response()->json(
-                ['message' => 'You have no permission to delete investment expense'],
+                ['message' => 'You have no permission to delete investment loss'],
                 403
             );
         }
@@ -207,9 +207,9 @@ class InvestmentExpenseController extends Controller
                 $investmentexpense->delete();
             });
 
-            return back()->with('success', 'Expense deleted successfully!');
+            return back()->with('success', 'Loss deleted successfully!');
         } catch (\Throwable $e) {
-            return back()->with('error', 'Error deleting expense: ' . $e->getMessage());
+            return back()->with('error', 'Error deleting loss: ' . $e->getMessage());
         }
     }
 }

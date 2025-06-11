@@ -75,12 +75,12 @@
 
                                                     <a class=" btn btn-sm btn-primary {{ Auth::user()->access->investment == 1 ? 'disabled' : '' }}" href="" data-bs-toggle="modal"
                                                 data-bs-target="#incomeModal{{ $investment->id }}"><i
-                                                        class="bx bx-wallet me-1"></i> Income from Investment</a>
+                                                        class="bx bx-wallet me-1"></i> Gain from Investment</a>
                                                         <a class=" btn btn-sm btn-primary {{ Auth::user()->access->investment == 1 ? 'disabled' : '' }}" href="" data-bs-toggle="modal"
                                                 data-bs-target="#expenseModal{{ $investment->id }}"><i
-                                                        class="bx bx-wallet me-1"></i> Expense from Investment</a>
+                                                        class="bx bx-wallet me-1"></i> Loss from Investment</a>
                                                         <a class=" btn btn-sm btn-outline-primary" href="{{ route('seeInvestmentsinex' ,$investment->slug ) }}" ><i
-                                                        class="bx bx-wallet me-1"></i> See All Income/Expenses</a>
+                                                        class="bx bx-wallet me-1"></i> See All Gain/Loss</a>
 
                                                 <form action="{{ route('investment.destroy', $investment->id) }}" method="POST" class="d-inline">
                                                     @csrf
@@ -421,7 +421,7 @@
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalLabel">Add New Income from Investment </h5>
+                        <h5 class="modal-title" id="exampleModalLabel">Add New Gain from Investment </h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <form id="investmentIncomeForms{{ $investment->id }}">
@@ -465,7 +465,7 @@
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalLabel">Add New Expense from Investment </h5>
+                        <h5 class="modal-title" id="exampleModalLabel">Add New Loss from Investment </h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <form id="investmentexpenseForms{{ $investment->id }}">

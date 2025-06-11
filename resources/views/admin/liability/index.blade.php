@@ -5,9 +5,9 @@
         <!-- Basic Bootstrap Table -->
         <div class="card ">
             <div class="card-header d-flex justify-content-between align-items-center border-bottom-1">
-                <h5 class="mb-0">Long Term Liabilities</h5>
+                <h5 class="mb-0">Short Term Liabilities</h5>
                 <button type="button" class="btn btn-primary {{ Auth::user()->access->liability == 1 ? 'disabled' : '' }}" data-bs-toggle="modal"
-                    data-bs-target="#addmodals">Add New Long Term Liabilities </button>
+                    data-bs-target="#addmodals">Add New Short Term Liabilities </button>
             </div>
             <div class="card-body  text-nowrap">
                 <div class="table-responsive">
@@ -105,7 +105,7 @@
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Add New Current Liability</h5>
+                    <h5 class="modal-title" id="exampleModalLabel">Add New Short Term Liability</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 

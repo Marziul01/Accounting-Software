@@ -5,7 +5,7 @@
         <!-- Basic Bootstrap Table -->
         <div class="card ">
             <div class="card-header d-flex justify-content-between align-items-center border-bottom-1">
-                <h5 class="mb-0">All {{ $investment->name }} Income Expenses</h5>
+                <h5 class="mb-0">All {{ $investment->name }} Gain/Loss</h5>
                 
             </div>
             <div class="card-body  text-nowrap">
@@ -14,7 +14,7 @@
                         <thead>
                             <tr>
                                 <th>Sl</th>
-                                <th>Income/Expenses</th>
+                                <th>Gain/Loss</th>
                                 <th>Description</th>
                                 <th>Amount</th>
                                 <th>Date</th>
@@ -26,7 +26,7 @@
                             @foreach ($records as $record )
                             <tr>
                                 <td>{{ $loop->iteration }}</td>
-                                <td>{{ $record->category_id == '13' ? 'Income' : 'Expense' }}</td>
+                                <td>{{ $record->category_id == '13' ? 'Gain' : 'Loss' }}</td>
                                 
                                 <td>{{ $record->description }}</td>
                                 <td>{{ $record->amount ?? 'N/A' }}</td>
@@ -92,7 +92,7 @@
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalLabel">Edit Investments {{ $record->category_id == '13' ? 'Income' : 'Expense' }} </h5>
+                        <h5 class="modal-title" id="exampleModalLabel">Edit Investments {{ $record->category_id == '13' ? 'Gain' : 'Loss' }} </h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <form id="investmentIncomeUpdateForm{{ $record->id }}">
@@ -135,7 +135,7 @@
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalLabel">Edit Investments {{ $record->category_id == '13' ? 'Income' : 'Expense' }} </h5>
+                        <h5 class="modal-title" id="exampleModalLabel">Edit Investments {{ $record->category_id == '13' ? 'Gain' : 'Loss' }} </h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <form id="investmentexpenseUpdateForm{{ $record->id }}">
