@@ -21,7 +21,7 @@ class AssetSubCategory extends Model
 
     public function assets()
     {
-        return $this->hasMany(Asset::class);
+        return $this->hasMany(Asset::class , 'subcategory_id');
     }
 
     public function getRouteKeyName()

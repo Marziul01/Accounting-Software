@@ -32,12 +32,12 @@
                 </select>
             </div>
 
-            <div class="mobile-reports-filter-group1">
+            {{-- <div class="mobile-reports-filter-group1">
                 <label for="liability_subsubcategory">Sub-subcategory:</label>
                 <select class="form-select category-select" name="subsubcategory_id" id="liability_subsubcategory">
                     <option value="">Select Sub-subcategory</option>
                 </select>
-            </div>
+            </div> --}}
 
             
         </div>
@@ -61,12 +61,12 @@
                 class="btn btn-primary">
                 Subcategory Report
             </button>
-            <button
+            {{-- <button
                 id="subsubcategoryReportBtn"
                 data-url="{{ route('admin.liability.subsubcategoryReport', ['slug' => 'SUBSUBCATEGORY_SLUG']) }}"
                 class="btn btn-primary">
                 Sub-subcategory Report
-            </button>
+            </button> --}}
         </div>
     </div>
 
@@ -165,14 +165,14 @@
 
     const routes = {
         getSubcategories: "{{ route('liabilitysubcategories.byCategory', ['id' => 'CATEGORY_ID']) }}",
-        getSubSubcategories: "{{ route('liabilitysubsubcategories.bySubCategory', ['id' => 'SUBCATEGORY_ID']) }}",
+        // getSubSubcategories: "{{ route('liabilitysubsubcategories.bySubCategory', ['id' => 'SUBCATEGORY_ID']) }}",
     };
 
     function populateSubcategories(categoryId, autoSelect = true) {
         const subcategorySelect = document.getElementById('liability_subcategory');
         const subsubcategorySelect = document.getElementById('liability_subsubcategory');
         subcategorySelect.innerHTML = '<option value="">Select Subcategory</option>';
-        subsubcategorySelect.innerHTML = '<option value="">Select Sub-subcategory</option>';
+        // subsubcategorySelect.innerHTML = '<option value="">Select Sub-subcategory</option>';
 
         if (!categoryId) return;
 
@@ -191,35 +191,35 @@
 
                 if (autoSelect && data.length > 0) {
                     subcategorySelect.selectedIndex = 1;
-                    populateSubSubcategories(data[0].id);
+                    // populateSubSubcategories(data[0].id);
                 }
             });
     }
 
-    function populateSubSubcategories(subcategoryId, autoSelect = true) {
-        const subsubcategorySelect = document.getElementById('liability_subsubcategory');
-        subsubcategorySelect.innerHTML = '<option value="">Select Sub-subcategory</option>';
+    // function populateSubSubcategories(subcategoryId, autoSelect = true) {
+    //     const subsubcategorySelect = document.getElementById('liability_subsubcategory');
+    //     subsubcategorySelect.innerHTML = '<option value="">Select Sub-subcategory</option>';
 
-        if (!subcategoryId) return;
+    //     if (!subcategoryId) return;
 
-        const url = routes.getSubSubcategories.replace('SUBCATEGORY_ID', subcategoryId);
+    //     const url = routes.getSubSubcategories.replace('SUBCATEGORY_ID', subcategoryId);
 
-        fetch(url)
-            .then(response => response.json())
-            .then(data => {
-                data.forEach((subsub, index) => {
-                    const opt = document.createElement('option');
-                    opt.value = subsub.id;
-                    opt.textContent = subsub.name;
-                    opt.setAttribute('data-slug', subsub.slug);
-                    subsubcategorySelect.appendChild(opt);
-                });
+    //     fetch(url)
+    //         .then(response => response.json())
+    //         .then(data => {
+    //             data.forEach((subsub, index) => {
+    //                 const opt = document.createElement('option');
+    //                 opt.value = subsub.id;
+    //                 opt.textContent = subsub.name;
+    //                 opt.setAttribute('data-slug', subsub.slug);
+    //                 subsubcategorySelect.appendChild(opt);
+    //             });
 
-                if (autoSelect && data.length > 0) {
-                    subsubcategorySelect.selectedIndex = 1;
-                }
-            });
-    }
+    //             if (autoSelect && data.length > 0) {
+    //                 subsubcategorySelect.selectedIndex = 1;
+    //             }
+    //         });
+    // }
 
     document.addEventListener('DOMContentLoaded', function () {
         const defaultCategoryId = document.getElementById('liability_category').value;
@@ -229,9 +229,9 @@
             populateSubcategories(this.value);
         });
 
-        document.getElementById('liability_subcategory').addEventListener('change', function () {
-            populateSubSubcategories(this.value);
-        });
+        // document.getElementById('liability_subcategory').addEventListener('change', function () {
+        //     populateSubSubcategories(this.value);
+        // });
     });
 </script>
 
@@ -239,14 +239,14 @@
     document.addEventListener('DOMContentLoaded', function () {
         const categorySelect = document.getElementById('liability_category');
         const subcategorySelect = document.getElementById('liability_subcategory');
-        const subsubcategorySelect = document.getElementById('liability_subsubcategory');
+        // const subsubcategorySelect = document.getElementById('liability_subsubcategory');
 
         const startDateInput = document.getElementById('start_date');
         const endDateInput = document.getElementById('end_date');
 
         const categoryReportBtn = document.getElementById('categoryReportBtn');
         const subcategoryReportBtn = document.getElementById('subcategoryReportBtn');
-        const subsubcategoryReportBtn = document.getElementById('subsubcategoryReportBtn');
+        // const subsubcategoryReportBtn = document.getElementById('subsubcategoryReportBtn');
 
         function generateReportUrl(baseUrl, placeholder, slug) {
             const startDate = startDateInput.value;
@@ -273,14 +273,14 @@
             window.location.href = fullUrl;
         });
 
-        subsubcategoryReportBtn.addEventListener('click', function () {
-            const selectedOption = subsubcategorySelect.selectedOptions[0];
-            const slug = selectedOption?.dataset.slug;
-            if (!slug) return alert('Please select a valid sub-subcategory.');
+        // subsubcategoryReportBtn.addEventListener('click', function () {
+        //     const selectedOption = subsubcategorySelect.selectedOptions[0];
+        //     const slug = selectedOption?.dataset.slug;
+        //     if (!slug) return alert('Please select a valid sub-subcategory.');
 
-            const fullUrl = generateReportUrl(this.dataset.url, 'SUBSUBCATEGORY_SLUG', slug);
-            window.location.href = fullUrl;
-        });
+        //     const fullUrl = generateReportUrl(this.dataset.url, 'SUBSUBCATEGORY_SLUG', slug);
+        //     window.location.href = fullUrl;
+        // });
     });
 </script>
 
@@ -291,8 +291,8 @@ function fetchFilteredLiabilityData() {
     const startDateInput = document.getElementById('start_date');
     const endDateInput = document.getElementById('end_date');
     const filterButton = document.getElementById('filterButton');
-    const subSubcategorySelect = document.getElementById('liability_subsubcategory');
-    const subsubcategoryId = subSubcategorySelect.value;
+    // const subSubcategorySelect = document.getElementById('liability_subsubcategory');
+    // const subsubcategoryId = subSubcategorySelect.value;
 
     const categoryId = categorySelect.value;
     const subcategoryId = subcategorySelect.value;
@@ -316,7 +316,7 @@ function fetchFilteredLiabilityData() {
         </tr>
     `;
 
-    const fullUrl = `${baseUrl}?category_id=${categoryId}&subcategory_id=${subcategoryId}&subsubcategory_id=${subsubcategoryId}&start_date=${startDate}&end_date=${endDate}`;
+    const fullUrl = `${baseUrl}?category_id=${categoryId}&subcategory_id=${subcategoryId}&start_date=${startDate}&end_date=${endDate}`;
 
     fetch(fullUrl, {
         headers: {

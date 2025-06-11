@@ -132,6 +132,11 @@ class IncomeCategoryController extends Controller
         if(Auth::user()->access->income != 2){
             return redirect()->route('admin.dashboard')->with('error', 'You do not have permission .');
         }
+
+        if( $id == 13 ) {
+            return back()->with('error', 'You cannot delete the default Income category.');
+
+        }
         // Find the income category by ID and delete it
         $incomeCategory = IncomeCategory::findOrFail($id);
         $incomeCategory->delete();

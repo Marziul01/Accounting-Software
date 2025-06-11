@@ -5,9 +5,9 @@
         <!-- Basic Bootstrap Table -->
         <div class="card ">
             <div class="card-header d-flex justify-content-between align-items-center border-bottom-1">
-                <h5 class="mb-0">Asset {{ $categorysettings->asset_category == 2 ? 'Sub' : '' }} {{ $categorysettings->asset_subcategory == 2 ? 'Sub' : '' }} Category</h5>
+                <h5 class="mb-0">Asset {{ $categorysettings->asset_category == 2 ? 'Sub' : '' }} Category</h5>
                 <button type="button" class="btn btn-primary {{ Auth::user()->access->asset == 1 ? 'disabled' : '' }}" data-bs-toggle="modal"
-                    data-bs-target="#addmodals">Add Asset {{ $categorysettings->asset_category == 2 ? 'Sub' : '' }} {{ $categorysettings->asset_subcategory == 2 ? 'Sub' : '' }} Category</button>
+                    data-bs-target="#addmodals">Add Asset {{ $categorysettings->asset_category == 2 ? 'Sub' : '' }} Category</button>
             </div>
             <div class="card-body  text-nowrap">
                 <div class="table-responsive">
@@ -27,7 +27,7 @@
                             @foreach ($assetSubSubCategories as $assetsubsubcategory )
                             <tr>
                                 <td>{{ $loop->iteration }}</td>
-                                <td>{{ $assetsubsubcategory->assetCategory->name ?? 'Asset Category Not Assigned' }} - ( {{ $assetsubsubcategory->assetSubCategory->name ?? 'Asset Sub Category Not Assigned' }} )</td>
+                                <td>{{ $assetsubsubcategory->assetCategory->name ?? 'Asset Category Not Assigned' }}</td>
                                 <td>{{ $assetsubsubcategory->name }}</td>
                                 <td>{{ $assetsubsubcategory->description ?? 'N/A' }}</td>
                                 <td>
@@ -70,7 +70,7 @@
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Add Asset {{ $categorysettings->asset_category == 2 ? 'Sub' : '' }} {{ $categorysettings->asset_subcategory == 2 ? 'Sub' : '' }} Category</h5>
+                    <h5 class="modal-title" id="exampleModalLabel">Add Asset {{ $categorysettings->asset_category == 2 ? 'Sub' : '' }} Category</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form id="addIncomeCategoryForms">
@@ -95,12 +95,12 @@
                                 @endforeach
                             </select>
                         </div>
-                        <div class="mb-3">
+                        {{-- <div class="mb-3">
                             <label for="add_income_sub_category_id" class="form-label">Sub Category</label>
                             <select class="form-select subcategory-select" id="add_income_sub_category_id" name="asset_sub_category_id" required>
                                 <option value="">Select Sub Category</option>
                             </select>
-                        </div>
+                        </div> --}}
                         <div class="mb-3">
                             <label for="Description" class="form-label">Description</label>
                             <textarea class="form-control" id="Description" name="description" rows="3"></textarea>
@@ -157,7 +157,7 @@
                                 </select>
                                 
                             </div>
-                            <div class="mb-3">
+                            {{-- <div class="mb-3">
                                 <label for="edit_income_sub_category_id" class="form-label">Sub Category</label>
                                 <select class="form-select subcategory-select" 
                                         id="edit_income_sub_category_id{{ $assetsubsubcategory->id }}" 
@@ -167,7 +167,7 @@
                                     <option value="">Select Sub Category</option>
                                 </select>
 
-                            </div>
+                            </div> --}}
                             <div class="mb-3">
                                 <label for="Description" class="form-label">Description</label>
                                 <textarea class="form-control" id="Description" name="description" rows="3">{{ $assetsubsubcategory->description }}</textarea>

@@ -23,10 +23,10 @@ class LiabilityController extends Controller
         if (Auth::user()->access->liability == 3) {
             return redirect()->route('admin.dashboard')->with('error', 'You do not have permission to access this page.');
         }
-        $Liabilities = Liability::where('category_id', 1)->get();
+        $Liabilities = Liability::where('category_id', 3)->get();
         return view('admin.liability.index',[
             'liabilities' => $Liabilities,
-            'liabilityCategories' => LiabilitySubCategory::where('liability_category_id', 1)->where('status', 1)->get(),
+            'liabilityCategories' => LiabilitySubCategory::where('liability_category_id', 3)->where('status', 1)->get(),
             'liabilityTransactions' => LiabilityTransaction::all(),
             'users' => Contact::all(),
         ]);
@@ -37,10 +37,10 @@ class LiabilityController extends Controller
             return redirect()->route('admin.dashboard')->with('error', 'You do not have permission to access this page.');
         }
 
-        $Liabilities = Liability::where('category_id', 2)->get();
+        $Liabilities = Liability::where('category_id', 4)->get();
         return view('admin.liability.fixed',[
             'liabilities' => $Liabilities,
-            'liabilityCategories' => LiabilitySubCategory::where('liability_category_id', 2)->where('status', 1)->get(),
+            'liabilityCategories' => LiabilitySubCategory::where('liability_category_id', 4)->where('status', 1)->get(),
             'liabilityTransactions' => LiabilityTransaction::all(),
             'users' => Contact::all(),
         ]);
@@ -65,7 +65,6 @@ class LiabilityController extends Controller
         $request->validate([
             'name' => 'required',
             'subcategory_id' => 'required',
-            'subsubcategory_id' => 'required',
             'amount' => 'required|numeric',
             'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:512',
             'user_name' => 'nullable|string',
@@ -188,7 +187,7 @@ class LiabilityController extends Controller
         $request->validate([
             'name' => 'required',
             'subcategory_id' => 'required',
-            'subsubcategory_id' => 'required',
+            
             'amount' => 'required|numeric',
             'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:512',
         ]);
@@ -392,13 +391,13 @@ class LiabilityController extends Controller
         // Default category, subcategory, sub-subcategory
         $defaultCategory = $categories->first();
         $defaultSubcategory = $defaultCategory?->liabilitySubCategories->where('status', 1)->first();
-        $defaultSubsubcategory = $defaultSubcategory?->liabilitySubSubCategories->where('status', 1)->first();
+        
 
         // Fetch liabilities under default selection
         $filteredLiabilities = Liability::query()
             ->where('category_id', $defaultCategory->id ?? null )
             ->where('subcategory_id', $defaultSubcategory->id ?? null )
-            ->where('subsubcategory_id', $defaultSubsubcategory->id ?? null )
+            
             ->with(['transactions' => function ($q) use ($startDate, $endDate) {
             if ($startDate && $endDate) {
                     $q->whereBetween('transaction_date', [$startDate, $endDate]);
@@ -439,9 +438,9 @@ class LiabilityController extends Controller
             $query->where('subcategory_id', $subcategoryId);
         }
 
-        if ($subsubcategoryId) {
-            $query->where('subsubcategory_id', $subsubcategoryId);
-        }
+        // if ($subsubcategoryId) {
+        //     $query->where('subsubcategory_id', $subsubcategoryId);
+        // }
 
         $query->with(['transactions' => function ($q) use ($startDate, $endDate) {
             if ($startDate && $endDate) {

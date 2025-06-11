@@ -11,9 +11,21 @@ class LiabilityTransactionController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index($slug)
     {
-        //
+        // Check if the user has permission to view liability transactions
+        if (auth()->user()->access->liability == 3) {
+            return redirect()->route('admin.dashboard')->with('error', 'You do not have permission to view liability transactions.');
+        }
+
+        // Fetch the liability by slug
+        $liability = Liability::where('slug', $slug)->firstOrFail();
+
+        // Fetch all transactions related to the liability
+        $transactions = LiabilityTransaction::where('liability_id', $liability->id)->get();
+
+        // Return the view with the liability and its transactions
+        return view('admin.liability.transactions', compact('liability', 'transactions'));
     }
 
     /**
@@ -106,7 +118,7 @@ class LiabilityTransactionController extends Controller
         $assetTransaction->update($request->all());
 
         // Fetch the associated asset
-        $asset = Liability::findOrFail($request->asset_id);
+        $asset = Liability::findOrFail($request->liability_id);
 
         // Reverse the previous transaction
         if ($previousType === 'Deposit') {

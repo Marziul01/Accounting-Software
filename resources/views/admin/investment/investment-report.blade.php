@@ -83,9 +83,7 @@
                         @foreach ($filteredInvestments as $investment)
                         @php
                             // 1. Total transactions (all time)
-                            $totalDeposits = $investment->allTransactions->where('transaction_type', 'Deposit')->sum('amount');
-                            $totalWithdrawals = $investment->allTransactions->where('transaction_type', 'Withdraw')->sum('amount');
-                            $initialAmount = $investment->amount - $totalDeposits + $totalWithdrawals;
+                            $initialAmount = $investment->transactions->first()->amount ?? 0;
 
                             // 2. Filtered transactions (between start and end)
                             $depositInRange = $investment->transactions->where('transaction_type', 'Deposit')->sum('amount');
@@ -94,11 +92,9 @@
 
                             
 
-                            if ($startDate <= $investment->date ) {
-                                // Start date is before investment was created, so only show current with initial
-                                $currentAmount += $initialAmount;
-                                $depositInRange += $initialAmount;
-                                $previousAmount = null;
+                            if ($investment->transactions->isNotEmpty() && $investment->transactions->first()->transaction_date >= $startDate) {
+                                // If the first transaction is on or after the start date, previous amount is just the initial amount
+                                $previousAmount = $initialAmount;
                             } else {
                                 // Start date is on or after investment date
                                 $depositBeforeStart = $investment->allTransactions
@@ -111,22 +107,16 @@
                                     ->where('transaction_date', '<', $startDate)
                                     ->sum('amount');
 
-                                $previousAmount = $initialAmount + $depositBeforeStart - $withdrawBeforeStart;
+                                $previousAmount = $depositBeforeStart - $withdrawBeforeStart;
                             }
+                            
                         @endphp
                         <tr>
                             <td>{{ $loop->iteration }}</td>
                             <td>{{ $investment->investmentCategory->name }} - ({{ $investment->investmentSubCategory->name }})</td>
                             <td>{{ $investment->name }}</td>
                             <td>{{ $investment->description ?? 'N/A' }}</td>
-                             <td> {{--{{ $investment->currentAmount ?? 'No Transactions' }} --}}
-                                @if ($currentAmount < 0)
-                                        <span class="badge bg-success">Gain: {{ number_format(abs($currentAmount), 2) }} Tk</span>
-                                    @elseif ($currentAmount > 0)
-                                        <span class="badge bg-danger">Loss: {{ number_format($currentAmount, 2) }} Tk</span>
-                                    @else
-                                        <span class="badge bg-warning">No Transactions / Break Even</span>
-                                    @endif
+                             <td> {{ number_format($currentAmount, 2) }} Tk
                             </td>
                             <td>{{ \Carbon\Carbon::parse($investment->date)->format('d M, Y') }}</td>
                             <td>
@@ -276,15 +266,6 @@ function fetchFilteredData() {
         let rows = '';
         if (data.length > 0) {
             data.forEach((investment, index) => {
-                let badge = '';
-
-                if (investment.amount < 0) {
-                    badge = `<span class="badge bg-success">Gain: ${Math.abs(investment.amount).toFixed(2)} Tk</span>`;
-                } else if (investment.amount > 0) {
-                    badge = `<span class="badge bg-danger">Loss: ${investment.amount.toFixed(2)} Tk</span>`;
-                } else {
-                    badge = `<span class="badge bg-warning">No Transactions / Break Even</span>`;
-                }
 
                 const reportUrl = `${routeTemplate.replace('SLUG', investment.slug)}?start_date=${encodeURIComponent(investment.start_date)}&end_date=${encodeURIComponent(investment.end_date)}`;
 
@@ -294,7 +275,7 @@ function fetchFilteredData() {
                         <td>${investment.category_name} - (${investment.subcategory_name})</td>
                         <td>${investment.name}</td>
                         <td>${investment.description ?? 'N/A'}</td>
-                        <td>${badge}</td>
+                        <td>${investment.amount}</td>
                         <td>${investment.formatted_date}</td>
                         <td>
                             <a href="${reportUrl}" class="btn btn-sm btn-outline-secondary">

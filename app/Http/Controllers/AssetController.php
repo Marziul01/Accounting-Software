@@ -23,10 +23,10 @@ class AssetController extends Controller
         if (auth()->user()->access->asset == 3) {
             return redirect()->route('admin.dashboard')->with('error', 'You do not have permission to access this page.');
         }
-        $assets = Asset::where('category_id', 1)->get();
+        $assets = Asset::where('category_id', 4)->get();
         return view('admin.asset.index',[
             'assets' => $assets,
-            'assetCategories' => AssetSubCategory::where('asset_category_id', 1)->where('status', 1)->get(),
+            'assetCategories' => AssetSubCategory::where('asset_category_id', 4)->where('status', 1)->get(),
             'assetTransactions' => AssetTransaction::all(),
             'users' => Contact::all(),
         ]);
@@ -38,10 +38,10 @@ class AssetController extends Controller
             return redirect()->route('admin.dashboard')->with('error', 'You do not have permission to access this page.');
         }
 
-        $assets = Asset::where('category_id', 2)->get();
+        $assets = Asset::where('category_id', 5)->get();
         return view('admin.asset.fixed',[
             'assets' => $assets,
-            'assetCategories' => AssetSubCategory::where('asset_category_id', 2)->where('status', 1)->get(),
+            'assetCategories' => AssetSubCategory::where('asset_category_id', 5)->where('status', 1)->get(),
             'assetTransactions' => AssetTransaction::all(),
             'users' => Contact::all(),
         ]);
@@ -65,7 +65,7 @@ class AssetController extends Controller
         $request->validate([
             'name' => 'required',
             'subcategory_id' => 'required',
-            'subsubcategory_id' => 'required',
+            
             'amount' => 'required|numeric',
             'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'user_name' => 'nullable|string',
@@ -191,7 +191,7 @@ class AssetController extends Controller
         $request->validate([
             'name' => 'required',
             'subcategory_id' => 'required',
-            'subsubcategory_id' => 'required',
+            
             'amount' => 'required|numeric',
             'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
@@ -360,11 +360,11 @@ class AssetController extends Controller
         $subCategories = AssetSubCategory::where('asset_category_id', $categoryId)->where('status', 1)->get();
         return response()->json($subCategories);
     }
-    public function getSubSubcategories($subCategoryId)
-    {
-        $subSubCategories = AssetSubSubCategory::where('asset_sub_category_id', $subCategoryId)->where('status', 1)->get();
-        return response()->json($subSubCategories);
-    }
+    // public function getSubSubcategories($subCategoryId)
+    // {
+    //     $subSubCategories = AssetSubSubCategory::where('asset_sub_category_id', $subCategoryId)->where('status', 1)->get();
+    //     return response()->json($subSubCategories);
+    // }
     
     public function report(Request $request)
     {
@@ -401,16 +401,14 @@ class AssetController extends Controller
         if($defaultCategory && $defaultCategory->assetSubCategories){
             $defaultSubcategory = $defaultCategory->assetSubCategories->where('status', 1)->first() ?? null;
         }
-        if($defaultCategory && $defaultSubcategory && $defaultSubcategory->assetSubSubCategories){
-            $defaultSubsubcategory = $defaultSubcategory->assetSubSubCategories->where('status', 1)->first() ?? null;
-        }
+        
         
 
         // Fetch assets under default selection
         $filteredAssets = Asset::query()
             ->where('category_id', $defaultCategory->id ?? null )
             ->where('subcategory_id', $defaultSubcategory->id ?? null)
-            ->where('subsubcategory_id', $defaultSubsubcategory->id ?? null)
+            
             ->with(['transactions' => function ($q) use ($startDate, $endDate) {
             if ($startDate && $endDate) {
                     $q->whereBetween('transaction_date', [$startDate, $endDate]);
@@ -433,7 +431,7 @@ class AssetController extends Controller
         // Get all filters
         $categoryId = $request->input('category_id');
         $subcategoryId = $request->input('subcategory_id');
-        $subsubcategoryId = $request->input('subsubcategory_id');
+        // $subsubcategoryId = $request->input('subsubcategory_id');
         $startDate = $request->input('start_date');
         $endDate = $request->input('end_date');
 
@@ -452,9 +450,9 @@ class AssetController extends Controller
             $query->where('subcategory_id', $subcategoryId);
         }
 
-        if ($subsubcategoryId) {
-            $query->where('subsubcategory_id', $subsubcategoryId);
-        }
+        // if ($subsubcategoryId) {
+        //     $query->where('subsubcategory_id', $subsubcategoryId);
+        // }
 
         $query->with(['transactions' => function ($q) use ($startDate, $endDate) {
             if ($startDate && $endDate) {

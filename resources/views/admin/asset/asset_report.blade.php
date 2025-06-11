@@ -7,15 +7,12 @@
     <title>{{ $asset->name }} সম্পদ রিপোর্ট</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&family=Tiro+Bangla&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Tiro+Bangla:ital@0;1&display=swap');
 
         body {
             font-family: "Hind Siliguri", sans-serif;
             background-color: #f8f9fa;
-        }
-
-        .tiro-font {
-            font-family: "Tiro Bangla", serif;
         }
 
         @media print {
@@ -29,6 +26,10 @@
 
             .img {
                 width: 15% !important;
+            }
+
+            .signature_img {
+                width: 20% !important;
             }
         }
 
@@ -53,16 +54,26 @@
             font-size: 12px;
         }
 
-        .category-total,
-        .grand-total,
-        .subcategory-total {
-            background-color: #d4edda;
-            font-weight: bold;
+        .summary-box {
+            background: #fff3cd;
+            padding: 15px;
+        }
+
+        .tiro-font {
+            font-family: 'Tiro Bangla', serif;
+        }
+
+        table tbody tr td {
+            font-size: 12px;
         }
 
         .summary-box {
             background: #fff3cd;
             padding: 15px;
+        }
+
+        .tiro-font {
+            font-family: 'Tiro Bangla', serif;
         }
 
         table tbody tr td {
@@ -86,10 +97,27 @@
             margin-bottom: 5px;
             font-weight: 500;
             font-size: 16px !important;
+            text-align: left !important;
         }
 
         .img {
             width: 6%;
+        }
+
+        .report-footer {
+            text-align: left !important;
+        }
+
+        .signature_text {
+            width: fit-content;
+            padding: 5px 70px 0 2px;
+            border-top: #000 solid 1px;
+
+        }
+
+        .signature_img {
+            width: 10%;
+            height: auto;
         }
     </style>
 </head>
@@ -103,9 +131,9 @@
             return '<span class="tiro-font">' . str_replace($eng, $bang, $number) . '</span>';
         }
 
-        $category = $asset->subsubcategory->assetSubCategory->assetCategory->name ?? '';
-        $subcategory = $asset->subsubcategory->assetSubCategory->name ?? '';
-        $subsubcategory = $asset->subsubcategory->name ?? '';
+        $category = $asset->category->name ?? '';
+        $subcategory = $asset->subcategory->name ?? '';
+        
     @endphp
 
     @php
@@ -145,7 +173,7 @@
         <div class="report-header text-center border-bottom mb-4">
             <img src="{{ asset($setting->site_logo) }}" height="100%" class="img" alt="">
             <h2>{{ $setting->site_name_bangla }}</h2>
-            <h4>{{ $subsubcategory }}</h4>
+            <h4>{{ $subcategory }}</h4>
             <h4>{{ $asset->name }} এর সম্পদের রিপোর্ট</h4>
             <p class=""> {!! bn_number($startDate ?? 'সর্বপ্রথম') !!} থেকে {!! bn_number($endDate ?? now()->format('Y-m-d')) !!} পর্যন্ত </p>
         </div>
@@ -286,7 +314,7 @@
                     </tr>
                     <tr>
                         <td><strong>ক্যাটাগরি</strong></td>
-                        <td>{{ $category }} > {{ $subcategory }} > {{ $subsubcategory }}</td>
+                        <td>{{ $category }} > {{ $subcategory }}</td>
                     </tr>
                     <tr class="grand-total">
                         <td><strong>বর্তমান সম্পদ</strong></td>
@@ -308,7 +336,12 @@
 
         <div class="report-footer mt-4">
             <div class="text-center">
-                <p class="bangla-text">{{ $setting->site_name_bangla }}</p>
+                <div class="d-flex justify-content-start mb-3">
+                    <img src="{{ asset($setting->signature) }}" height="100%" class="signature_img" alt="">
+                </div>
+                <p class="signature_text mb-3">স্বাক্ষর</p>
+
+                <p class="bangla-text">{{ $setting->site_owner }}</p>
 
                 <p class="bangla-text">
                     ঠিকানা: {!! preg_replace_callback(

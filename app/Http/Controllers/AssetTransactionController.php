@@ -11,9 +11,21 @@ class AssetTransactionController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index($slug)
     {
-        //
+        // Check if the user has permission to view asset transactions
+        if (auth()->user()->access->asset == 3) {
+            return redirect()->route('admin.dashboard')->with('error', 'You do not have permission to view asset transactions.');
+        }
+
+        // Fetch the asset by slug
+        $asset = Asset::where('slug', $slug)->firstOrFail();
+
+        // Fetch all transactions related to the asset
+        $transactions = AssetTransaction::where('asset_id', $asset->id)->get();
+
+        // Return the view with the asset and its transactions
+        return view('admin.asset.transactions', compact('asset', 'transactions'));
     }
 
     /**

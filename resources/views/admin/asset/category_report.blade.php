@@ -7,15 +7,12 @@
     <title>{{ $category->name }} সম্পদ রিপোর্ট</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&family=Tiro+Bangla&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Tiro+Bangla:ital@0;1&display=swap');
 
         body {
             font-family: "Hind Siliguri", sans-serif;
             background-color: #f8f9fa;
-        }
-
-        .tiro-font {
-            font-family: "Tiro Bangla", serif;
         }
 
         @media print {
@@ -29,6 +26,10 @@
 
             .img {
                 width: 15% !important;
+            }
+
+            .signature_img {
+                width: 20% !important;
             }
         }
 
@@ -53,16 +54,26 @@
             font-size: 12px;
         }
 
-        .category-total,
-        .grand-total,
-        .subcategory-total {
-            background-color: #d4edda;
-            font-weight: bold;
+        .summary-box {
+            background: #fff3cd;
+            padding: 15px;
+        }
+
+        .tiro-font {
+            font-family: 'Tiro Bangla', serif;
+        }
+
+        table tbody tr td {
+            font-size: 12px;
         }
 
         .summary-box {
             background: #fff3cd;
             padding: 15px;
+        }
+
+        .tiro-font {
+            font-family: 'Tiro Bangla', serif;
         }
 
         table tbody tr td {
@@ -86,10 +97,27 @@
             margin-bottom: 5px;
             font-weight: 500;
             font-size: 16px !important;
+            text-align: left !important;
         }
 
         .img {
             width: 6%;
+        }
+
+        .report-footer {
+            text-align: left !important;
+        }
+
+        .signature_text {
+            width: fit-content;
+            padding: 5px 70px 0 2px;
+            border-top: #000 solid 1px;
+
+        }
+
+        .signature_img {
+            width: 10%;
+            height: auto;
         }
     </style>
 </head>
@@ -121,20 +149,22 @@
 
             @foreach ($category->assetSubCategories as $subcategory)
                 @php
-                  $subcategoryTotal = 0;
+                    $subdeposit = 0;
+                    $subwithdraw = 0;
+                    $subtotal = 0;
                 @endphp
-                @if ($subcategory->assetSubSubCategories->count())
+                {{-- @if ($subcategory->assetSubSubCategories->count())
                     @foreach ($subcategory->assetSubSubCategories as $subsubcategory)
                         @php
                             $subsubdeposit = 0;
                             $subsubwithdraw = 0;
                             $subsubtotal = 0;
-                        @endphp
+                        @endphp --}}
 
                         @if ($assets->count())
                             <div class="card mb-4">
                                 <div class="card-header bg-dark text-white">
-                                    <strong>{{ $subcategory->name }} → {{ $subsubcategory->name }}</strong>
+                                    <strong>{{ $subcategory->name }}</strong>
                                 </div>
                                 <div class="card-body p-0">
                                     <div class="table-responsive">
@@ -151,7 +181,7 @@
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                @foreach ($assets->where('subsubcategory_id', $subsubcategory->id) as $asset)
+                                                @foreach ($assets->where('subcategory_id', $subcategory->id) as $asset)
                                                     @php
                                                         $totalDeposits = $asset->allTransactions
                                                             ->where('transaction_type', 'Deposit')
@@ -194,9 +224,9 @@
                                                                 $withdrawBeforeStart;
                                                         }
 
-                                                        $subsubdeposit += $depositInRange;
-                                                        $subsubwithdraw += $withdrawInRange;
-                                                        $subsubtotal = $subsubdeposit - $subsubwithdraw;
+                                                        $subdeposit += $depositInRange;
+                                                        $subwithdraw += $withdrawInRange;
+                                                        $subtotal = $subdeposit - $subwithdraw;
 
                                                         
 
@@ -225,23 +255,22 @@
                                                     </tr>
                                                 @endforeach
                                                 @php
-                                                  $subcategoryTotal += $subsubtotal;
-
-                                                        
+                                
+                                                    $categorytotal += $subtotal;
                                                 @endphp
                                                 <tr class="subsubcategory-total">
-                                                    <td colspan="5" class="text-end">
-                                                        <strong>{{ $subsubcategory->name }} মোট:</strong>
+                                                    <td colspan="6" class="text-end">
+                                                        <strong>{{ $subcategory->name }} মোট:</strong>
                                                     </td>
                                                     <td class="text-end tiro">
                                                         <strong>
-                                                            @if ($subsubtotal < 0)
+                                                            @if ($subtotal < 0)
                                                                 <span class="text-success">সম্পদের বিক্রয়:
-                                                                    {!! bn_number(number_format(abs($subsubtotal), 2)) !!}
+                                                                    {!! bn_number(number_format(abs($subtotal), 2)) !!}
                                                                     টাকা</span>
-                                                            @elseif ($subsubtotal > 0)
+                                                            @elseif ($subtotal > 0)
                                                                 <span class="text-success">সম্পদ:
-                                                                    {!! bn_number(number_format(abs($subsubtotal), 2)) !!}
+                                                                    {!! bn_number(number_format(abs($subtotal), 2)) !!}
                                                                     টাকা</span>
                                                             @else
                                                                 <span class="text-secondary">লাভ বা ক্ষতি নেই</span>
@@ -255,15 +284,12 @@
                                 </div>
                             </div>
                         @else
-                            <div><strong>{{ $subcategory->name }} → {{ $subsubcategory->name }}</strong> এর জন্য কোনো
+                            <div><strong>{{ $subcategory->name }}</strong> এর জন্য কোনো
                                 সম্পদ নেই।</div>
                         @endif
-                    @endforeach
-                              @php
-                                
-                                $categorytotal += $subcategoryTotal;
-                              @endphp
-                    <div class="text-end mb-2 pe-3 subcategory-total">
+                    
+                              
+                    {{-- <div class="text-end mb-2 pe-3 subcategory-total">
                         <strong>{{ $subcategory->name }} মোট:</strong>
                         <span class="tiro">
                             @if ($subcategoryTotal < 0)
@@ -278,8 +304,8 @@
                                 <span class="text-secondary">লাভ বা ক্ষতি নেই</span>
                             @endif
                         </span>
-                    </div>
-                @endif
+                    </div> --}}
+                
             @endforeach
         @else
             <p class="text-danger text-center">{{ $category->name }} এর অধীনে কোনো সাব-ক্যাটাগরি পাওয়া যায়নি।</p>
@@ -315,7 +341,12 @@
 
         <div class="report-footer mt-4">
             <div class="text-center">
-                <p class="bangla-text">{{ $setting->site_name_bangla }}</p>
+                <div class="d-flex justify-content-start mb-3">
+                    <img src="{{ asset($setting->signature) }}" height="100%" class="signature_img" alt="">
+                </div>
+                <p class="signature_text mb-3">স্বাক্ষর</p>
+
+                <p class="bangla-text">{{ $setting->site_owner }}</p>
 
                 <p class="bangla-text">
                     ঠিকানা: {!! preg_replace_callback(

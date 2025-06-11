@@ -126,6 +126,11 @@ class ExpenseCategoryController extends Controller
         if (Auth::user()->access->expense != 2) {
             return redirect()->route('admin.dashboard')->with('error', 'You do not have permission to delete .');
         }
+
+        if( $id == 7 ) {
+            return back()->with('error', 'You cannot delete the default Expense category.');
+
+        }
         // Find the expense category by ID
         $expenseCategory = ExpenseCategory::findOrFail($id);
 

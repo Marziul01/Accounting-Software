@@ -13,9 +13,20 @@ class InvestmentTransactionController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index($slug)
     {
-        //
+        // Check if the user has permission to view investment transactions
+        if (auth()->user()->access->investment == 3) {
+            return redirect()->route('admin.dashboard')->with('error', 'You do not have permission to view investment transactions.');
+        }
+
+        // Fetch the investment by slug
+        $investment = Investment::where('slug', $slug)->firstOrFail();
+
+        // Fetch all transactions related to this investment
+        $transactions = InvestmentTransaction::where('investment_id', $investment->id)->get();
+
+        return view('admin.investment.transactions', compact('investment', 'transactions'));
     }
 
     /**

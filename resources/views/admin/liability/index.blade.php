@@ -37,7 +37,7 @@
                             <tr>
                                 <td>{{ $loop->iteration }}</td>
                                 @if($categorysettings->liability_category_table == 2)
-                                <td>{{ $liability->category->name ?? 'Liability Category Not Assigned' }} - ( {{ $liability->subcategory->name ?? 'Liability Category Not Assigned' }} ) - ( {{ $liability->subsubcategory->name ?? 'Liability Sub Category not Assigned' }} )</td>
+                                <td>{{ $liability->category->name ?? 'Liability Category Not Assigned' }} - ( {{ $liability->subcategory->name ?? 'Liability Category Not Assigned' }} )</td>
                                 @endif
 
                                 @if($categorysettings->liability_name_table == 2)
@@ -57,25 +57,32 @@
                                 <td>{{ $liability->description ?? 'N/A' }}</td>
                                 
                                 <td>
-                                    <div class="d-flex align-items-center gap-1 cursor-pointer">
-                                        <a class=" btn btn-sm btn-primary {{ Auth::user()->access->liability == 1 ? 'disabled' : '' }}" href="" data-bs-toggle="modal"
-                                        data-bs-target="#updateModal{{ $liability->id }}"><i
-                                                class="bx bx-wallet me-1"></i> Update Liability Transaction</a>
-                                                <a class=" btn btn-sm btn-outline-primary" href="" data-bs-toggle="modal"
-                                        data-bs-target="#seeModal{{ $liability->id }}"><i
-                                                class="bx bx-wallet me-1"></i> See All Liability Transactions</a>
-                                        <a class=" btn btn-sm btn-outline-secondary" href="" data-bs-toggle="modal"
-                                        data-bs-target="#viewModal{{ $liability->id }}"><i
-                                                class="bx bx-show me-1"></i> See Details</a>
-                                            <a class=" btn btn-sm btn-outline-secondary {{ Auth::user()->access->liability == 1 ? 'disabled' : '' }}" href="" data-bs-toggle="modal"
-                                            data-bs-target="#editModal{{ $liability->id }}"><i
-                                                    class="bx bx-edit-alt me-1"></i> Edit</a>
-                                        <form action="{{ route('liability.destroy', $liability->id) }}" method="POST" class="d-inline">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="btn btn-sm btn-outline-danger delete-confirm {{ Auth::user()->access->liability == 1 ? 'disabled' : '' }}" ><i
-                                                    class="bx bx-trash me-1"></i> Delete</button>
+                                    
+                                    <div class="dropdown" data-bs-boundary="viewport">  <!-- 👈  only this line added -->
+                                        <button class="btn p-0 btn-outline-secondary" data-bs-toggle="dropdown" aria-expanded="false" style=" padding: 0px 5px !important ;">
+                                            Actions <i class="bx bx-dots-vertical-rounded" style="font-size: 20px !important;"></i> 
+                                        </button>
+                                        <div class="dropdown-menu dropdown-menu-end p-3" aria-labelledby="cardOpt6">
+                                            <div class="d-flex flex-column gap-1 cursor-pointer">
+                                                <a class=" btn btn-sm btn-primary {{ Auth::user()->access->liability == 1 ? 'disabled' : '' }}" href="" data-bs-toggle="modal"
+                                                data-bs-target="#updateModal{{ $liability->id }}"><i
+                                                        class="bx bx-wallet me-1"></i> Update Liability Transaction</a>
+                                                        <a class=" btn btn-sm btn-outline-primary" href="{{ route('seeLiabilityTrans', $liability->slug) }}" ><i
+                                                        class="bx bx-wallet me-1"></i> See All Liability Transactions</a>
+                                                <a class=" btn btn-sm btn-outline-secondary" href="" data-bs-toggle="modal"
+                                                data-bs-target="#viewModal{{ $liability->id }}"><i
+                                                        class="bx bx-show me-1"></i> See Details</a>
+                                                    <a class=" btn btn-sm btn-outline-secondary {{ Auth::user()->access->liability == 1 ? 'disabled' : '' }}" href="" data-bs-toggle="modal"
+                                                    data-bs-target="#editModal{{ $liability->id }}"><i
+                                                            class="bx bx-edit-alt me-1"></i> Edit</a>
+                                                <form action="{{ route('liability.destroy', $liability->id) }}" method="POST" class="d-inline">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger delete-confirm {{ Auth::user()->access->liability == 1 ? 'disabled' : '' }}" ><i
+                                                            class="bx bx-trash me-1"></i> Delete</button>
                                         </form>
+                                            </div>
+                                        </div>
                                     </div>
                                 </td>
                             </tr> 
@@ -131,7 +138,7 @@
                             </div>
 
                             
-                            <input type="hidden" value="1" name="category_id">
+                            <input type="hidden" value="3" name="category_id">
                 
                             <div class="col-6 mb-3">
                                 <label for="add_income_category_id" class="form-label">Category</label>
@@ -142,12 +149,12 @@
                                     @endforeach
                                 </select>
                             </div>
-                            <div class="col-6 mb-3">
+                            {{-- <div class="col-6 mb-3">
                                 <label for="add_income_sub_category_id" class="form-label">Sub Category</label>
                                 <select class="form-select subcategory-select" id="add_income_sub_category_id" name="subsubcategory_id" required>
                                     <option value="">Select Sub Category</option>
                                 </select>
-                            </div>
+                            </div> --}}
 
                             <div class="col-12 mb-3">
                                 <label>Description</label>
@@ -299,7 +306,7 @@
                                                 @endforeach
                                             </select>
                                         </div>
-                                        <div class="col-6 mb-3">
+                                        {{-- <div class="col-6 mb-3">
                                             <label for="add_income_sub_category_id" class="form-label">Sub Category</label>
                                             <select class="form-select subcategory-select" 
                                                     id="edit_income_sub_category_id{{ $liability->id }}" 
@@ -308,7 +315,7 @@
                                                     required>
                                                 <option value="">Select Sub Category</option>
                                             </select>
-                                        </div>
+                                        </div> --}}
 
                                         <div class="col-12 mb-3">
                                             <label>Description</label>
@@ -427,7 +434,7 @@
                                     <div class="row">
                                         
                                         <div class="col-12 mb-3">
-                                            <img @if($liability->photo) src="{{ asset($liability->photo) }}" @else src="{{ asset('admin-assets/img/nophoto.jpg') }}"  @endif width="100px" height="100px" style="object-fit: fill" alt="">
+                                            <img @if($liability->photo) src="{{ asset($liability->photo) }}" @else src="{{ asset('admin-assets/img/nophoto.jpg') }}"  @endif width="100px" height="100px" style="object-fit: fill ; border-radius: 50%;" alt="">
                                         </div>
 
                                         @php

@@ -5,104 +5,119 @@
   <title>উপ-বিভাগ ব্যয়ের রিপোর্ট - {{ $subcategory->name ?? 'প্রযোজ্য নয়' }}</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&display=swap');
-    @import url('https://fonts.googleapis.com/css2?family=Tiro+Bangla:ital@0;1&display=swap');
-    body {
-      font-family: "Hind Siliguri", sans-serif;
-      background-color: #f1f3f6;
-    }
+        @import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Tiro+Bangla:ital@0;1&display=swap');
 
-    @media print {
-      .no-print { display: none !important; }
-      body { -webkit-print-color-adjust: exact !important; }
-      .img{ width: 15% !important;}
-    }
+        body {
+            font-family: "Hind Siliguri", sans-serif;
+            background-color: #f8f9fa;
+        }
 
-    .report-header {
-      
-      padding: 20px;
-      border-radius: 6px 6px 0 0;
-      text-align: center;
-      margin-bottom: 15px;
-    }
+        @media print {
+            .no-print {
+                display: none !important;
+            }
 
-    .report-header h1 {
-      margin: 0;
-      font-size: 26px;
-    }
+            body {
+                -webkit-print-color-adjust: exact !important;
+            }
 
-    .report-header p {
-      margin: 0;
-      font-size: 15px;
-    }
+            .img {
+                width: 15% !important;
+            }
 
-    .report-meta {
-      
-      background: #fff3cd;
-      padding: 15px;
-      border-left: 5px solid #ffc107;
-    
-    }
+            .signature_img {
+                width: 20% !important;
+            }
+        }
 
-    .report-meta p {
-      margin: 0;
-      font-size: 16px;
-    }
+        .report-header,
+        .report-footer {
+            text-align: center;
+            padding: 10px 0;
+        }
 
-    .table thead th {
-      background-color: #343a40;
-      color: white;
-      font-size: 12px;
-    }
+        .report-header {
+            border-bottom: 2px solid #000;
+            margin-bottom: 20px;
+        }
 
-    .subtotal-row {
-      background-color: #d4edda;
-      font-weight: bold;
-    }
+        .card-header {
+            background-color: #343a40;
+            color: white;
+        }
 
-    .footer-note {
-      font-size: 13px;
-      color: #6c757d;
-      margin-top: 40px;
-      text-align: center;
-    }
+        .table-light th {
+            background-color: #f1f1f1 !important;
+            font-size: 12px;
+        }
 
-    .container {
-      max-width: 1000px;
-    }
-    .report-header, .report-footer {
-      text-align: center;
-      padding: 10px 0;
-    }
-    .report-header {
-      border-bottom: 2px solid #000;
-      margin-bottom: 20px;
-    }
-    .tiro-font {
-      font-family: 'Tiro Bangla', serif;
-    }
-    table tbody tr td{
-      background-color: transparent !important;
-      font-size: 12px;
-    }
-    table.table tbody tr:nth-of-type(odd) {
-      background-color: #d4edda !important;
-    }
+        .summary-box {
+            background: #fff3cd;
+            padding: 15px;
+        }
 
-    table.table tbody tr:nth-of-type(even) {
-      background-color: #fff3cd !important;
-    }
-    .last-row td{
-      border-bottom: 2px solid #00a652 !important;
-    }
-    .report-footer .text-center p{
-      margin-bottom: 5px;
-      font-weight: 500;
-    }
-    .img{
-      width: 6%;
-    }
-  </style>
+        .tiro-font {
+            font-family: 'Tiro Bangla', serif;
+        }
+
+        table tbody tr td {
+            font-size: 12px;
+        }
+
+        .summary-box {
+            background: #fff3cd;
+            padding: 15px;
+        }
+
+        .tiro-font {
+            font-family: 'Tiro Bangla', serif;
+        }
+
+        table tbody tr td {
+            background-color: transparent !important;
+            font-size: 12px;
+        }
+
+        table.table tbody tr:nth-of-type(odd) {
+            background-color: #d4edda !important;
+        }
+
+        table.table tbody tr:nth-of-type(even) {
+            background-color: #fff3cd !important;
+        }
+
+        .last-row td {
+            border-bottom: 2px solid #00a652 !important;
+        }
+
+        .report-footer .text-center p {
+            margin-bottom: 5px;
+            font-weight: 500;
+            font-size: 16px !important;
+            text-align: left !important;
+        }
+
+        .img {
+            width: 6%;
+        }
+
+        .report-footer {
+            text-align: left !important;
+        }
+
+        .signature_text {
+            width: fit-content;
+            padding: 5px 70px 0 2px;
+            border-top: #000 solid 1px;
+
+        }
+
+        .signature_img {
+            width: 10%;
+            height: auto;
+        }
+    </style>
 </head>
 <body>
 @php
@@ -189,46 +204,78 @@
   </div>
 
   <div class="report-footer mt-4">
-    <div class="text-center">
-      <p>{{ $setting->site_name_bangla }}</p>
-      <p class="bangla-text">
-        ঠিকানা: {!! preg_replace_callback('/[০-৯]+/u', function($m) { return '<span class="tiro-font">'.$m[0].'</span>'; }, e($setting->site_address)) !!}
-      </p>
+            <div class="text-center">
+                <div class="d-flex justify-content-start mb-3">
+                    <img src="{{ asset($setting->signature) }}" height="100%" class="signature_img" alt="">
+                </div>
+                <p class="signature_text mb-3">স্বাক্ষর</p>
 
-      <p class="bangla-text">
-        ইমেইল: {!! preg_replace_callback('/[০-৯]+/u', function($m) { return '<span class="tiro-font">'.$m[0].'</span>'; }, e($setting->site_email)) !!}
-      </p>
+                <p class="bangla-text">{{ $setting->site_owner }}</p>
 
-      <p class="bangla-text">
-        ওয়েবসাইট : {!! preg_replace_callback('/[০-৯]+/u', function($m) { return '<span class="tiro-font">'.$m[0].'</span>'; }, e($setting->site_website ?? 'www.example.com')) !!}
-      </p>
-      
-    </div>
+                <p class="bangla-text">
+                    ঠিকানা: {!! preg_replace_callback(
+                        '/[০-৯]+/u',
+                        function ($m) {
+                            return '<span class="tiro-font">' . $m[0] . '</span>';
+                        },
+                        e($setting->site_address),
+                    ) !!}
+                </p>
 
-    @php
-        use Illuminate\Support\Carbon;
+                <p class="bangla-text">
+                    ইমেইল: {!! preg_replace_callback(
+                        '/[০-৯]+/u',
+                        function ($m) {
+                            return '<span class="tiro-font">' . $m[0] . '</span>';
+                        },
+                        e($setting->site_email),
+                    ) !!}
+                </p>
 
-        $banglaMonths = [
-            'January' => 'জানুয়ারি', 'February' => 'ফেব্রুয়ারি', 'March' => 'মার্চ',
-            'April' => 'এপ্রিল', 'May' => 'মে', 'June' => 'জুন',
-            'July' => 'জুলাই', 'August' => 'আগস্ট', 'September' => 'সেপ্টেম্বর',
-            'October' => 'অক্টোবর', 'November' => 'নভেম্বর', 'December' => 'ডিসেম্বর'
-        ];
+                <p class="bangla-text">
+                    ওয়েবসাইট : {!! preg_replace_callback(
+                        '/[০-৯]+/u',
+                        function ($m) {
+                            return '<span class="tiro-font">' . $m[0] . '</span>';
+                        },
+                        e($setting->site_website ?? 'www.example.com'),
+                    ) !!}
+                </p>
 
-        $banglaMeridiem = ['AM' => 'পূর্বাহ্ণ', 'PM' => 'অপরাহ্ণ'];
+            </div>
 
-        $now = Carbon::now();
-        $formatted = $now->format('d F, Y h:i A'); // Example: 31 May, 2025 09:45 PM
+            @php
+                use Illuminate\Support\Carbon;
 
-        // Translate English month and AM/PM to Bangla
-        $formatted = str_replace(array_keys($banglaMonths), array_values($banglaMonths), $formatted);
-        $formatted = str_replace(array_keys($banglaMeridiem), array_values($banglaMeridiem), $formatted);
+                $banglaMonths = [
+                    'January' => 'জানুয়ারি',
+                    'February' => 'ফেব্রুয়ারি',
+                    'March' => 'মার্চ',
+                    'April' => 'এপ্রিল',
+                    'May' => 'মে',
+                    'June' => 'জুন',
+                    'July' => 'জুলাই',
+                    'August' => 'আগস্ট',
+                    'September' => 'সেপ্টেম্বর',
+                    'October' => 'অক্টোবর',
+                    'November' => 'নভেম্বর',
+                    'December' => 'ডিসেম্বর',
+                ];
 
-        $banglaDateTime = bn_number($formatted);
-    @endphp
+                $banglaMeridiem = ['AM' => 'পূর্বাহ্ণ', 'PM' => 'অপরাহ্ণ'];
 
-    <p class="mt-4">রাসেল বুক দ্বারা প্রস্তুতকৃত - {!! $banglaDateTime !!}</p>
-  </div>
+                $now = Carbon::now();
+                $formatted = $now->format('d F, Y h:i A'); // Example: 31 May, 2025 09:45 PM
+
+                // Translate English month and AM/PM to Bangla
+                $formatted = str_replace(array_keys($banglaMonths), array_values($banglaMonths), $formatted);
+                $formatted = str_replace(array_keys($banglaMeridiem), array_values($banglaMeridiem), $formatted);
+
+                $banglaDateTime = bn_number($formatted);
+            @endphp
+
+            <p class="mt-4">রাসেল বুক দ্বারা প্রস্তুতকৃত - {!! $banglaDateTime !!} </p>
+        </div>
   <!-- Print Button -->
   <div class="text-center no-print">
     <button onclick="window.print()" class="btn btn-primary mt-4">প্রিন্ট করুন</button>

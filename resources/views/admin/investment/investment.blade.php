@@ -35,24 +35,19 @@
                                 <td>{{ $investment->name }}</td>
                                 <td>{{ $investment->description ?? 'N/A' }}</td>
                                 @php
-                                    $currentAmount = $investment->amount;
+                                    
                                     $transactions = $investmentTransactions->where('investment_id', $investment->id);
 
                                     $totalDeposits = $transactions->where('transaction_type', 'Deposit')->sum('amount');
                                     $totalWithdrawals = $transactions->where('transaction_type', 'Withdraw')->sum('amount');
 
-                                    $initialAmount = $currentAmount - $totalDeposits + $totalWithdrawals;
+                                    $initialAmount = $transactions->first()->amount ?? 0;
+                                    $currentAmount = $totalDeposits - $totalWithdrawals;
                                 @endphp
 
                                 <td>{{ number_format($initialAmount, 2) }} Tk</td>
                                 <td>
-                                    @if ($currentAmount < 0)
-                                        <span class="badge bg-success">Gain: {{ number_format(abs($currentAmount), 2) }} Tk</span>
-                                    @elseif ($currentAmount > 0)
-                                        <span class="badge bg-danger">Loss: {{ number_format($currentAmount, 2) }} Tk</span>
-                                    @else
-                                        <span class="badge bg-secondary">Break-even</span>
-                                    @endif
+                                    {{ number_format($currentAmount, 2) }} Tk
 
                                 </td>
 
@@ -61,22 +56,42 @@
                                 <td>{{ \Carbon\Carbon::parse($investment->date)->format('d M, Y') ?? 'N/A' }}</td> <!-- ✅ Income Date -->
                                 <td>
                                     <div class="d-flex align-items-center gap-1 cursor-pointer">
-                                        <a class=" btn btn-sm btn-primary {{ Auth::user()->access->investment == 1 ? 'disabled' : '' }}" href="" data-bs-toggle="modal"
-                                        data-bs-target="#updateModal{{ $investment->id }}"><i
-                                                class="bx bx-wallet me-1"></i> Add New Transaction</a>
-                                                <a class=" btn btn-sm btn-outline-primary" href="" data-bs-toggle="modal"
-                                        data-bs-target="#seeModal{{ $investment->id }}"><i
-                                                class="bx bx-wallet me-1"></i> See All Transactions</a>
-                                        <a class="btn btn-sm btn-outline-secondary {{ Auth::user()->access->investment == 1 ? 'disabled' : '' }}" href="#" data-bs-toggle="modal"
-                                           data-bs-target="#editModal{{ $investment->id }}"><i class="bx bx-edit-alt me-1"></i> Edit</a>
-                                        <form action="{{ route('investment.destroy', $investment->id) }}" method="POST" class="d-inline">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="btn btn-sm btn-outline-danger delete-confirm {{ Auth::user()->access->investment == 1 ? 'disabled' : '' }}">
-                                                <i class="bx bx-trash me-1"></i> Delete
-                                            </button>
-                                        </form>
+                                        
                                     </div>
+
+                                    <div class="dropdown" data-bs-boundary="viewport">  <!-- 👈  only this line added -->
+                                        <button class="btn p-0 btn-outline-secondary" data-bs-toggle="dropdown" aria-expanded="false" style=" padding: 0px 5px !important ;">
+                                            Actions <i class="bx bx-dots-vertical-rounded" style="font-size: 20px !important;"></i> 
+                                        </button>
+                                        <div class="dropdown-menu dropdown-menu-end p-3" aria-labelledby="cardOpt6">
+                                            <div class="d-flex flex-column gap-1 cursor-pointer">
+                                                <a class=" btn btn-sm btn-primary {{ Auth::user()->access->investment == 1 ? 'disabled' : '' }}" href="" data-bs-toggle="modal"
+                                                data-bs-target="#updateModal{{ $investment->id }}"><i
+                                                        class="bx bx-wallet me-1"></i> Add New Transaction</a>
+                                                        <a class=" btn btn-sm btn-outline-primary" href="{{ route('seeInvestmentTrans' ,$investment->slug ) }}" ><i
+                                                        class="bx bx-wallet me-1"></i> See All Transactions</a>
+                                                <a class="btn btn-sm btn-outline-secondary {{ Auth::user()->access->investment == 1 ? 'disabled' : '' }}" href="#" data-bs-toggle="modal"
+                                                data-bs-target="#editModal{{ $investment->id }}"><i class="bx bx-edit-alt me-1"></i> Edit</a>
+
+                                                    <a class=" btn btn-sm btn-primary {{ Auth::user()->access->investment == 1 ? 'disabled' : '' }}" href="" data-bs-toggle="modal"
+                                                data-bs-target="#incomeModal{{ $investment->id }}"><i
+                                                        class="bx bx-wallet me-1"></i> Income from Investment</a>
+                                                        <a class=" btn btn-sm btn-primary {{ Auth::user()->access->investment == 1 ? 'disabled' : '' }}" href="" data-bs-toggle="modal"
+                                                data-bs-target="#expenseModal{{ $investment->id }}"><i
+                                                        class="bx bx-wallet me-1"></i> Expense from Investment</a>
+                                                        <a class=" btn btn-sm btn-outline-primary" href="{{ route('seeInvestmentsinex' ,$investment->slug ) }}" ><i
+                                                        class="bx bx-wallet me-1"></i> See All Income/Expenses</a>
+
+                                                <form action="{{ route('investment.destroy', $investment->id) }}" method="POST" class="d-inline">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger delete-confirm {{ Auth::user()->access->investment == 1 ? 'disabled' : '' }}">
+                                                        <i class="bx bx-trash me-1"></i> Delete
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div> 
                                 </td>
                             </tr>
                             
@@ -208,10 +223,6 @@
 
                             </div>
                             
-                            <div class="mb-3">
-                                <label for="amount" class="form-label">Amount</label>
-                                <input type="number" class="form-control" id="amount" name="amount" value="{{ $investment->amount }}" required>
-                            </div>
                             <div class="mb-3">
                                 <label for="income_date" class="form-label">investment Date</label>
                                 <input type="date" class="form-control" id="date" name="date" value="{{ $investment->date }}" required>
@@ -400,6 +411,97 @@
         </div>
         @endforeach
     @endif
+
+
+
+    @if($investments->isNotEmpty())
+        @foreach ($investments as $investment )
+
+        <div class="modal fade" id="incomeModal{{ $investment->id }}">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Add New Income from Investment </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form id="investmentIncomeForms{{ $investment->id }}">
+                        @csrf
+                        
+                        <div class="modal-body">
+                            <input type="hidden" name="investment_id" value="{{ $investment->id }}">
+                            <input type="hidden" name="category_id" value="13">
+                            <input type="hidden" name="subcategory_id" value="8">
+                            <div class="mb-3">
+                                <label for="" class="form-label">Amount</label>
+                                <input type="number" class="form-control" id="" name="amount" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="income_date" class="form-label">Income Date</label>
+                                <input type="date" class="form-control" id="date" name="date" value="{{ date('Y-m-d') }}" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="Description" class="form-label">Description</label>
+                                <textarea class="form-control" id="Description" name="description" rows="3"></textarea>
+                                
+                            </div>
+                            
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-primary">Confirm</button>
+                        </div>
+                    </form>
+                    
+                </div>  
+            </div>
+        </div>
+        @endforeach
+    @endif
+
+
+    @if($investments->isNotEmpty())
+        @foreach ($investments as $investment )
+
+        <div class="modal fade" id="expenseModal{{ $investment->id }}">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Add New Expense from Investment </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form id="investmentexpenseForms{{ $investment->id }}">
+                        @csrf
+                        
+                        <div class="modal-body">
+                            <input type="hidden" name="investment_id" value="{{ $investment->id }}">
+                            <input type="hidden" name="category_id" value="7">
+                            <input type="hidden" name="subcategory_id" value="14">
+                            <div class="mb-3">
+                                <label for="" class="form-label">Amount</label>
+                                <input type="number" class="form-control" id="" name="amount" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="income_date" class="form-label">Expense Date</label>
+                                <input type="date" class="form-control" id="date" name="date" value="{{ date('Y-m-d') }}" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="Description" class="form-label">Description</label>
+                                <textarea class="form-control" id="Description" name="description" rows="3"></textarea>
+                                
+                            </div>
+                            
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-primary">Confirm</button>
+                        </div>
+                    </form>
+                    
+                </div>  
+            </div>
+        </div>
+        @endforeach
+    @endif
+
+
 
 
     <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
@@ -798,8 +900,114 @@
     
 
 
+    <script>
+        $(function () {
+
+            // grab Laravel’s CSRF token once
+            $.ajaxSetup({
+                headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
+            });
+
+            // delegate submit handler to every form id that starts with investmentIncomeForms
+            $(document).on('submit', 'form[id^="investmentIncomeForms"]', function (e) {
+                e.preventDefault();
+
+                const $form = $(this);
+                const $btn  = $form.find('button[type=submit]');
+                $btn.prop('disabled', true);
+
+                // build payload
+                const data = $form.serialize();
+
+                $.post('{{ route('investment-income.store') }}', data)
+                    .done(function (res) {
+
+                        // 🔔 Toastr success
+                        toastr.success(res.message);
+
+                        // hide the current modal
+                        $form.closest('.modal').modal('hide');
+
+                        // show success modal, update its message
+                        $('#successMessage').text(res.message);
+                        $('#successModal').modal('show');
+
+                        // auto-reload after 2 s
+                        setTimeout(function () { location.reload(); }, 2000);
+                    })
+                    .fail(function (xhr) {
+
+                        // 422 = validation; 403/500 handled similarly
+                        if (xhr.status === 422) {
+                            const errors = xhr.responseJSON.errors;
+                            $.each(errors, function (field, msgs) {
+                                toastr.error(msgs[0]);
+                            });
+                        } else {
+                            toastr.error(xhr.responseJSON?.message || 'Server error');
+                        }
+                    })
+                    .always(function () {
+                        $btn.prop('disabled', false);
+                    });
+            });
+        });
+</script>
+
     
     
-    
+<script>
+$(function () {
+
+    // grab Laravel’s CSRF token once
+    $.ajaxSetup({
+        headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
+    });
+
+    // delegate submit handler to every form id that starts with investmentIncomeForms
+    $(document).on('submit', 'form[id^="investmentexpenseForms"]', function (e) {
+        e.preventDefault();
+
+        const $form = $(this);
+        const $btn  = $form.find('button[type=submit]');
+        $btn.prop('disabled', true);
+
+        // build payload
+        const data = $form.serialize();
+
+        $.post('{{ route('investment-expense.store') }}', data)
+            .done(function (res) {
+
+                // 🔔 Toastr success
+                toastr.success(res.message);
+
+                // hide the current modal
+                $form.closest('.modal').modal('hide');
+
+                // show success modal, update its message
+                $('#successMessage').text(res.message);
+                $('#successModal').modal('show');
+
+                // auto-reload after 2 s
+                setTimeout(function () { location.reload(); }, 2000);
+            })
+            .fail(function (xhr) {
+
+                // 422 = validation; 403/500 handled similarly
+                if (xhr.status === 422) {
+                    const errors = xhr.responseJSON.errors;
+                    $.each(errors, function (field, msgs) {
+                        toastr.error(msgs[0]);
+                    });
+                } else {
+                    toastr.error(xhr.responseJSON?.message || 'Server error');
+                }
+            })
+            .always(function () {
+                $btn.prop('disabled', false);
+            });
+    });
+});
+</script>
 
 @endsection

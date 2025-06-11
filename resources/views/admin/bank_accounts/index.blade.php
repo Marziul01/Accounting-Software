@@ -9,10 +9,12 @@
                 <button type="button" class="btn btn-primary {{ Auth::user()->access->bankbook == 1 ? 'disabled' : '' }}" data-bs-toggle="modal" data-bs-target="#addmodals">Add New
                     BankBook</button>
             </div>
-            <div class="card-body row text-nowrap gap-3 m-0">
+            <div class="card-body m-0">
+                <div class="row g-2">
                 @if ($bankbooks->isNotEmpty())
                     @foreach ($bankbooks as $bankbook)
-                        <div class="card contact-card col-md-3">
+                    <div class="col-12 col-sm-6 col-lg-4 col-xxl-3 mb-2">
+                        <div class="card contact-card h-100">
                             <div class="card-header d-flex justify-content-between">
                                 <a class=" btn btn-sm btn-outline-secondary {{ Auth::user()->access->bankbook == 1 ? 'disabled' : '' }}" href="" data-bs-toggle="modal"
                                     data-bs-target="#editModal{{ $bankbook->id }}"><i class="bx bx-edit-alt me-1"></i>
@@ -30,7 +32,8 @@
                                     <div class="d-flex align-items-center justify-content-between gap-2 mb-3">
                                         <i class="bx bx-wallet bx-lg text-info bank_card_icon"></i>
                                         <div class="bank_card_info">
-                                            <h4> {{ $bankbook->bank_name }} ( {{ $bankbook->branch_name }} ) </h4>
+                                            <h4> {{ $bankbook->bank_name }}</h4>
+                                            <p class="mb-2"> Branch : {{ $bankbook->branch_name }} </p>
                                             <p class="bank_type float-right"> {{ $bankbook->account_type }} </p>
                                         </div>
                                     </div>
@@ -50,9 +53,10 @@
                             </div>
 
                         </div>
+                    </div>
                     @endforeach
                 @endif
-
+                </div>
             </div>
         </div>
     </div>

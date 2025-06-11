@@ -7,15 +7,12 @@
     <title>সম্পূর্ণ দায় রিপোর্ট</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&family=Tiro+Bangla&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Tiro+Bangla:ital@0;1&display=swap');
 
         body {
             font-family: "Hind Siliguri", sans-serif;
             background-color: #f8f9fa;
-        }
-
-        .tiro-font {
-            font-family: "Tiro Bangla", serif;
         }
 
         @media print {
@@ -29,6 +26,10 @@
 
             .img {
                 width: 15% !important;
+            }
+
+            .signature_img {
+                width: 20% !important;
             }
         }
 
@@ -53,17 +54,26 @@
             font-size: 12px;
         }
 
-        .category-total,
-        .subcategory-total,
-        .subsubcategory-total,
-        .grand-total {
-            background-color: #d4edda;
-            font-weight: bold;
+        .summary-box {
+            background: #fff3cd;
+            padding: 15px;
+        }
+
+        .tiro-font {
+            font-family: 'Tiro Bangla', serif;
+        }
+
+        table tbody tr td {
+            font-size: 12px;
         }
 
         .summary-box {
             background: #fff3cd;
             padding: 15px;
+        }
+
+        .tiro-font {
+            font-family: 'Tiro Bangla', serif;
         }
 
         table tbody tr td {
@@ -87,10 +97,27 @@
             margin-bottom: 5px;
             font-weight: 500;
             font-size: 16px !important;
+            text-align: left !important;
         }
 
         .img {
             width: 6%;
+        }
+
+        .report-footer {
+            text-align: left !important;
+        }
+
+        .signature_text {
+            width: fit-content;
+            padding: 5px 70px 0 2px;
+            border-top: #000 solid 1px;
+
+        }
+
+        .signature_img {
+            width: 10%;
+            height: auto;
         }
     </style>
 </head>
@@ -124,19 +151,23 @@
                     <h5 class="text-center border-bottom pb-2">{{ $category->name }}</h5>
 
                     @foreach ($category->liabilitySubCategories as $subcategory)
-                        @php $subcategoryTotal = 0; @endphp
-                        @if ($subcategory->liabilitySubSubCategories->count())
+                        @php
+                            $subdeposit = 0;
+                            $subwithdraw = 0;
+                            $subtotal = 0;
+                        @endphp
+                        {{-- @if ($subcategory->liabilitySubSubCategories->count())
                             @foreach ($subcategory->liabilitySubSubCategories as $subsubcategory)
                                 @php
                                     $subsubdeposit = 0;
                                     $subsubwithdraw = 0;
                                     $subsubtotal = 0;
-                                @endphp
+                                @endphp --}}
 
                                 @if ($liabilities->count())
                                     <div class="card mb-4">
                                         <div class="card-header">
-                                            <strong>{{ $subcategory->name }} → {{ $subsubcategory->name }}</strong>
+                                            <strong>{{ $subcategory->name }}</strong>
                                         </div>
                                         <div class="card-body p-0">
                                             <div class="table-responsive">
@@ -153,7 +184,7 @@
                                                         </tr>
                                                     </thead>
                                                     <tbody>
-                                                        @foreach ($liabilities->where('subsubcategory_id', $subsubcategory->id) as $liability)
+                                                        @foreach ($liabilities->where('subcategory_id', $subcategory->id) as $liability)
                                                             @php
                                                                 $totalDeposits = $liability->allTransactions
                                                                     ->where('transaction_type', 'Deposit')
@@ -198,9 +229,9 @@
                                                                         $withdrawBeforeStart;
                                                                 }
 
-                                                                $subsubdeposit += $depositInRange;
-                                                                $subsubwithdraw += $withdrawInRange;
-                                                                $subsubtotal = $subsubdeposit - $subsubwithdraw;
+                                                                $subdeposit += $depositInRange;
+                                                                $subwithdraw += $withdrawInRange;
+                                                                $subtotal = $subdeposit - $subwithdraw;
                                                             @endphp
                                                             @php $isLast = $loop->last; @endphp
                                                             <tr class="{{ $isLast ? 'last-row' : '' }}">
@@ -227,21 +258,21 @@
                                                             </tr>
                                                         @endforeach
                                                         @php
-                                                            $subcategoryTotal += $subsubtotal;
 
+                                                            $categorytotal += $subtotal;
                                                         @endphp
 
                                                         <tr class="subsubcategory-total">
                                                             <td colspan="6" class="text-end">
-                                                                <strong>{{ $subsubcategory->name }} মোট:</strong>
+                                                                <strong>{{ $subcategory->name }} মোট:</strong>
                                                             </td>
                                                             <td class="text-end tiro"><strong>
-                                                                    @if ($subsubtotal < 0)
+                                                                    @if ($subtotal < 0)
                                                                         <span class="text-danger">অতিরিক্ত প্রদান :
-                                                                            {!! bn_number(number_format(abs($subsubtotal)), 2) !!} Tk</span>
-                                                                    @elseif ($subsubtotal > 0)
+                                                                            {!! bn_number(number_format(abs($subtotal)), 2) !!} Tk</span>
+                                                                    @elseif ($subtotal > 0)
                                                                         <span class="text-danger">দায়:
-                                                                            {!! bn_number(number_format($subsubtotal, 2)) !!} Tk</span>
+                                                                            {!! bn_number(number_format($subtotal, 2)) !!} Tk</span>
                                                                     @else
                                                                         <span class="text-warning">পরিশোধিত </span>
                                                                     @endif
@@ -257,13 +288,12 @@
                                         <strong>{{ $subcategory->name }} → {{ $subsubcategory->name }}</strong> এর জন্য
                                         কোনো দায় নেই।
                                 @endif
-                            @endforeach
 
-                            @php
-
-                                $categorytotal += $subcategoryTotal;
-                            @endphp
-                            <div class="text-end mb-2 pe-3 subcategory-total">
+                                
+                            {{-- @endforeach --}}
+                            
+                            
+                            {{-- <div class="text-end mb-2 pe-3 subcategory-total">
                                 <strong>{{ $subcategory->name }} মোট:</strong>
                                 <span class="tiro">
                                     @if ($subcategoryTotal < 0)
@@ -280,13 +310,13 @@
                                     @endif
                                 </span>
                             </div>
-                        @endif
+                        @endif --}}
                     @endforeach
+@php
 
-                    @php
-
-                        $grandTotal += $categorytotal;
-                    @endphp
+                                    $grandTotal += $categorytotal;
+                                @endphp
+                    
                     <div class="text-end mt-3 pe-3 category-total">
                         <strong>{{ $category->name }} মোট:</strong>
                         <span class="tiro">
@@ -300,7 +330,7 @@
                                     টাকা</span>
                             @else
                                 <span class="text-secondary">পরিশোধিত
-                                    নেই</span>
+                                    </span>
                             @endif
                         </span>
                     </div>
@@ -338,7 +368,12 @@
 
         <div class="report-footer mt-4">
             <div class="text-center">
-                <p class="bangla-text">{{ $setting->site_name_bangla }}</p>
+                <div class="d-flex justify-content-start mb-3">
+                    <img src="{{ asset($setting->signature) }}" height="100%" class="signature_img" alt="">
+                </div>
+                <p class="signature_text mb-3">স্বাক্ষর</p>
+
+                <p class="bangla-text">{{ $setting->site_owner }}</p>
 
                 <p class="bangla-text">
                     ঠিকানা: {!! preg_replace_callback(

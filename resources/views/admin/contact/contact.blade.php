@@ -16,10 +16,12 @@
                 </div>
                 
             </div>
-            <div class="card-body row text-nowrap gap-3 m-0">
+            <div class="card-body m-0">
+                <div class="row g-2">
                 @if ($contacts->isNotEmpty())
                     @foreach ($contacts as $contact)
-                        <div class="card contact-card col-md-3" data-name="{{ strtolower($contact->name) }}" data-email="{{ strtolower($contact->email) }}" data-number="{{ strtolower($contact->mobile_number) }}">
+                        <div class="col-12 col-sm-6 col-lg-4 col-xxl-3 mb-2">
+                        <div class="card contact-card h-100" data-name="{{ strtolower($contact->name) }}" data-email="{{ strtolower($contact->email) }}" data-number="{{ strtolower($contact->mobile_number) }}">
                             <div class="card-header d-flex justify-content-between">
                                 <a class=" btn btn-sm btn-outline-secondary {{ Auth::user()->access->contact == 1 ? 'disabled' : '' }} " href="" data-bs-toggle="modal"
                                     data-bs-target="#editModal{{ $contact->id }}"><i class="bx bx-edit-alt me-1"></i>
@@ -48,9 +50,10 @@
                             </div>
 
                         </div>
+                        </div>
                     @endforeach
                 @endif
-
+                </div>
             </div>
         </div>
     </div>

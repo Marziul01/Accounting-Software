@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Investment;
 use App\Models\InvestmentCategory;
+use App\Models\InvestmentExpense;
+use App\Models\InvestmentIncome;
 use App\Models\InvestmentSubCategory;
 use App\Models\InvestmentTransaction;
 use Carbon\Carbon;
@@ -70,7 +72,14 @@ class InvestmentController extends Controller
         $data['slug'] = $slug;
         $request->merge(['slug' => $data['slug']]);
         // Create a new investment
-        Investment::create($request->all());
+        $investment = Investment::create($request->except('amount'));
+
+        $firsttransaction = new InvestmentTransaction();
+        $firsttransaction->investment_id = $investment->id;
+        $firsttransaction->amount = $request->amount;
+        $firsttransaction->transaction_type = 'Deposit';
+        $firsttransaction->transaction_date = $request->date;
+        $firsttransaction->save();
         // Redirect back to the index with a success message
         return response()->json([
             'message' => 'Investment created successfully!',
@@ -109,7 +118,6 @@ class InvestmentController extends Controller
             'description' => 'nullable|string|max:1000',
             'investment_category_id' => 'required|exists:investment_categories,id',
             'investment_sub_category_id' => 'required|exists:investment_sub_categories,id',
-            'amount' => 'required|numeric|min:0',
             'date' => 'required|date',
            
             'slug' => 'required|string|max:255',
@@ -127,21 +135,6 @@ class InvestmentController extends Controller
         $data['slug'] = $slug;
         $request->merge(['slug' => $data['slug']]);
         $investment->update($request->all());
-
-        $finalAmount = $request->amount;
-
-        $transactions = InvestmentTransaction::where('investment_id', $id)->get();
-
-        foreach ($transactions as $transaction) {
-            if ($transaction->transaction_type === 'Deposit') {
-                $finalAmount += $transaction->amount;
-            } elseif ($transaction->transaction_type === 'Withdraw') {
-                $finalAmount -= $transaction->amount;
-            }
-        }
-
-        $investment->amount = $finalAmount;
-        $investment->save();
 
         // Redirect back to the index with a success message
         return response()->json([
@@ -161,6 +154,13 @@ class InvestmentController extends Controller
         }
         // Find the investment and delete it
         $investment = Investment::findOrFail($id);
+
+        // Check if there are any transactions associated with this investment
+        $transactions = InvestmentTransaction::where('investment_id', $investment->id)->get();
+        foreach ($transactions as $transaction) {
+            // Delete each transaction
+            $transaction->delete();
+        }
         $investment->delete();
 
         // Redirect back to the index with a success message
@@ -289,38 +289,32 @@ class InvestmentController extends Controller
         if ($request->ajax()) {
             return response()->json(
                 $investments->map(function ($investment) use ($startDate, $endDate) {
-                    // Sum filtered transactions
-                    $depositInRange = $investment->transactions->where('transaction_type', 'Deposit')->sum('amount');
-                    $withdrawInRange = $investment->transactions->where('transaction_type', 'Withdraw')->sum('amount');
-                    $currentAmount = $depositInRange - $withdrawInRange;
+                    $initialAmount = $investment->transactions->first()->amount ?? 0;
 
-                    // Sum all transactions
-                    $totalDeposits = $investment->allTransactions->where('transaction_type', 'Deposit')->sum('amount');
-                    $totalWithdrawals = $investment->allTransactions->where('transaction_type', 'Withdraw')->sum('amount');
-                    $initialAmount = $investment->amount - $totalDeposits + $totalWithdrawals;
+                            // 2. Filtered transactions (between start and end)
+                            $depositInRange = $investment->transactions->where('transaction_type', 'Deposit')->sum('amount');
+                            $withdrawInRange = $investment->transactions->where('transaction_type', 'Withdraw')->sum('amount');
+                            $currentAmount = $depositInRange - $withdrawInRange;
 
-                    
-                    
+                            
 
-                    if ($startDate <= $investment->date ) {
-                        // Start date is before investment, or no previous transactions, so no previous amount
-                        $currentAmount += $initialAmount;
-                        $depositInRange += $initialAmount;
-                        $previousAmount = null;
-                    } else {
-                        // Start date is on or after investment date, so calculate previous
-                        $depositBeforeStart = $investment->allTransactions
-                            ->where('transaction_type', 'Deposit')
-                            ->where('transaction_date', '<', $startDate)
-                            ->sum('amount');
+                            if ($investment->transactions->isNotEmpty() && $investment->transactions->first()->transaction_date >= $startDate) {
+                                // If the first transaction is on or after the start date, previous amount is just the initial amount
+                                $previousAmount = $initialAmount;
+                            } else {
+                                // Start date is on or after investment date
+                                $depositBeforeStart = $investment->allTransactions
+                                    ->where('transaction_type', 'Deposit')
+                                    ->where('transaction_date', '<', $startDate)
+                                    ->sum('amount');
 
-                        $withdrawBeforeStart = $investment->allTransactions
-                            ->where('transaction_type', 'Withdraw')
-                            ->where('transaction_date', '<', $startDate)
-                            ->sum('amount');
+                                $withdrawBeforeStart = $investment->allTransactions
+                                    ->where('transaction_type', 'Withdraw')
+                                    ->where('transaction_date', '<', $startDate)
+                                    ->sum('amount');
 
-                        $previousAmount = $initialAmount + $depositBeforeStart - $withdrawBeforeStart;
-                    }
+                                $previousAmount = $depositBeforeStart - $withdrawBeforeStart;
+                            }
 
 
 
@@ -366,7 +360,28 @@ class InvestmentController extends Controller
 
         $investments = $query->orderBy('date', 'desc')->get();
 
-        return view('admin.investment.category-report', compact('category', 'investments', 'startDate', 'endDate'));
+        $Categoryinvestments = Investment::where('investment_category_id', $category->id)
+            ->get();
+
+        $totalIncome = 0;
+        $totalExpense = 0;
+
+        if($Categoryinvestments->isNotEmpty()){
+            foreach($Categoryinvestments as $investment) {
+                $income = InvestmentIncome::where('investment_id', $investment->id)
+                    ->whereBetween('date', [$request->start_date, $request->end_date])
+                    ->sum('amount');
+
+                $expense = InvestmentExpense::where('investment_id', $investment->id)
+                    ->whereBetween('date', [$request->start_date, $request->end_date])
+                    ->sum('amount');
+
+                $totalIncome += $income;
+                $totalExpense += $expense;
+            }
+        }
+
+        return view('admin.investment.category-report', compact('category', 'investments', 'startDate', 'endDate', 'totalIncome', 'totalExpense'));
     }
 
 
@@ -388,11 +403,35 @@ class InvestmentController extends Controller
 
         $investments = $query->orderBy('date', 'desc')->get();
 
+        $SubCategoryinvestments = Investment::where('investment_sub_category_id', $subcategory->id)
+            ->get();
+
+        $totalIncome = 0;
+        $totalExpense = 0;
+
+        if($SubCategoryinvestments->isNotEmpty()){
+            foreach($SubCategoryinvestments as $investment) {
+                $income = InvestmentIncome::where('investment_id', $investment->id)
+                    ->whereBetween('date', [$request->start_date, $request->end_date])
+                    ->sum('amount');
+
+                $expense = InvestmentExpense::where('investment_id', $investment->id)
+                    ->whereBetween('date', [$request->start_date, $request->end_date])
+                    ->sum('amount');
+
+                $totalIncome += $income;
+                $totalExpense += $expense;
+            }
+        }
+        
+
         return view('admin.investment.subcategory-report', [
             'subcategory' => $subcategory,
             'investments' => $investments,
             'startDate' => $startDate,
             'endDate' => $endDate,
+            'totalIncome' => $totalIncome,
+            'totalExpense' => $totalExpense,
         ]);
     }
     public function singleInvestmentReport(Request $request, $slug)
@@ -404,6 +443,20 @@ class InvestmentController extends Controller
             ->whereBetween('transaction_date', [$request->start_date, $request->end_date])
             ->orderBy('transaction_date')
             ->get();
+
+        $investmentIncomes = InvestmentIncome::where('investment_id', $investment->id)
+            ->whereBetween('date', [$request->start_date, $request->end_date])
+            ->get();
+
+        $totalinvestmentIncomes = $investmentIncomes->sum('amount');
+
+        $investmentExpeses = InvestmentExpense::where('investment_id', $investment->id)
+            ->whereBetween('date', [$request->start_date, $request->end_date])
+            ->get();
+
+        $totalinvestmentExpeses = $investmentExpeses->sum('amount');
+
+        $merged = $investmentIncomes->concat($investmentExpeses)->sortBy('date')->values();
 
         $totalInvested = $transactions->sum('investment_amount');
         $totalReturned = $transactions->sum('return_amount');
@@ -419,6 +472,11 @@ class InvestmentController extends Controller
             'profitOrLoss',
             'startDate',
             'endDate',
+            'merged',
+            'totalinvestmentIncomes',
+            'totalinvestmentExpeses',
+            'investmentIncomes',
+            'investmentExpeses',
         ));
     }
 
@@ -442,7 +500,23 @@ class InvestmentController extends Controller
         // Fetch all categories
         $categories = InvestmentCategory::where('status',1)->get();
 
-        return view('admin.investment.full-report', compact('categories', 'startDate', 'endDate', 'investments'));
+        
+
+        $totalIncome = 0;
+        $totalExpense = 0;
+
+        
+                $income = InvestmentIncome::whereBetween('date', [$request->start_date, $request->end_date])
+                    ->sum('amount');
+
+                $expense = InvestmentExpense::whereBetween('date', [$request->start_date, $request->end_date])
+                    ->sum('amount');
+
+                $totalIncome += $income;
+                $totalExpense += $expense;
+           
+
+        return view('admin.investment.full-report', compact('categories', 'startDate', 'endDate', 'investments', 'totalIncome', 'totalExpense'));
     }
 
 

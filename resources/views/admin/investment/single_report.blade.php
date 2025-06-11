@@ -27,6 +27,9 @@
             .img {
                 width: 15% !important;
             }
+            .signature_img{
+                width: 20% !important;
+            }
         }
 
         .report-header,
@@ -93,10 +96,24 @@
             margin-bottom: 5px;
             font-weight: 500;
             font-size: 16px !important;
+            text-align: left !important;
         }
 
         .img {
             width: 6%;
+        }
+        .report-footer{
+            text-align: left !important;
+        }
+        .signature_text{
+            width: fit-content ;
+            padding: 5px 70px 0 2px;
+            border-top: #000 solid 1px;
+            
+        }
+        .signature_img {
+            width: 10%;
+            height: auto;
         }
     </style>
 </head>
@@ -114,51 +131,49 @@
 
     @php
         // 1. Total transactions (all time)
-        $totalDeposits = $investment->allTransactions->where('transaction_type', 'Deposit')->sum('amount');
-        $totalWithdrawals = $investment->allTransactions->where('transaction_type', 'Withdraw')->sum('amount');
-        $initialAmount = $investment->amount - $totalDeposits + $totalWithdrawals;
+                            $initialAmount = $investment->allTransactions->first()->amount ?? 0;
 
-        // 2. Filtered transactions (between start and end)
-        $depositInRange = $transactions->where('transaction_type', 'Deposit')->sum('amount');
-        $withdrawInRange = $transactions->where('transaction_type', 'Withdraw')->sum('amount');
-        $currentAmount = $depositInRange - $withdrawInRange;
+                            // 2. Filtered transactions (between start and end)
+                            $depositInRange = $investment->transactions->where('transaction_type', 'Deposit')->sum('amount');
+                            $withdrawInRange = $investment->transactions->where('transaction_type', 'Withdraw')->sum('amount');
+                            $currentAmount = $depositInRange - $withdrawInRange;
 
-        if ($startDate <= $investment->date) {
-            // Start date is before investment was created, so only show current with initial
-            $currentAmount += $initialAmount;
-            $depositInRange += $initialAmount;
-            $previousAmount = null;
-        } else {
-            // Start date is on or after investment date
-            $depositBeforeStart = $investment->allTransactions
-                ->where('transaction_type', 'Deposit')
-                ->where('transaction_date', '<', $startDate)
-                ->sum('amount');
+                            
 
-            $withdrawBeforeStart = $investment->allTransactions
-                ->where('transaction_type', 'Withdraw')
-                ->where('transaction_date', '<', $startDate)
-                ->sum('amount');
+                            if ($investment->allTransactions->isNotEmpty() && $investment->allTransactions->first()->transaction_date >= $startDate) {
+                                // If the first transaction is on or after the start date, previous amount is just the initial amount
+                                $previousAmount = $initialAmount;
+                            } else {
+                                // Start date is on or after investment date
+                                $depositBeforeStart = $investment->allTransactions
+                                    ->where('transaction_type', 'Deposit')
+                                    ->where('transaction_date', '<', $startDate)
+                                    ->sum('amount');
 
-            $previousAmount = $initialAmount + $depositBeforeStart - $withdrawBeforeStart;
-        }
+                                $withdrawBeforeStart = $investment->allTransactions
+                                    ->where('transaction_type', 'Withdraw')
+                                    ->where('transaction_date', '<', $startDate)
+                                    ->sum('amount');
+
+                                $previousAmount = $depositBeforeStart - $withdrawBeforeStart;
+                            }
 
         $deposits = $transactions->where('transaction_type', 'Deposit')->sum('amount');
         $withdrawals = $transactions->where('transaction_type', 'Withdraw')->sum('amount');
 
     @endphp
 
-    <div class="container my-4">
+    <div class="container-fluid my-4">
         <div class="report-header">
             <img src="{{ asset($setting->site_logo) }}" height="100%" class="img" alt="">
             <h2>{{ $setting->site_name_bangla }}</h2>
             <h4>{{ $investment->name }} এর বিনিয়োগ রিপোর্ট</h4>
             <p> {!! bn_number($startDate ?? 'সর্বপ্রথম') !!} থেকে {!! bn_number($endDate ?? now()->format('Y-m-d')) !!} পর্যন্ত </p>
-            <p><strong>নাম:</strong> {{ $investment->name }}</p>
-            <p><strong>বিনিয়োগ তারিখ:</strong> {!! bn_number($investment->date) !!}</p>
+            {{-- <p><strong>নাম:</strong> {{ $investment->name }}</p>
+            <p><strong>বিনিয়োগ তারিখ:</strong> {!! bn_number($investment->date) !!}</p> --}}
             <p><strong>বিনিয়োগ বিস্তারিত:</strong> {{ $investment->description ?? 'N/A' }}</p>
-            <p><strong>ক্যাটেগরি:</strong> {{ $investment->investmentSubCategory->investmentCategory->name ?? 'N/A' }} |
-                <strong>সাবক্যাটেগরি:</strong> {{ $investment->investmentSubCategory->name ?? 'N/A' }}</p>
+            {{-- <p><strong>ক্যাটেগরি:</strong> {{ $investment->investmentSubCategory->investmentCategory->name ?? 'N/A' }} |
+                <strong>সাবক্যাটেগরি:</strong> {{ $investment->investmentSubCategory->name ?? 'N/A' }}</p> --}}
         </div>
 
         <div class="card">
@@ -196,6 +211,41 @@
             </div>
         </div>
 
+        <div class="card mt-4">
+            <div class="card-header">বিনিয়োগ আয়/ব্যায় বিবরণী</div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-bordered m-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>ক্রমিক নম্বর</th>
+                                <th>তারিখ</th>
+                                <th>ধরণ</th>
+                                <th>বিবরণী</th>
+                                <th class="text-end">পরিমাণ</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($merged as $record)
+                                @php $isLast = $loop->last; @endphp
+                                <tr class="{{ $isLast ? 'last-row' : '' }}">
+                                    <td>{!! bn_number($loop->iteration) !!}</td>
+                                    <td>{!! bn_number(\Carbon\Carbon::parse($record->date)->format('d-m-y')) !!}</td>
+                                    <td>{{ $record->category_id == '13' ? 'আয়' : 'ব্যয়' }}</td>
+                                    <td>{{ $record->description}}</td>
+                                    <td class="text-end">{!! bn_number(number_format($record->amount, 2)) !!} টাকা</td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="4" class="text-center">কোনো বিনিয়োগ আয়/ব্যায় পাওয়া যায়নি</td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
         <div class="d-flex justify-content-center mt-4">
             <table class="table table-bordered w-auto summary-box mb-0" style="min-width: 350px;">
                 <thead>
@@ -206,34 +256,29 @@
                 <tbody>
 
                     <tr>
-                        <td><strong>শুরুর পরিমাণ</strong></td>
-                        <td>{!! bn_number(number_format(abs($initialAmount), 2)) !!} টাকা</td>
+                        <td><strong>শুরুর পরিমাণ / পূর্বের ব্যালেন্স</strong></td>
+                        <td>{!! bn_number(number_format($previousAmount, 2)) !!} টাকা</td>
                     </tr>
-                    @if ($previousAmount !== null && $previousAmount != $initialAmount)
-                        <tr>
-                            <td><strong>পূর্বের ব্যালেন্স </strong></td>
-                            <td>{!! bn_number(number_format(abs($previousAmount), 2)) !!} টাকা</td>
-                        </tr>
-                    @endif
                     <tr>
                         <td><strong>মোট জমা</strong></td>
-                        <td>{!! bn_number(number_format(abs($depositInRange), 2)) !!} টাকা</td>
+                        <td>{!! bn_number(number_format($depositInRange, 2)) !!} টাকা</td>
                     </tr>
                     <tr>
                         <td><strong>মোট উত্তোলন</strong></td>
-                        <td>{!! bn_number(number_format(abs($withdrawInRange), 2)) !!} টাকা</td>
+                        <td>{!! bn_number(number_format($withdrawInRange, 2)) !!} টাকা</td>
                     </tr>
-
+                    <tr>
+                        <td><strong>মোট বিনিয়োগ হতে আয়</strong></td>
+                        <td>{!! bn_number(number_format($totalinvestmentIncomes, 2)) !!} টাকা</td>
+                    </tr>
+                    <tr>
+                        <td><strong>মোট বিনিয়োগ হতে ব্যায়</strong></td>
+                        <td>{!! bn_number(number_format($totalinvestmentExpeses, 2)) !!} টাকা</td>
+                    </tr>
                     <tr>
                         <td><strong>লাভ / ক্ষতি</strong></td>
                         <td>
-                            @if ($currentAmount < 0)
-                                <span class="text-success">লাভ: {!! bn_number(number_format(abs($currentAmount), 2)) !!} টাকা</span>
-                            @elseif($currentAmount > 0)
-                                <span class="text-danger">ক্ষতি: {!! bn_number(number_format(abs($currentAmount), 2)) !!} টাকা</span>
-                            @else
-                                <span class="text-muted">ব্যালেন্স সমান</span>
-                            @endif
+                            {!! bn_number(number_format($currentAmount, 2)) !!} টাকা
                         </td>
                     </tr>
                 </tbody>
@@ -242,7 +287,12 @@
 
         <div class="report-footer mt-4">
             <div class="text-center">
-                <p class="bangla-text">{{ $setting->site_name_bangla }}</p>
+                <div class="d-flex justify-content-start mb-3">
+                    <img src="{{ asset($setting->signature) }}" height="100%" class="signature_img" alt="">
+                </div>
+                <p class="signature_text mb-3">স্বাক্ষর</p>
+
+                <p class="bangla-text">{{ $setting->site_owner }}</p>
 
                 <p class="bangla-text">
                     ঠিকানা: {!! preg_replace_callback(

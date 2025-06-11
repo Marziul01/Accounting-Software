@@ -16,8 +16,8 @@
                             'Income' => ['income_category'],
                             'Expense' => ['expense_category'],
                             'Investment' => ['investments_category'],
-                            'Asset' => ['asset_category_table', 'asset_name_table', 'asset_category', 'asset_subcategory'],
-                            'Liability' => ['liability_category_table', 'liability_name_table', 'liability_category', 'liability_subcategory'],
+                            'Asset' => ['asset_category_table', 'asset_name_table', 'asset_category'],
+                            'Liability' => ['liability_category_table', 'liability_name_table', 'liability_category'],
                             
                         ];
                     @endphp

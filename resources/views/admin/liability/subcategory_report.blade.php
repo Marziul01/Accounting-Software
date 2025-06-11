@@ -3,24 +3,91 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ $subcategory->name }} দায় রিপোর্ট</title>
+    <title>{{ $subcategory->name }} দায় রিপোর্ট</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&family=Tiro+Bangla&display=swap');
-        body { font-family: "Hind Siliguri", sans-serif; background-color: #f8f9fa; }
-        .tiro-font { font-family: "Tiro Bangla", serif; }
-        @media print { .no-print { display: none !important; } body { -webkit-print-color-adjust: exact !important; } .img {
+        @import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Tiro+Bangla:ital@0;1&display=swap');
+
+        body {
+            font-family: "Hind Siliguri", sans-serif;
+            background-color: #f8f9fa;
+        }
+
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+
+            body {
+                -webkit-print-color-adjust: exact !important;
+            }
+
+            .img {
                 width: 15% !important;
-            } }
-        .report-header, .report-footer { text-align: center; padding: 10px 0; }
-        .report-header { border-bottom: 2px solid #000; margin-bottom: 20px; }
-        .card-header { background-color: #343a40; color: white; }
-        .table-light th { background-color: #f1f1f1 !important; font-size: 12px; }
-        .category-total, .grand-total, .subcategory-total { background-color: #d4edda; font-weight: bold; }
-        .summary-box { background: #fff3cd; padding: 15px; }
-        table tbody tr td { background-color: transparent !important; font-size: 12px; }
-        table.table tbody tr:nth-of-type(odd) { background-color: #d4edda !important; }
-        table.table tbody tr:nth-of-type(even) { background-color: #fff3cd !important; }
+            }
+
+            .signature_img {
+                width: 20% !important;
+            }
+        }
+
+        .report-header,
+        .report-footer {
+            text-align: center;
+            padding: 10px 0;
+        }
+
+        .report-header {
+            border-bottom: 2px solid #000;
+            margin-bottom: 20px;
+        }
+
+        .card-header {
+            background-color: #343a40;
+            color: white;
+        }
+
+        .table-light th {
+            background-color: #f1f1f1 !important;
+            font-size: 12px;
+        }
+
+        .summary-box {
+            background: #fff3cd;
+            padding: 15px;
+        }
+
+        .tiro-font {
+            font-family: 'Tiro Bangla', serif;
+        }
+
+        table tbody tr td {
+            font-size: 12px;
+        }
+
+        .summary-box {
+            background: #fff3cd;
+            padding: 15px;
+        }
+
+        .tiro-font {
+            font-family: 'Tiro Bangla', serif;
+        }
+
+        table tbody tr td {
+            background-color: transparent !important;
+            font-size: 12px;
+        }
+
+        table.table tbody tr:nth-of-type(odd) {
+            background-color: #d4edda !important;
+        }
+
+        table.table tbody tr:nth-of-type(even) {
+            background-color: #fff3cd !important;
+        }
+
         .last-row td {
             border-bottom: 2px solid #00a652 !important;
         }
@@ -29,10 +96,27 @@
             margin-bottom: 5px;
             font-weight: 500;
             font-size: 16px !important;
+            text-align: left !important;
         }
 
         .img {
             width: 6%;
+        }
+
+        .report-footer {
+            text-align: left !important;
+        }
+
+        .signature_text {
+            width: fit-content;
+            padding: 5px 70px 0 2px;
+            border-top: #000 solid 1px;
+
+        }
+
+        .signature_img {
+            width: 10%;
+            height: auto;
         }
     </style>
 </head>
@@ -45,34 +129,28 @@
             return '<span class="tiro-font">' . str_replace($eng, $bang, $number) . '</span>';
         }
 
-        $subcategoryTotal = 0;
+        $subdeposit = 0;
+        $subwithdraw = 0;
+        $subtotal = 0;
 @endphp
 
 <div class="container-fluid my-4">
     <div class="report-header text-center border-bottom mb-4">
         <img src="{{ asset($setting->site_logo) }}" height="100%" class="img" alt="">
             <h2>{{ $setting->site_name_bangla }}</h2>
-        <h4>{{ $subcategory->name }} এর দায় রিপোর্ট</h4>
+        <h4>{{ $subcategory->name }} এর দায় রিপোর্ট</h4>
         <p class=""> {!! bn_number($startDate ?? 'সর্বপ্রথম') !!} থেকে {!! bn_number($endDate ?? now()->format('Y-m-d')) !!} পর্যন্ত </p>
     </div>
 
-    @if($subcategory->liabilitySubSubCategories->count())
-        @foreach($subcategory->liabilitySubSubCategories as $subsubcategory)
-            @php
-                $subsubdeposit = 0;
-                $subsubwithdraw = 0;
-                $subsubtotal = 0;
-            @endphp
-
-            @if($liabilities->count())
-                <div class="card mb-4">
-                    <div class="card-header bg-dark text-white">
-                        <strong>{{ $subsubcategory->name }}</strong>
-                    </div>
-                    <div class="card-body p-0">
-                        <div class="table-responsive">
-                            <table class="table table-bordered m-0">
-                                <thead class="table-light">
+    @if($subcategory->liabilities->count())
+        <div class="card mb-4">
+            <div class="card-header bg-dark text-white">
+                <strong>{{ $subcategory->name }} এর দায়সমূহের তালিকা</strong>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-bordered m-0">
+                        <thead class="table-light">
                                 <tr>
                                     <th>ক্রমিক নম্বর</th>
                                     <th>তারিখ</th>
@@ -84,7 +162,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach ($liabilities->where('subsubcategory_id' , $subsubcategory->id ) as $liability)
+                                @foreach ($liabilities->where('subcategory_id' , $subcategory->id ) as $liability)
                                     @php
                                         $totalDeposits = $liability->allTransactions
                                             ->where('transaction_type', 'Deposit')
@@ -124,9 +202,9 @@
                                                 $initialAmount + $depositBeforeStart - $withdrawBeforeStart;
                                         }
 
-                                        $subsubdeposit += $depositInRange;
-                                        $subsubwithdraw += $withdrawInRange;
-                                        $subsubtotal = $subsubdeposit - $subsubwithdraw;
+                                        $subdeposit += $depositInRange;
+                                        $subwithdraw += $withdrawInRange;
+                                        $subtotal = $subdeposit - $subwithdraw;
                                     @endphp
                                     @php $isLast = $loop->last; @endphp
                                     <tr class="{{ $isLast ? 'last-row' : '' }}">
@@ -147,39 +225,13 @@
                                         </td>
                                     </tr>
                                 @endforeach
-                                @php
-                                            $subcategoryTotal += $subsubtotal;
-                                        @endphp
-                                        <tr class="subsubcategory-total">
-                                            <td colspan="6" class="text-end"><strong>{{ $subsubcategory->name }}
-                                                    মোট:</strong></td>
-                                            <td class="text-end text-success">
-                                                <strong>
-                                                    @if ($subsubtotal < 0)
-                                                        <span class="text-danger">অতিরিক্ত প্রদান:
-                                                            {!! bn_number(number_format(abs($subsubtotal), 2)) !!}
-                                                            টাকা</span>
-                                                    @elseif ($subsubtotal > 0)
-                                                        <span class="text-danger">দায়: {!! bn_number(number_format(abs($subsubtotal), 2)) !!}
-                                                            টাকা</span>
-                                                    @else
-                                                        <span class="text-secondary">পরিশোধিত</span>
-                                                    @endif
-                                                </strong>
-                                            </td>
-                                        </tr>
                             </tbody>
-                            </table>
-                        </div>
-                    </div>
+                    </table>
                 </div>
-            @else
-                <div><strong>{{ $subsubcategory->name }}</strong> এর জন্য কোনো দায় নেই।</div>
-            @endif
-        @endforeach
-
+            </div>
+        </div>
     @else
-        <p class="text-danger text-center">{{ $subcategory->name }} এর অধীনে কোনো সাব-সাব-ক্যাটাগরি পাওয়া যায়নি।</p>
+        <p class="text-danger text-center">{{ $subcategory->name }} এর জন্য কোনো দায় পাওয়া যায়নি।</p>
     @endif
 
     <div class="d-flex justify-content-center mt-4">
@@ -190,18 +242,23 @@
                 </tr>
             </thead>
             <tbody>
+                <tr class="table-info">
+                        <td  class=""><strong>মোট জমা</strong></td>
+                        <td class="text-end" colspan="2">{!! bn_number(number_format($subdeposit, 2)) !!} টাকা</td>
+                    </tr>
+                    <tr class="table-warning">
+                        <td  class=""><strong>মোট উত্তোলন</strong></td>
+                        <td class="text-end " colspan="2">{!! bn_number(number_format($subwithdraw, 2)) !!} টাকা</td>
+                    </tr>
                 <tr class="grand-total">
-                    <td><strong>{{ $subcategory->name }} সর্বমোট  </strong></td>
-                    <td class="tiro"><strong>@if ($subcategoryTotal < 0)
-                                                        <span class="text-danger">অতিরিক্ত প্রদান:
-                                                            {!! bn_number(number_format(abs($subcategoryTotal), 2)) !!}
-                                                            টাকা</span>
-                                                    @elseif ($subcategoryTotal > 0)
-                                                        <span class="text-danger">দায়: {!! bn_number(number_format(abs($subcategoryTotal), 2)) !!}
-                                                            টাকা</span>
-                                                    @else
-                                                        <span class="text-secondary">পরিশোধিত</span>
-                                                    @endif</strong></td>
+                    <td><strong>{{ $subcategory->name }} সর্বমোট </strong></td>
+                    <td class="tiro text-end"><strong>@if ($currentAmount < 0)
+                                    <span class="text-danger">অতিরিক্ত প্রদান  : {!! bn_number(number_format(abs($currentAmount), 2)) !!} Tk</span>
+                                @elseif ($currentAmount > 0)
+                                    <span class="text-danger">দায়: {!! bn_number(number_format($currentAmount, 2)) !!} Tk</span>
+                                @else
+                                    <span class="text-warning">পরিশোধিত </span>
+                                @endif</strong></td>
                 </tr>
             </tbody>
         </table>
@@ -209,7 +266,12 @@
 
     <div class="report-footer mt-4">
             <div class="text-center">
-                <p class="bangla-text">{{ $setting->site_name_bangla }}</p>
+                <div class="d-flex justify-content-start mb-3">
+                    <img src="{{ asset($setting->signature) }}" height="100%" class="signature_img" alt="">
+                </div>
+                <p class="signature_text mb-3">স্বাক্ষর</p>
+
+                <p class="bangla-text">{{ $setting->site_owner }}</p>
 
                 <p class="bangla-text">
                     ঠিকানা: {!! preg_replace_callback(
@@ -280,6 +342,5 @@
         <button onclick="window.print()" class="btn btn-primary mt-3">প্রিন্ট করুন</button>
     </div>
 </div>
-
 </body>
 </html>

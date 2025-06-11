@@ -237,9 +237,13 @@ div:where(.swal2-container){
 }
 .contact-card{
   box-shadow: 0 0 10px skyblue !important;
+  white-space: normal !important;
+    word-break: break-word;
 }
 .contact-card h3{
   color: var(--primary-color) !important;
+  font-size: 21px;
+  
 }
 .bank_card_icon{
   font-size: 45px !important;
@@ -247,6 +251,7 @@ div:where(.swal2-container){
 .bank_card_info h4{
   font-size: 16px !important;
   margin-bottom: 0px !important;
+  text-align: right !important;
 }
 .bank_type{
   font-size: 9px !important;
@@ -312,6 +317,9 @@ table tbody tr:nth-child(even) {
 .badge.bg-success{
   color: black !important;
 }
+div.dataTables_wrapper{
+    position: unset !important;
+}
 
 @media screen and (max-width: 768px) {
   .dt-buttons, div.dataTables_wrapper div.dataTables_info{
@@ -332,4 +340,5 @@ table tbody tr:nth-child(even) {
   .mobile-reports-filter-btns{
     overflow-x: auto !important;
   }
+  
 }

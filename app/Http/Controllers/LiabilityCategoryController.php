@@ -130,6 +130,11 @@ class LiabilityCategoryController extends Controller
         if (auth()->user()->access->liability != 2) {
             return redirect()->route('admin.dashboard')->with('error', 'You do not have permission.');
         }
+
+        if( $id == 3 || $id == 4 ) {
+            return back()->with('error', 'You cannot delete the default Liability category.');
+
+        }
         // Find the liability category by ID
         $liabilityCategory = LiabilityCategory::findOrFail($id);
 

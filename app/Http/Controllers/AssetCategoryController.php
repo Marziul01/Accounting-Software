@@ -130,6 +130,10 @@ class AssetCategoryController extends Controller
             return redirect()->route('admin.dashboard')->with('error', 'You do not have permission to delete .');
         }
         // Find the asset category by ID and delete it
+        if( $id == 4 || $id == 5 ) {
+            return back()->with('error', 'You cannot delete the default asset category.');
+
+        }
         $assetCategory = AssetCategory::findOrFail($id);
         $assetCategory->delete();
 

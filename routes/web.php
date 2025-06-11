@@ -26,6 +26,8 @@ use App\Http\Controllers\BankTransactionController;
 use App\Http\Controllers\CategoryTableSettings;
 use App\Http\Controllers\InvestmentCategoryController;
 use App\Http\Controllers\InvestmentController;
+use App\Http\Controllers\InvestmentExpenseController;
+use App\Http\Controllers\InvestmentIncomeController;
 use App\Http\Controllers\InvestmentSubCategoryController;
 use App\Http\Controllers\InvestmentTransactionController;
 use App\Http\Controllers\LiabilityTransactionController;
@@ -136,6 +138,19 @@ Route::prefix('admin')->middleware(['auth:admin', 'admin.only'])->group(function
 
     Route::get('/admin/category/table/settings', [CategoryTableSettings::class, 'categoryTableSettings'])->name('admin.categoryTableSettings');
     Route::post('/admin/settings/updateCategoryField', [CategoryTableSettings::class, 'updateCategoryField'])->name('admin.settings.updateCategoryField');
+
+    Route::get('/see/Asset/Trans/{slug}', [AssetTransactionController::class, 'index'])->name('seeAssetTrans');
+    Route::get('/see/Liability/Trans/{slug}', [LiabilityTransactionController::class, 'index'])->name('seeLiabilityTrans');
+    Route::get('/see/Investment/trans/{slug}', [InvestmentTransactionController::class, 'index'])->name('seeInvestmentTrans');
+    Route::get('/see/Investment/income-expenses/{slug}', [InvestmentIncomeController::class, 'index'])->name('seeInvestmentsinex');
+
+    Route::post('/investment-income', [InvestmentIncomeController::class, 'store'])->name('investment-income.store');
+    Route::post('/investment-income/update/{id}', [InvestmentIncomeController::class, 'update'])->name('investment-income.update');
+    Route::post('/investment-income/delete/{id}', [InvestmentIncomeController::class, 'destroy'])->name('investment-income.destroy');
+
+    Route::post('/investment-expense', [InvestmentExpenseController::class, 'store'])->name('investment-expense.store');
+    Route::post('/investment-expense/update/{id}', [InvestmentExpenseController::class, 'update'])->name('investment-expense.update');
+    Route::post('/investment-expense/delete/{id}', [InvestmentExpenseController::class, 'destroy'])->name('investment-expense.destroy');
 
 });
 

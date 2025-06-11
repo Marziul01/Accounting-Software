@@ -18,6 +18,11 @@ class AssetCategory extends Model
         return $this->hasMany(AssetSubCategory::class);
     }
 
+    public function assetSubSubCategories()
+    {
+        return $this->hasMany(AssetSubSubCategory::class, 'asset_category_id');
+    }
+
     public function assets()
     {
         return $this->hasMany(Asset::class);

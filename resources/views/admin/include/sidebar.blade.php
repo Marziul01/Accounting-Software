@@ -223,18 +223,18 @@
                     </a>
                 </li>
                 @endif
-                @if($categorysettings->asset_subcategory == 2)
+                
                 <li class="menu-item {{ Route::currentRouteName() == 'assetsubcategory.index' ? 'active' : '' }}">
                     <a href="{{ route('assetsubcategory.index') }}" class="menu-link">
                         <div class="text-truncate" data-i18n="CRM">Assets {{ $categorysettings->asset_category == 2 ? 'Sub' : '' }} Category</div>
                     </a>
                 </li>
-                @endif
-                <li class="menu-item {{ Route::currentRouteName() == 'assetsubsubcategory.index' ? 'active' : '' }}">
+                
+                {{-- <li class="menu-item {{ Route::currentRouteName() == 'assetsubsubcategory.index' ? 'active' : '' }}">
                     <a href="{{ route('assetsubsubcategory.index') }}" class="menu-link">
-                        <div class="text-truncate" data-i18n="CRM">Assets {{ $categorysettings->asset_category == 2 ? 'Sub' : '' }} {{ $categorysettings->asset_subcategory == 2 ? 'Sub' : '' }} Category</div>
+                        <div class="text-truncate" data-i18n="CRM">Assets {{ $categorysettings->asset_category == 2 ? 'Sub' : '' }}  Category</div>
                     </a>
-                </li>
+                </li> --}}
                 <li class="menu-item {{ Route::currentRouteName() == 'asset.index' ? 'active' : '' }}">
                     <a href="{{ route('asset.index') }}" class="menu-link">
                         <div class="text-truncate" data-i18n="eCommerce">Current Assets</div>
@@ -269,18 +269,18 @@
                     </a>
                 </li>
                 @endif
-                @if($categorysettings->liability_subcategory == 2)
+                
                 <li class="menu-item {{ Route::currentRouteName() == 'liabilitysubcategory.index' ? 'active' : '' }}">
                     <a href="{{ route('liabilitysubcategory.index') }}" class="menu-link">
                         <div class="text-truncate" data-i18n="CRM">Liabilities {{ $categorysettings->liability_category == 2 ? 'Sub' : '' }} Category</div>
                     </a>
                 </li>
-                @endif
-                <li class="menu-item {{ Route::currentRouteName() == 'liabilitysubsubcategory.index' ? 'active' : '' }}">
+                
+                {{-- <li class="menu-item {{ Route::currentRouteName() == 'liabilitysubsubcategory.index' ? 'active' : '' }}">
                     <a href="{{ route('liabilitysubsubcategory.index') }}" class="menu-link">
-                        <div class="text-truncate" data-i18n="CRM">Liabilities {{ $categorysettings->liability_category == 2 ? 'Sub' : '' }} {{ $categorysettings->liability_subcategory == 2 ? 'Sub' : '' }} Category</div>
+                        <div class="text-truncate" data-i18n="CRM">Liabilities {{ $categorysettings->liability_category == 2 ? 'Sub' : '' }} Category</div>
                     </a>
-                </li>
+                </li> --}}
                 <li class="menu-item {{ Route::currentRouteName() == 'liability.index' ? 'active' : '' }}">
                     <a href="{{ route('liability.index') }}" class="menu-link">
                         <div class="text-truncate" data-i18n="eCommerce">Long Term Liabilities</div>

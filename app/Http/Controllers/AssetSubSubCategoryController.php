@@ -49,7 +49,6 @@ class AssetSubSubCategoryController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string|max:1000',
-            'asset_sub_category_id' => 'required|exists:asset_sub_categories,id',
             'asset_category_id' => 'required|exists:asset_categories,id',
             'slug' => 'required|string|max:255',
         ]);
@@ -71,7 +70,7 @@ class AssetSubSubCategoryController extends Controller
 
         // Redirect back to the index with a success message
         return response()->json([
-            'message' => 'Asset sub-subcategory created successfully!',
+            'message' => 'Asset subcategory created successfully!',
         ]);
     }
 
@@ -104,7 +103,6 @@ class AssetSubSubCategoryController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string|max:1000',
-            'asset_sub_category_id' => 'required|exists:asset_sub_categories,id',
             'asset_category_id' => 'required|exists:asset_categories,id',
             'slug' => 'required|string|max:255',
         ]);
@@ -124,7 +122,7 @@ class AssetSubSubCategoryController extends Controller
 
         // Redirect back to the index with a success message
         return response()->json([
-            'message' => 'Asset sub-subcategory updated successfully!',
+            'message' => 'Asset subcategory updated successfully!',
             'id' => $id,
         ]);
     }
@@ -145,12 +143,12 @@ class AssetSubSubCategoryController extends Controller
         $assetSubSubCategory->delete();
 
         // Redirect back to the index with a success message
-        return back()->with('success', 'Asset sub-subcategory deleted successfully!');
+        return back()->with('success', 'Asset subcategory deleted successfully!');
     }
 
     public function getByCategory($category_id)
     {
-        $subCategories = AssetSubSubCategory::where('asset_sub_category_id', $category_id)->where('status', 1)->get();
+        $subCategories = AssetSubSubCategory::where('asset_category_id', $category_id)->where('status', 1)->get();
 
         return response()->json($subCategories);
     }
