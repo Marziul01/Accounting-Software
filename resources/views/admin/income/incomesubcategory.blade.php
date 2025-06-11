@@ -42,12 +42,14 @@
                                             <a class=" btn btn-sm btn-outline-secondary {{ Auth::user()->access->income == 1 ? 'disabled' : '' }}" href="" data-bs-toggle="modal"
                                             data-bs-target="#editModal{{ $incomecategory->id }}"><i
                                                     class="bx bx-edit-alt me-1"></i> Edit</a>
+                                                     @if($incomecategory->id != 8 && $incomecategory->id != 9)
                                         <form action="{{ route('incomesubcategory.destroy', $incomecategory->id) }}" method="POST" class="d-inline">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="btn btn-sm btn-outline-danger delete-confirm {{ Auth::user()->access->income == 1 ? 'disabled' : '' }}" ><i
                                                     class="bx bx-trash me-1"></i> Delete</button>
                                         </form>
+                                    @endif
                                     </div>
                                 </td>
                             </tr> 

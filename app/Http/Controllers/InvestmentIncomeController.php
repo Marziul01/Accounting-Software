@@ -11,6 +11,7 @@ use App\Models\IncomeCategory;
 use App\Models\IncomeSubCategory;
 use App\Models\Investment;
 use App\Models\InvestmentExpense;
+use Illuminate\Support\Str;
 
 class InvestmentIncomeController extends Controller
 {
@@ -79,6 +80,17 @@ class InvestmentIncomeController extends Controller
         try {
             DB::transaction(function () use ($request) {
 
+                // 🗂️ fetch the investment by ID
+                $investment = Investment::findOrFail($request->investment_id);
+                $name = $investment->name;
+                // generate slug from name (supports Bangla and Unicode)
+                $slug = Str::slug($name, '-', null);
+
+                // fallback if slug is empty (e.g., all Bangla chars removed)
+                if (empty($slug)) {
+                    $slug = md5($name . microtime());
+                }
+
                 // 👉 1. create the investment-income record
                 $InvestmentIncome = InvestmentIncome::create([
                     'investment_id' => $request->investment_id,
@@ -93,8 +105,8 @@ class InvestmentIncomeController extends Controller
                 $income = Income::create([
                     'income_category_id'       => $request->category_id,
                     'income_sub_category_id'   => $request->subcategory_id,
-                    'name'        => 'আয়',
-                    'slug'        => 'ay',
+                    'name'        => $name,
+                    'slug'        => $slug,
                     'description' => $request->description,
                     'amount'      => $request->amount,
                     'date'        => $request->date,
@@ -172,10 +184,7 @@ class InvestmentIncomeController extends Controller
 
                 if ($income) {
                     $income->update([
-                        'income_category_id'       => $request->category_id,
-                        'income_sub_category_id'   => $request->subcategory_id,
-                        'name'        => 'আয়',
-                        'slug'        => 'ay',
+                        
                         'description' => $request->description,
                         'amount'      => $request->amount,
                         'date'        => $request->date,

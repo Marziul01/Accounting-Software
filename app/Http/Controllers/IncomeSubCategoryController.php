@@ -22,7 +22,7 @@ class IncomeSubCategoryController extends Controller
 
         return view('admin.income.incomesubcategory', [
             'incomeSubCategories' => $incomeSubCategories,
-            'incomeCategories' => IncomeCategory::where('status', 1)->get(),
+            'incomeCategories' => IncomeCategory::where('status', 1)->where('id', '!=', 13)->get(),
         ]);
     }
 
@@ -129,6 +129,11 @@ class IncomeSubCategoryController extends Controller
     {
         if(Auth::user()->access->income != 2){
             return redirect()->route('admin.dashboard')->with('error', 'You do not have permission .');
+        }
+        // Check if the user has permission to delete income subcategories
+        // If not, redirect with an error message
+        if ($id == 8 || $id == 9) {
+            return redirect()->route('admin.dashboard')->with('error', 'You do not have permission to delete income subcategories.');
         }
         // Find the income subcategory and delete it
         $incomeSubCategory = IncomeSubCategory::findOrFail($id);

@@ -127,6 +127,11 @@ class InvestmentCategoryController extends Controller
         if (auth()->user()->access->investment != 2) {
             return redirect()->route('admin.dashboard')->with('error', 'You do not have permission to delete investment categories.');
         }
+
+        if($id == 4 || $id == 5 ) {
+            return back()->with('error', 'You cannot delete the default investment category.');
+        }
+
         // Find the investment category by ID and delete it
         $investmentCategory = InvestmentCategory::findOrFail($id);
         $investmentCategory->delete();

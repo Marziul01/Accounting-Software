@@ -42,12 +42,14 @@
                                             <a class=" btn btn-sm btn-outline-secondary {{ Auth::user()->access->expense == 1 ? 'disabled' : '' }}" href="" data-bs-toggle="modal"
                                             data-bs-target="#editModal{{ $expensesubcategory->id }}"><i
                                                     class="bx bx-edit-alt me-1"></i> Edit</a>
+                                                     @if($expensesubcategory->id != 14 && $expensesubcategory->id != 15)
                                         <form action="{{ route('expensesubcategory.destroy', $expensesubcategory->id) }}" method="POST" class="d-inline">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="btn btn-sm btn-outline-danger delete-confirm {{ Auth::user()->access->expense == 1 ? 'disabled' : '' }}" ><i
                                                     class="bx bx-trash me-1"></i> Delete</button>
                                         </form>
+                                        @endif
                                     </div>
                                 </td>
                             </tr> 

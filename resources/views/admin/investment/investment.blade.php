@@ -430,7 +430,7 @@
                         <div class="modal-body">
                             <input type="hidden" name="investment_id" value="{{ $investment->id }}">
                             <input type="hidden" name="category_id" value="13">
-                            <input type="hidden" name="subcategory_id" value="8">
+                            <input type="hidden" name="subcategory_id" value="{{ $investment->investment_category_id == 4 ? '8' : '9' }}">
                             <div class="mb-3">
                                 <label for="" class="form-label">Amount</label>
                                 <input type="number" class="form-control" id="" name="amount" required>
@@ -474,7 +474,7 @@
                         <div class="modal-body">
                             <input type="hidden" name="investment_id" value="{{ $investment->id }}">
                             <input type="hidden" name="category_id" value="7">
-                            <input type="hidden" name="subcategory_id" value="14">
+                            <input type="hidden" name="subcategory_id" value="{{ $investment->investment_category_id == 4 ? '14' : '15' }}">
                             <div class="mb-3">
                                 <label for="" class="form-label">Amount</label>
                                 <input type="number" class="form-control" id="" name="amount" required>

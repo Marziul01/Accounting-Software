@@ -12,6 +12,8 @@ use App\Models\IncomeCategory;
 use App\Models\IncomeSubCategory;
 use App\Models\Investment;
 use App\Models\InvestmentExpense;
+use Illuminate\Support\Str;
+
 
 class InvestmentExpenseController extends Controller
 {
@@ -61,6 +63,16 @@ class InvestmentExpenseController extends Controller
         try {
             DB::transaction(function () use ($request) {
 
+                $investment = Investment::findOrFail($request->investment_id);
+                $name = $investment->name;
+                // generate slug from name (supports Bangla and Unicode)
+                $slug = Str::slug($name, '-', null);
+
+                // fallback if slug is empty (e.g., all Bangla chars removed)
+                if (empty($slug)) {
+                    $slug = md5($name . microtime());
+                }
+
                 // 👉 1. create the investment-expense record
                 $Investmentexpense = InvestmentExpense::create([
                     'investment_id' => $request->investment_id,
@@ -75,8 +87,8 @@ class InvestmentExpenseController extends Controller
                 $expense = Expense::create([
                     'expense_category_id'       => $request->category_id,
                     'expense_sub_category_id'   => $request->subcategory_id,
-                    'name'        => 'ব্যয়',
-                    'slug'        => 'byay',
+                    'name'        => $name,
+                    'slug'        => $slug,
                     'description' => $request->description,
                     'amount'      => $request->amount,
                     'date'        => $request->date,
@@ -154,10 +166,7 @@ class InvestmentExpenseController extends Controller
 
                 if ($expense) {
                     $expense->update([
-                        'expense_category_id'       => $request->category_id,
-                        'expense_sub_category_id'   => $request->subcategory_id,
-                        'name'        => 'ব্যয়',
-                        'slug'        => 'byay',
+
                         'description' => $request->description,
                         'amount'      => $request->amount,
                         'date'        => $request->date,

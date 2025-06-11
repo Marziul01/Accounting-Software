@@ -23,7 +23,7 @@ class ExpenseSubCategoryController extends Controller
 
         return view('admin.expense.expensesubcategory', [
             'expenseSubCategories' => $expenseSubCategories,
-            'expenseCategories' => ExpenseCategory::where('status', 1)->get(),
+            'expenseCategories' => ExpenseCategory::where('status', 1)->where('id', '!=', 7)->get(),
         ]);
     }
 
@@ -131,6 +131,12 @@ class ExpenseSubCategoryController extends Controller
         if (Auth::user()->access->expense != 2) {
             return redirect()->route('admin.dashboard')->with('error', 'You do not have permission to delete .');
         }
+
+        if($id == 14 || $id == 15) {
+            return back()->with('error', 'Default expense subcategory cannot be deleted.');
+
+        }
+
         // Find the expense subcategory by ID
         $expenseSubCategory = ExpenseSubCategory::findOrFail($id);
 

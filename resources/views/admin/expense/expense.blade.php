@@ -34,6 +34,7 @@
                                 <td>{{ $expense->amount ?? 'N/A' }}</td> <!-- ✅ Amount -->
                                 <td>{{ \Carbon\Carbon::parse($expense->date)->format('d M, Y') ?? 'N/A' }}</td> <!-- ✅ Income Date -->
                                 <td>
+                                    @if($expense->expense_category_id != 7)
                                     <div class="d-flex align-items-center gap-1 cursor-pointer">
                                         <a class="btn btn-sm btn-outline-secondary {{ Auth::user()->access->expense == 1 ? 'disabled' : '' }}" href="#" data-bs-toggle="modal"
                                            data-bs-target="#editModal{{ $expense->id }}"><i class="bx bx-edit-alt me-1"></i> Edit</a>
@@ -45,6 +46,7 @@
                                             </button>
                                         </form>
                                     </div>
+                                    @endif
                                 </td>
                             </tr>
                             

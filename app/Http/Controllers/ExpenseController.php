@@ -25,7 +25,7 @@ class ExpenseController extends Controller
 
         return view('admin.expense.expense', [
             'expenses' => $expenses,
-            'expenseCategories' => ExpenseCategory::where('status', 1)->get(),
+            'expenseCategories' => ExpenseCategory::where('status', 1)->where('id', '!=', 7)->get(),
             'expenseSubCategories' => ExpenseSubCategory::where('status', 1)->get(),
         ]);
     }
@@ -161,6 +161,11 @@ class ExpenseController extends Controller
         }
         // Find the expense record and delete it
         $expense = Expense::findOrFail($id);
+
+        if($expense->expense_category_id == 7) {
+            return back()->with('error', 'You cannot delete this income record.');
+        }
+
         $expense->delete();
 
         // Redirect back to the index with a success message

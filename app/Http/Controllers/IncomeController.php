@@ -25,7 +25,7 @@ class IncomeController extends Controller
 
         return view('admin.income.income', [
             'incomes' => $incomes,
-            'incomeCategories' => IncomeCategory::where('status', 1)->get(),
+            'incomeCategories' => IncomeCategory::where('status', 1)->where('id', '!=', 13)->get(),
             'incomeSubCategories' => IncomeSubCategory::where('status', 1)->get(),
             'firstDate' => $firstDate,
             'lastDate' => $lastDate,
@@ -170,8 +170,13 @@ class IncomeController extends Controller
         if(Auth::user()->access->income != 2){
             return redirect()->route('admin.dashboard')->with('error', 'You do not have permission .');
         }
+
         // Find the income record by ID
         $income = Income::findOrFail($id);
+
+        if($income->income_category_id == 13) {
+            return back()->with('error', 'You cannot delete this income record.');
+        }
 
         // Delete the income record
         $income->delete();

@@ -40,7 +40,7 @@
                                             <a class=" btn btn-sm btn-outline-secondary {{ Auth::user()->access->liability == 1 ? 'disabled' : '' }}" href="" data-bs-toggle="modal"
                                             data-bs-target="#editModal{{ $liabilityCategory->id }}"><i
                                                     class="bx bx-edit-alt me-1"></i> Edit</a>
-                                        @if($assetCategory->id != 3 && $assetCategory->id != 4)
+                                        @if($liabilityCategory->id != 3 && $liabilityCategory->id != 4)
                                         <form action="{{ route('liabilitycategory.destroy', $liabilityCategory->id) }}" method="POST" class="d-inline">
                                             @csrf
                                             @method('DELETE')

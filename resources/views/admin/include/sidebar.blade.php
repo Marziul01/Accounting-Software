@@ -98,6 +98,42 @@
         </li>
         @endif
 
+
+        @if(Auth::user()->access->investment == '1' || Auth::user()->access->investment == '2')
+        <li class="menu-item  {{ Route::currentRouteName() == 'investment.index' || Route::currentRouteName() == 'investmentcategory.index' || Route::currentRouteName() == 'investmentsubcategory.index' ? 'active open' : '' }}  ">
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons bx bx-home-smile"></i>
+                <div class="text-truncate" data-i18n="Dashboards">Investments Management</div>
+            </a>
+            <ul class="menu-sub">
+                @if($categorysettings->investments_category == 2)
+                <li class="menu-item {{ Route::currentRouteName() == 'investmentcategory.index' ? 'active' : '' }}">
+                    <a href="{{ route('investmentcategory.index') }}" class="menu-link">
+                        <div class="text-truncate" data-i18n="Analytics">Investments Category</div>
+                    </a>
+                </li>
+                @endif
+                <li class="menu-item {{ Route::currentRouteName() == 'investmentsubcategory.index' ? 'active' : '' }}">
+                    <a href="{{ route('investmentsubcategory.index') }}" class="menu-link">
+                        <div class="text-truncate" data-i18n="CRM">Investments {{ $categorysettings->investments_category == 2 ? 'Sub' : '' }} Category</div>
+                    </a>
+                </li>
+                <li class="menu-item {{ Route::currentRouteName() == 'investment.index' ? 'active' : '' }}">
+                    <a href="{{ route('investment.index') }}" class="menu-link">
+                        <div class="text-truncate" data-i18n="eCommerce">Investments</div>
+                    </a>
+                </li>
+                <li class="menu-item {{ Route::currentRouteName() == 'investment.report' ? 'active' : '' }}">
+                    <a href="{{ route('investment.report') }}"
+                        class="menu-link">
+                        <div class="text-truncate" data-i18n="eCommerce">Reports</div>
+                        
+                    </a>
+                </li>
+            </ul>
+        </li>
+        @endif
+
         @if(Auth::user()->access->income == '1' || Auth::user()->access->income == '2')
         <li class="menu-item  {{ Route::currentRouteName() == 'income.index' || Route::currentRouteName() == 'incomecategory.index' || Route::currentRouteName() == 'incomesubcategory.index' ? 'active open' : '' }}  ">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
@@ -174,40 +210,7 @@
         </li>
         @endif
 
-        @if(Auth::user()->access->investment == '1' || Auth::user()->access->investment == '2')
-        <li class="menu-item  {{ Route::currentRouteName() == 'investment.index' || Route::currentRouteName() == 'investmentcategory.index' || Route::currentRouteName() == 'investmentsubcategory.index' ? 'active open' : '' }}  ">
-            <a href="javascript:void(0);" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons bx bx-home-smile"></i>
-                <div class="text-truncate" data-i18n="Dashboards">Investments Management</div>
-            </a>
-            <ul class="menu-sub">
-                @if($categorysettings->investments_category == 2)
-                <li class="menu-item {{ Route::currentRouteName() == 'investmentcategory.index' ? 'active' : '' }}">
-                    <a href="{{ route('investmentcategory.index') }}" class="menu-link">
-                        <div class="text-truncate" data-i18n="Analytics">Investments Category</div>
-                    </a>
-                </li>
-                @endif
-                <li class="menu-item {{ Route::currentRouteName() == 'investmentsubcategory.index' ? 'active' : '' }}">
-                    <a href="{{ route('investmentsubcategory.index') }}" class="menu-link">
-                        <div class="text-truncate" data-i18n="CRM">Investments {{ $categorysettings->investments_category == 2 ? 'Sub' : '' }} Category</div>
-                    </a>
-                </li>
-                <li class="menu-item {{ Route::currentRouteName() == 'investment.index' ? 'active' : '' }}">
-                    <a href="{{ route('investment.index') }}" class="menu-link">
-                        <div class="text-truncate" data-i18n="eCommerce">Investments</div>
-                    </a>
-                </li>
-                <li class="menu-item {{ Route::currentRouteName() == 'investment.report' ? 'active' : '' }}">
-                    <a href="{{ route('investment.report') }}"
-                        class="menu-link">
-                        <div class="text-truncate" data-i18n="eCommerce">Reports</div>
-                        
-                    </a>
-                </li>
-            </ul>
-        </li>
-        @endif
+        
 
         @if(Auth::user()->access->asset == '1' || Auth::user()->access->asset == '2')
         <li class="menu-item  {{ Route::currentRouteName() == 'asset.index' || Route::currentRouteName() == 'assetFixed' || Route::currentRouteName() == 'assetcategory.index' || Route::currentRouteName() == 'assetsubcategory.index' || Route::currentRouteName() == 'assetsubsubcategory.index' ? 'active open' : '' }}  ">

@@ -14,6 +14,9 @@
     --card-bg: #1e1e1e;
     --table-odd-row: #003a0e;
     --table-even-row: #443400;
+    .bg-label-success{
+      color: rgb(53, 53, 53) !important;
+}
   }
   
   body  {
