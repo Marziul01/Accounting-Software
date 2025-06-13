@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AccountsController;
 use App\Http\Controllers\AdminAuthController;
 use App\Http\Controllers\AssetController;
 use App\Http\Controllers\ContactController;
@@ -151,6 +152,9 @@ Route::prefix('admin')->middleware(['auth:admin', 'admin.only'])->group(function
     Route::post('/investment-expense', [InvestmentExpenseController::class, 'store'])->name('investment-expense.store');
     Route::post('/investment-expense/update/{id}', [InvestmentExpenseController::class, 'update'])->name('investment-expense.update');
     Route::post('/investment-expense/delete/{id}', [InvestmentExpenseController::class, 'destroy'])->name('investment-expense.destroy');
+
+
+    Route::get('/Cash/flow/statement', [AccountsController::class, 'Cashflowstatement'])->name('Cash-flow-statement');
 
 });
 

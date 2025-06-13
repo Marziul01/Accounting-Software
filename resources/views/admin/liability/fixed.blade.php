@@ -299,7 +299,7 @@
                                                 <option value="">Select Category</option>
                                                 @foreach ($liabilityCategories as $category)
                                                     <option value="{{ $category->id }}" 
-                                                        {{ $category->id == $liability->category_id ? 'selected' : '' }}>
+                                                        {{ $category->id == $liability->subcategory_id ? 'selected' : '' }}>
                                                         {{ $category->name }}
                                                     </option>
                                                 @endforeach
@@ -1187,5 +1187,22 @@
     });
     </script>
     
+<script>
+    $(document).on('change', '.contact-select', function () {
+        // Get selected subcategory name
+        let subcategoryName = $(this).find('option:selected').text();
 
+        // Get closest form
+        let $form = $(this).closest('form');
+
+        // Fill in name field
+        $form.find('.name-input').val(subcategoryName);
+
+        // If generateSlug function is defined globally, use it
+        if (typeof generateSlug === 'function') {
+            const slug = generateSlug(subcategoryName);
+            $form.find('.slug-output').val(slug);
+        }
+    });
+</script>
 @endsection

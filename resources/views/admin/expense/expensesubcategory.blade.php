@@ -141,6 +141,9 @@
                                 <label for="slug" class="form-label">Slug</label>
                                 <input type="text" class="form-control slug-output" id="slug" name="slug" value="{{ $expensesubcategory->slug }}" readonly>
                             </div>
+                            @if($expensesubcategory->expense_category_id == 7)
+                            <input type="hidden" name="income_category_id" value="{{ $expensesubcategory->expense_category_id }}">
+                            @else
                             <div class="mb-3">
                                 <label for="expense_category_id" class="form-label">Category</label>
                                 <select class="form-select" id="income_category_id" name="expense_category_id" required>
@@ -150,7 +153,7 @@
                                     @endforeach
                                 </select>
                             </div>
-                            
+                            @endif
                             <div class="mb-3">
                                 <label for="Description" class="form-label">Description</label>
                                 <textarea class="form-control" id="Description" name="description" rows="3">{{ $expensesubcategory->description }}</textarea>

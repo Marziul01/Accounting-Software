@@ -140,6 +140,9 @@
                                 <label for="slug" class="form-label">Slug</label>
                                 <input type="text" class="form-control slug-output" id="slug" name="slug" value="{{ $incomecategory->slug }}" readonly>
                             </div>
+                            @if($incomecategory->income_category_id == 13)
+                            <input type="hidden" name="income_category_id" value="{{ $incomecategory->income_category_id }}">
+                            @else
                             <div class="mb-3">
                                 <label for="income_category_id" class="form-label">Category</label>
                                 <select class="form-select" id="income_category_id" name="income_category_id" required>
@@ -149,7 +152,7 @@
                                     @endforeach
                                 </select>
                             </div>
-                            
+                            @endif
                             <div class="mb-3">
                                 <label for="Description" class="form-label">Description</label>
                                 <textarea class="form-control" id="Description" name="description" rows="3">{{ $incomecategory->description }}</textarea>

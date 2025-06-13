@@ -25,7 +25,7 @@
                         </thead>
                         <tbody class="table-border-bottom-0">
                             @if($expenses->isNotEmpty())
-                            @foreach ($expenses as $expense )
+                            @foreach ($expenses->sortByDesc('date') as $expense )
                             <tr>
                                 <td>{{ $loop->iteration }}</td>
                                 <td>{{ $expense->expenseCategory->name ?? 'Expense Category Not Assigned' }} - ( {{ $expense->expenseSubCategory->name ?? 'Expense Sub Category Not Assigned' }} ) </td>
@@ -228,7 +228,8 @@
 @if ($expenses->isNotEmpty())
 <script>
     $('#myTable').DataTable({
-        pageLength: 20,
+        pageLength: 25,
+        lengthMenu: [ [25, 50, 100], [25, 50, 100] ],
         dom: 'Bfrtip',
         buttons: [
             {
@@ -495,7 +496,24 @@
     
     
     
+<script>
+    $(document).on('change', '.subcategory-select', function () {
+        // Get selected subcategory name
+        let subcategoryName = $(this).find('option:selected').text();
 
+        // Get closest form
+        let $form = $(this).closest('form');
+
+        // Fill in name field
+        $form.find('.name-input').val(subcategoryName);
+
+        // If generateSlug function is defined globally, use it
+        if (typeof generateSlug === 'function') {
+            const slug = generateSlug(subcategoryName);
+            $form.find('.slug-output').val(slug);
+        }
+    });
+</script>
 
     
     

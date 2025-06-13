@@ -42,7 +42,7 @@
                                         <td>
                                             <a class="btn btn-sm btn-outline-secondary"
                                                href="{{ route('admin.expensesubcategoryReport', ['slug' => $expenseSubCategory->slug, 'start_date' => $startDate, 'end_date' => $endDate]) }}">
-                                                <i class="bx bx-edit-alt me-1"></i> View Report
+                                                View Report
                                             </a>
                                         </td>
                                     </tr>

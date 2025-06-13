@@ -18,7 +18,12 @@ class BankAccount extends Model
     // Define any relationships or additional methods here
     public function transactions()
     {
-        return $this->hasMany(BankTransaction::class);
+        return $this->hasMany(BankTransaction::class, 'bank_account_id');
+    }
+
+    public function allTransactions()
+    {
+        return $this->hasMany(BankTransaction::class , 'bank_account_id');
     }
 
     public function getBalanceAttribute()

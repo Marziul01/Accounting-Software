@@ -338,7 +338,28 @@
                 <div class="text-truncate" data-i18n="Dashboards">Accounts</div>
             </a>
             <ul class="menu-sub">
-                
+                <li class="menu-item {{ Route::currentRouteName() == 'Cash-flow-statement' ? 'active' : '' }}">
+                    <a href="{{ route('Cash-flow-statement') }}" class="menu-link">
+                        <div class="text-truncate" data-i18n="Analytics">Cash flow statement</div>
+                    </a>
+                </li>
+                <li class="menu-item {{ Route::currentRouteName() == '' ? 'active' : '' }}">
+                    <a href="" class="menu-link">
+                        <div class="text-truncate" data-i18n="CRM">Income and Expenditure Statement</div>
+                    </a>
+                </li>
+                <li class="menu-item {{ Route::currentRouteName() == '' ? 'active' : '' }}">
+                    <a href=""
+                        class="menu-link">
+                        <div class="text-truncate" data-i18n="eCommerce">Financial statement</div>
+                    </a>
+                </li>
+                <li class="menu-item {{ Route::currentRouteName() == '' ? 'active' : '' }}">
+                    <a href=""
+                        class="menu-link">
+                        <div class="text-truncate" data-i18n="eCommerce">Detailed financial statement</div>
+                    </a>
+                </li>
             </ul>
         </li>
         @endif
