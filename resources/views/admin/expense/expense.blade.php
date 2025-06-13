@@ -228,9 +228,9 @@
 @if ($expenses->isNotEmpty())
 <script>
     $('#myTable').DataTable({
-        pageLength: 25,
-        lengthMenu: [ [25, 50, 100], [25, 50, 100] ],
-        dom: 'Bfrtip',
+        pageLength: 25, // default page length
+        lengthMenu: [ [25, 50, 100], [25, 50, 100] ], // dropdown options
+        dom: 'Blfrtip', // ✅ include 'l' for length menu
         buttons: [
             {
                 extend: 'csv',
@@ -244,13 +244,14 @@
                 extend: 'print',
                 text: 'Print Table',
                 className: 'btn btn-sm my-custom-table-btn',
-                    exportOptions: {
+                exportOptions: {
                     columns: ':not(:last-child)' // exclude the last column
                 }
             }
         ]
     });
 </script>
+
     
 @endif
 <script>

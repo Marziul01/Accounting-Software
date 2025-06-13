@@ -176,8 +176,12 @@
   position: absolute !important;
 }
 .dataTable.no-footer{
-  margin-top: 30px !important;
+  margin-top: 65px !important;
   margin-bottom: 30px !important;
+}
+.dataTables_length{
+  position: absolute !important;
+  transform: translateY(45px);
 }
 .my-custom-table-btn{
   color: var(--secondary-color) !important ;
@@ -343,5 +347,10 @@ div.dataTables_wrapper{
   .mobile-reports-filter-btns{
     overflow-x: auto !important;
   }
-  
+  .dataTables_length {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
 }
