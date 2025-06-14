@@ -39,4 +39,13 @@ class Investment extends Model
     {
         return $this->hasMany(InvestmentTransaction::class, 'investment_id');
     }
+
+    public function investIncome()
+    {
+        return $this->hasMany(InvestmentIncome::class, 'investment_id');
+    }
+    public function investExpense()
+    {
+        return $this->hasMany(InvestmentExpense::class, 'investment_id');
+    }
 }

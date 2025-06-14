@@ -170,7 +170,10 @@ class AccountsController extends Controller
                     ->where('transaction_date', '<', $startDate)
                     ->sum('amount');
 
-                $previousCurrentAssetDeposit  += $prevDeposits + $initialAmount;
+                if ($entryDate && $entryDate->lessThan($startDate)) {
+                    $prevDeposits += $initialAmount;
+                }
+                $previousCurrentAssetDeposit  += $prevDeposits;
                 $previousCurrentAssetWithdraw += $prevWithdraws;
 
                 // Last month
@@ -280,7 +283,10 @@ class AccountsController extends Controller
                     ->where('transaction_date', '<', $startDate)
                     ->sum('amount');
 
-                $totalPreviousLiabilityDeposit  += $prevDeposits + $initialAmount;
+                if ($entryDate && $entryDate->lessThan($startDate)) {
+                    $prevDeposits += $initialAmount;
+                }
+                $totalPreviousLiabilityDeposit  += $prevDeposits;
                 $totalPreviousLiabilityWithdraw += $prevWithdraws;
 
                 // Last Month
@@ -365,39 +371,39 @@ class AccountsController extends Controller
 
         foreach ($allBanks as $bank) {
             $totalBankDeposit  += $bank->transactions
-                                    ->where('transaction_type', 'Deposit')
+                                    ->where('transaction_type', 'credit')
                                     ->sum('amount');
 
             $totalBankWithdraw += $bank->transactions
-                                    ->where('transaction_type', 'Withdraw')
+                                    ->where('transaction_type', 'debit')
                                     ->sum('amount');
 
 
             // Previous period
             $previousTotalBankDeposit += $bank->allTransactions()
-                ->where('transaction_type', 'Deposit')
+                ->where('transaction_type', 'credit')
                 ->where('transaction_date', '<', $startDate)
                 ->sum('amount');
             $previousTotalBankWithdraw += $bank->allTransactions()
-                ->where('transaction_type', 'Withdraw')
+                ->where('transaction_type', 'debit')
                 ->where('transaction_date', '<', $startDate)
                 ->sum('amount');
             // Last month
             $lastMonthBankDeposit += $bank->allTransactions()
-                ->where('transaction_type', 'Deposit')
+                ->where('transaction_type', 'credit')
                 ->whereBetween('transaction_date', [$lastMonthStart, $lastMonthEnd])
                 ->sum('amount');
             $lastMonthBankWithdraw += $bank->allTransactions()
-                ->where('transaction_type', 'Withdraw')
+                ->where('transaction_type', 'debit')
                 ->whereBetween('transaction_date', [$lastMonthStart, $lastMonthEnd])
                 ->sum('amount');
             // Last year
             $lastYearBankDeposit += $bank->allTransactions()
-                ->where('transaction_type', 'Deposit')
+                ->where('transaction_type', 'credit')
                 ->whereBetween('transaction_date', [$lastYearStart, $lastYearEnd])
                 ->sum('amount');
             $lastYearBankWithdraw += $bank->allTransactions()
-                ->where('transaction_type', 'Withdraw')
+                ->where('transaction_type', 'debit')
                 ->whereBetween('transaction_date', [$lastYearStart, $lastYearEnd])
                 ->sum('amount');
         }
@@ -470,7 +476,10 @@ class AccountsController extends Controller
                     ->where('transaction_date', '<', $startDate)
                     ->sum('amount');
 
-                $totalPreviousFixedAssetAmount += $initialAmount + $prevDeposits - $prevWithdraws;
+                if ($entryDate && $entryDate->lessThan($startDate)) {
+                    $prevDeposits += $initialAmount;
+                }
+                $totalPreviousFixedAssetAmount += ($prevDeposits - $prevWithdraws);
 
                 // === Last Month ===
                 $monthDeposits = $allTxns
@@ -697,6 +706,53 @@ class AccountsController extends Controller
 
 
 
+
+        // Fetch all investments
+        if (!$request->input('startDate') || !$request->input('endDate')) {
+            $startDate = Income::min('date') ?? now()->startOfMonth();
+            $endDate = Income::max('date') ?? now()->endOfMonth();
+        }
+        $investmentIncomes = Investment::with(['investIncome' => function ($query) use ($startDate, $endDate) {
+            $query->whereBetween('date', [$startDate, $endDate]);
+        }])->get();
+
+        if (!$request->input('startDate') || !$request->input('endDate')) {
+            $startDate = Expense::min('date') ?? now()->startOfMonth();
+            $endDate = Expense::max('date') ?? now()->endOfMonth();
+        }
+        $investmentExpenses = Investment::with(['investExpense' => function ($query) use ($startDate, $endDate) {
+            $query->whereBetween('date', [$startDate, $endDate]);
+        }])->get();
+
+
+
+
+        $previousPeriod = $request->input('previousPeriod');
+
+        if($request->input('previousPeriod') == 'lastMonth'){
+            $totalpreviousBalance =  ( $lastMonthIncomeExcluding13 + $lastMonthIncome13 + $lastMonthInvestDeposit + $lastMonthCurrentAssetWithdraw  + $lastMonthLiabilityDeposit + $lastMonthBankWithdraw )
+            - ( $lastMonthExpensesExcluding7 + $lastMonthExpenses7 + $lastMonthInvestWithdraw + $lastMonthCurrentAssetDeposit + $lastMonthLiabilityWithdraw + $lastMonthBankDeposit + $totallastMonthFixedAssetAmount );
+        }else if($request->input('previousPeriod') == 'lastYear'){
+            $totalpreviousBalance =  ( $lastYearIncomeExcluding13 + $lastYearIncome13 + $lastYearInvestDeposit + $lastYearCurrentAssetWithdraw  + $lastYearLiabilityDeposit + $lastYearBankWithdraw )
+            - ( $lastYearExpensesExcluding7 + $lastYearExpenses7 + $lastYearInvestWithdraw + $lastYearCurrentAssetDeposit + $lastYearLiabilityWithdraw + $lastYearBankDeposit + $totallastYearFixedAssetAmount );
+        }else if($request->input('previousPeriod') == null ){
+            $totalpreviousBalance = ( $previousTotalIncomeExcluding13 + $previousTotalIncome13 + $previousTotalInvestDeposit + $previousCurrentAssetWithdraw  + $totalPreviousLiabilityDeposit + $previousTotalBankWithdraw )
+            - ( $previousTotalExpensesExcluding7 + $previousTotalExpenses7 + $previousTotalInvestWithdraw + $previousCurrentAssetDeposit + $totalPreviousLiabilityWithdraw + $previousTotalBankDeposit + $totalPreviousFixedAssetAmount );
+        }
+        else{
+            $totalpreviousBalance = ( $previousTotalIncomeExcluding13 + $previousTotalIncome13 + $previousTotalInvestDeposit + $previousCurrentAssetWithdraw  + $totalPreviousLiabilityDeposit + $previousTotalBankWithdraw )
+            - ( $previousTotalExpensesExcluding7 + $previousTotalExpenses7 + $previousTotalInvestWithdraw + $previousCurrentAssetDeposit + $totalPreviousLiabilityWithdraw + $previousTotalBankDeposit + $totalPreviousFixedAssetAmount );
+        }
+ 
+        // dd(  $totalpreviousBalance,
+        //     $previousTotalIncomeExcluding13, $previousTotalIncome13, $previousTotalInvestDeposit, $previousCurrentAssetWithdraw, 
+        //     $totalPreviousLiabilityDeposit, $previousTotalBankWithdraw, 
+        //     $previousTotalExpensesExcluding7, $previousTotalExpenses7, $previousTotalInvestWithdraw, 
+        //     $previousCurrentAssetDeposit, $totalPreviousLiabilityWithdraw, $previousTotalBankDeposit, 
+        //     $totalPreviousFixedAssetAmount
+        // );
+        
+
         return view('admin.accounts.Cashflowstatement',[
             'totalInvestDeposit'  => $totalInvestDeposit,
             'totalInvestWithdraw' => $totalInvestWithdraw,
@@ -720,6 +776,13 @@ class AccountsController extends Controller
             'totalIncomeCat13' => $totalIncomeCat13,
             'totalExpensesExcludingCat7' => $totalExpensesExcludingCat7,
             'totalExpensesCat7' => $totalExpensesCat7,
+            'investmentIncomes' => $investmentIncomes,
+            'investmentExpenses' => $investmentExpenses,
+            'startDate' => $request->input('startDate') ?? null,
+            'endDate' => $request->input('endDate') ?? null,
+            'totalpreviousBalance' => $totalpreviousBalance,
+            'previousPeriod' => $previousPeriod,
         ]);
     }
+
 }

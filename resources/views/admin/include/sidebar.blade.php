@@ -340,7 +340,7 @@
             <ul class="menu-sub">
                 <li class="menu-item {{ Route::currentRouteName() == 'Cash-flow-statement' ? 'active' : '' }}">
                     <a href="{{ route('Cash-flow-statement') }}" class="menu-link">
-                        <div class="text-truncate" data-i18n="Analytics">Cash flow statement</div>
+                        <div class="text-truncate" data-i18n="Analytics">Cash Flow Statement</div>
                     </a>
                 </li>
                 <li class="menu-item {{ Route::currentRouteName() == '' ? 'active' : '' }}">
