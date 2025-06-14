@@ -373,13 +373,17 @@
                                 {!! bn_number(number_format( $totalpreviousBalance ,2)) !!}
                             </td>
                             <td>সমাপনী স্থিতি</td>
-                            <td class="text-end">{!! bn_number(number_format( ($totalIncomes - $totalExpenses ) ,2)) !!}</td>
+                            @php
+                                // Calculate the closing balance
+                                $closingBalance = ($totalIncomes - $totalExpenses) + $totalpreviousBalance;
+                            @endphp
+                            <td class="text-end">{!! bn_number(number_format( $closingBalance  ,2)) !!}</td>
                         </tr>
                         <tr>
                             <td>মোট</td>
                             <td class="text-end"> {!! bn_number(number_format( ($totalIncomes + $totalpreviousBalance ) ,2)) !!} </td>
                             <td>মোট</td>
-                            <td class="text-end"> {!! bn_number(number_format(  $totalIncomes ,2)) !!} </td>
+                            <td class="text-end"> {!! bn_number(number_format( $closingBalance + $totalExpenses ,2)) !!} </td>
                         </tr>
                         
                     </tbody>
