@@ -444,7 +444,7 @@
             <input type="date" name="startDate" id="startDate" class="form-control no-print" value="{{ request('startDate') }}">
             <span class="mx-1 no-print">-</span>
             <input type="date" name="endDate" id="endDate" class="form-control no-print" value="{{ request('endDate') }}">
-            <input type="hidden" name="previousPeriod" id="previousPeriod" value="">
+            
             <button type="button" class="btn btn-outline-primary no-print" onclick="setCurrentMonth()">Current Month</button>
             <button type="button" class="btn btn-outline-secondary no-print" onclick="setCurrentYear()">Current Year</button>
             <button type="submit" class="btn btn-success no-print">Filter</button>
@@ -455,23 +455,17 @@
         function setCurrentMonth() {
             document.getElementById('startDate').value = '{{ $currentMonthStart }}';
             document.getElementById('endDate').value = '{{ $currentMonthEnd }}';
-            document.getElementById('previousPeriod').value = 'lastMonth';
+            
             document.getElementById('filterForm').submit();
         }
         function setCurrentYear() {
             document.getElementById('startDate').value = '{{ $currentYearStart }}';
             document.getElementById('endDate').value = '{{ $currentYearEnd }}';
-            document.getElementById('previousPeriod').value = 'lastYear';
+            
             document.getElementById('filterForm').submit();
         }
         document.getElementById('filterForm').addEventListener('submit', function() {
-            // If user chooses dates manually, clear previousPeriod
-            if (
-                document.activeElement &&
-                (document.activeElement.type === 'submit' || document.activeElement.innerText === 'Filter')
-            ) {
-                document.getElementById('previousPeriod').value = '';
-            }
+            
         });
     </script>
 
