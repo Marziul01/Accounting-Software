@@ -222,12 +222,12 @@
                                         @foreach ($incomecategories->where('id', '!=', 13) as $incomecategory)
                                             {{-- Category row --}}
                                             <tr class="font-semibold">
-                                                <th class="w-3/4 ">
+                                                <th class="w-2/4 ">
                                                     <ul class="list-disc pl-5">
                                                         <li>{{ $incomecategory->name }}</li>
                                                     </ul>
                                                 </th>
-                                                <th class="w-1/4 "></th>
+                                                <th class="w-2/4 "></th>
                                             </tr>
 
                                             {{-- Subcategory rows --}}
@@ -259,12 +259,12 @@
                                                 @foreach ($expenseCategories->where('id' , '!=' , 7) as $expenseCategory)
                                                     {{-- Category row --}}
                                                     <tr class="font-semibold">
-                                                        <th class="w-3/4 ">
+                                                        <th class="w-2/4 ">
                                                             <ul class="list-disc pl-5">
                                                                 <li>{{ $expenseCategory->name }}</li>
                                                             </ul>
                                                         </th>
-                                                        <th class="w-1/4 "></th>
+                                                        <th class="w-2/4 "></th>
                                                     </tr>
 
                                                     {{-- Subcategory rows --}}
@@ -370,11 +370,12 @@
                                     <tbody>
                                         {{-- স্বল্পমেয়াদী বিনিয়োগ --}}
                                         <tr class="bg-gray-100 font-semibold">
-                                            <td colspan="2">
+                                            <th class="w-2/4 ">
                                                 <ul class="list-disc pl-5">
                                                     <li>স্বল্পমেয়াদী বিনিয়োগ হতে প্রাপ্ত আয় সমূহ</li>
                                                 </ul>
-                                            </td>
+                                            </th>
+                                            <th class="w-2/4"></th>
                                         </tr>
 
                                         @php $shortTermInvestmentIncomestotal = 0; @endphp
@@ -395,11 +396,12 @@
 
                                         {{-- দীর্ঘমেয়াদী বিনিয়োগ --}}
                                         <tr class="bg-gray-100 font-semibold">
-                                            <td colspan="2">
+                                            <th class="w-2/4 ">
                                                 <ul class="list-disc pl-5">
                                                     <li>দীর্ঘমেয়াদী বিনিয়োগ হতে প্রাপ্ত আয় সমূহ</li>
                                                 </ul>
-                                            </td>
+                                            </th>
+                                            <th class="w-2/4"></th>
                                         </tr>
 
                                         @php $LongTermInvestmentIncomestotal = 0; $longIndex = 1; @endphp
@@ -499,11 +501,12 @@
                                     <tbody>
                                         {{-- স্বল্পমেয়াদী বিনিয়োগ ক্ষতি --}}
                                         <tr class="bg-gray-100 font-semibold">
-                                            <td colspan="2">
+                                            <th class="w-2/4 ">
                                                 <ul class="list-disc pl-5">
                                                     <li>স্বল্পমেয়াদী বিনিয়োগ হতে প্রাপ্ত ক্ষতি সমূহ</li>
                                                 </ul>
-                                            </td>
+                                            </th>
+                                            <th class="w-2/4"></th>
                                         </tr>
 
                                         @php $shortTermInvestmentexpensestotal = 0; @endphp
@@ -524,11 +527,12 @@
 
                                         {{-- দীর্ঘমেয়াদী বিনিয়োগ ক্ষতি --}}
                                         <tr class="bg-gray-100 font-semibold">
-                                            <td colspan="2">
+                                            <th class="w-2/4 ">
                                                 <ul class="list-disc pl-5">
                                                     <li>দীর্ঘমেয়াদী বিনিয়োগ হতে ক্ষতি সমূহ</li>
                                                 </ul>
-                                            </td>
+                                            </th>
+                                            <th class="w-2/4"></th>
                                         </tr>
 
                                         @php $LongTermInvestmentexpensestotal = 0; $longIndex = 1; @endphp
