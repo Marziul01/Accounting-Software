@@ -84,6 +84,12 @@
             --tw-bg-opacity: 1;
             background-color: #f2f2f2 !important;
         }
+        table td {
+            max-width: 100%;
+            word-break: break-word;     /* Break long words */
+            white-space: normal;        /* Allow wrapping */
+            overflow-wrap: break-word;  /* Support for older browsers */
+        }
     </style>
 </head>
 <body class="p-8 md:p-12 lg:p-16 text-gray-800">
