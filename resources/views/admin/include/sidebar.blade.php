@@ -343,21 +343,21 @@
                         <div class="text-truncate" data-i18n="Analytics">Cash Flow Statement</div>
                     </a>
                 </li>
-                <li class="menu-item {{ Route::currentRouteName() == '' ? 'active' : '' }}">
-                    <a href="" class="menu-link">
+                <li class="menu-item {{ Route::currentRouteName() == 'income-expense-statement' ? 'active' : '' }}">
+                    <a href="{{ route('income-expense-statement') }}" class="menu-link">
                         <div class="text-truncate" data-i18n="CRM">Income and Expenditure Statement</div>
                     </a>
                 </li>
-                <li class="menu-item {{ Route::currentRouteName() == '' ? 'active' : '' }}">
-                    <a href=""
+                <li class="menu-item {{ Route::currentRouteName() == 'financial-statement' ? 'active' : '' }}">
+                    <a href="{{ route('financial-statement') }}"
                         class="menu-link">
-                        <div class="text-truncate" data-i18n="eCommerce">Financial statement</div>
+                        <div class="text-truncate" data-i18n="eCommerce">Financial Statement</div>
                     </a>
                 </li>
-                <li class="menu-item {{ Route::currentRouteName() == '' ? 'active' : '' }}">
-                    <a href=""
+                <li class="menu-item {{ Route::currentRouteName() == 'detailed-financial-statement' ? 'active' : '' }}">
+                    <a href="{{ route('detailed-financial-statement') }}"
                         class="menu-link">
-                        <div class="text-truncate" data-i18n="eCommerce">Detailed financial statement</div>
+                        <div class="text-truncate" data-i18n="eCommerce">Detailed Financial Statement</div>
                     </a>
                 </li>
             </ul>

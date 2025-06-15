@@ -25,6 +25,9 @@ use App\Http\Controllers\AssetTransactionController;
 use App\Http\Controllers\BankAccountController;
 use App\Http\Controllers\BankTransactionController;
 use App\Http\Controllers\CategoryTableSettings;
+use App\Http\Controllers\DetailedFinancialStatement;
+use App\Http\Controllers\FinancialStatement;
+use App\Http\Controllers\IncomeExpenseStatementController;
 use App\Http\Controllers\InvestmentCategoryController;
 use App\Http\Controllers\InvestmentController;
 use App\Http\Controllers\InvestmentExpenseController;
@@ -155,6 +158,8 @@ Route::prefix('admin')->middleware(['auth:admin', 'admin.only'])->group(function
 
 
     Route::get('/Cash/flow/statement', [AccountsController::class, 'Cashflowstatement'])->name('Cash-flow-statement');
-
+    Route::get('/income/expense/statement', [IncomeExpenseStatementController::class, 'incomeExpenseStatement'])->name('income-expense-statement');
+    Route::get('/financial/statement', [FinancialStatement::class, 'financialStatement'])->name('financial-statement');
+    Route::get('/detailed/financial/statement', [DetailedFinancialStatement::class, 'detailedfinancialStatement'])->name('detailed-financial-statement');
 });
 

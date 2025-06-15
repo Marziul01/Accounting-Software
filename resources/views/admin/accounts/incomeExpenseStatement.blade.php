@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="1024">
-    <title>নগদ প্রবাহ বিবরণী</title>
+    <title>আয় ও ব্যয় বিবরণী</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -127,6 +127,7 @@
 
             <a href="{{ route('admin.dashboard') }}" class="btn btn-dark no-print">Go Back</a>
         </form>
+        <button class="btn btn-primary no-print" onclick="window.print()">Print</button>        
     </div>
     @php
         function bn_number($number)
@@ -142,7 +143,7 @@
             <img src="{{ asset($setting->site_logo) }}" height="100%" class="img" alt="">
             <h2 class="text-3xl font-bold">{{ $setting->site_name_bangla }}</h2>
         </div>
-        <h1 class="text-2xl font-bold mb-2">নগদ প্রবাহ বিবরণী</h1>
+        <h1 class="text-2xl font-bold mb-2">আয় ও ব্যয় বিবরণী</h1>
         <p class="text-xl"> {!! bn_number(\Carbon\Carbon::now()->format('Y-m-d')) !!} তারিখে প্রস্তুতকৃত</p>
         @if($startDate && $endDate)
             <p class="text-lg"> {!! bn_number($startDate) !!} থেকে {!! bn_number($endDate) !!} পর্যন্ত</p>
@@ -154,63 +155,24 @@
     <div class="d-flex flex-column">
         <!-- Combined Detailed Section -->
         <div class="mb-12 order-2">
-            <h2 class="text-2xl font-semibold text-center mb-6">বিস্তারিত নগদ প্রবাহ বিবরণী</h2>
+            <h2 class="text-2xl font-semibold text-center mb-6">বিস্তারিত আয় ও ব্যয় বিবরণী</h2>
             <div class="overflow-x-auto">
                 <table class="w-full bg-white shadow-lg rounded-lg report-table border-collapse">
                     <thead>
                         <tr>
                             <th class="w-2/6">বিবরণ</th>
-                            <th class="w-1/6">ক্রেডিট</th>
+                            <th class="w-1/6">টাকা</th>
                             <th class="w-2/6">বিবরণ</th>
-                            <th class="w-1/6">ডেবিট</th>
+                            <th class="w-1/6">টাকা</th>
                         </tr>
                     </thead>
                     <tbody>
                         <!-- Content from the first Detailed Section -->
-                        <tr>
-                            <td>বিনিয়োগ</td>
-                            <td class="text-end"> {!! bn_number(number_format($totalInvestDeposit , 2) ) !!} </td>
-                            <td>বিনিয়োগ</td>
-                            <td class="text-end">{!! bn_number(number_format($totalInvestWithdraw), 2 ) !!}</td>
-                        </tr>
-                        <tr>
-                            <td>চলতি সম্পদ প্রাপ্তি</td>
-                            <td class="text-end">{!! bn_number(number_format($totalCurrentAssettWithdraw , 2)) !!}</td>
-                            <td>চলতি সম্পদ প্রদান</td>
-                            <td class="text-end">{!! bn_number(number_format($totalCurrentAssetDeposit ,2 )) !!}</td>
-                        </tr>
-                        <tr>
-                            <td>দায় সমূহ গ্রহন</td>
-                            <td class="text-end">{!! bn_number(number_format($totalLiabilitytDeposit, 2)) !!}</td>
-                            <td>দায় সমূহ পরিশোধ</td>
-                            <td class="text-end">{!! bn_number(number_format($totalLiabilityWithdraw,2)) !!}</td>
-                        </tr>
-                        <tr>
-                            <td>ব্যাংক উত্তোলন</td>
-                            <td class="text-end">{!! bn_number(number_format($totalBankWithdraw,2)) !!}</td>
-                            <td style="padding: 0px !important;">
-                                <div class="w-full py-2 px-3">
-                                    ব্যাংক জমা
-                                </div>
-                                <div class="w-100 border-t border-gray-300 py-2 px-3">
-                                    স্থায়ী সম্পদ
-                                </div>
-                            </td>
-                            <td style="padding: 0px !important;">
-                                <div class="w-full  py-2 px-3 text-end">
-                                    {!! bn_number(number_format($totalBankDeposit,2)) !!}
-                                </div>
-                                <div class="w-100 border-t border-gray-300 py-2 px-3 text-end">
-                                    
-                                    {!! bn_number(number_format($totalFixedAsset,2)) !!}
-                                </div>
-                            </td>
-                        </tr>
                         
-                        <tr>
+                        {{-- <tr>
                             <td colspan="2" class="bg-gray-100 font-semibold">আয় সমূহ:</td>
                             <td colspan="2" class="bg-gray-100 font-semibold">ব্যয় সমূহ:</td>
-                        </tr>
+                        </tr> --}}
                         <tr>
                             <td style="padding: 0px !important;">
                                 @if($incomecategories)
@@ -591,35 +553,22 @@
 
                         <!-- Section for "দীর্ঘমেয়াদী বিনিয়োগ হতে মোট প্রাপ্ত আয়" and "মোট প্রদান" -->
                         <tr class="bg-gray-100">
-                            <td class="font-semibold text-right">মোট প্রাপ্তি</td>
+                            <td class="font-semibold text-right">মোট </td>
                             @php
-                                $totalIncomes = $totalIncomesExcludingCat13 + $shortTermInvestmentIncomestotal + $LongTermInvestmentIncomestotal + $totalInvestDeposit + $totalCurrentAssettWithdraw + $totalLiabilitytDeposit + $totalBankWithdraw;
+                                $totalIncomes = $totalIncomesExcludingCat13 + $shortTermInvestmentIncomestotal + $LongTermInvestmentIncomestotal ;
                             @endphp
                             <td class="font-semibold text-end">{!! bn_number(number_format($totalIncomes,2)) !!}</td>
-                            <td class="font-semibold text-right">মোট প্রদান</td>
+                            <td class="font-semibold text-right">মোট</td>
                             @php
-                                $totalExpenses = $totalExpensesExcludingCat7 + $shortTermInvestmentexpensestotal + $LongTermInvestmentexpensestotal + $totalInvestWithdraw + $totalCurrentAssetDeposit + $totalLiabilityWithdraw + $totalBankDeposit + $totalFixedAsset;
+                                $totalExpenses = $totalExpensesExcludingCat7 + $shortTermInvestmentexpensestotal + $LongTermInvestmentexpensestotal ;
                             @endphp
                             <td class="font-semibold text-end">{!! bn_number(number_format($totalExpenses,2)) !!}</td>
                         </tr>
+                        
                         <tr class="bg-gray-100">
-                            <td class="font-semibold">@if($previousPeriod == 'lastMonth' ) গত মাসের  @endif @if($previousPeriod == 'lastYear' ) গত বছরের  @endif প্রারম্ভিক স্থিতি</td>
-                            <td class="font-semibold text-end"> 
+                            <td colspan="2" class="font-semibold">নীট লাভ বা ক্ষতি ( আয় - ব্যয়)</td>
+                            <td colspan="2" class="font-semibold text-end"> {!! bn_number(number_format( ($totalIncomes - $totalExpenses ) ,2)) !!} </td>
                             
-                                {!! bn_number(number_format( $totalpreviousBalance ,2)) !!}
-                            </td>
-                            <td class="font-semibold">সমাপনী স্থিতি</td>
-                            @php
-                                // Calculate the closing balance
-                                $closingBalance = ($totalIncomes - $totalExpenses) + $totalpreviousBalance;
-                            @endphp
-                            <td class="font-semibold text-end">{!! bn_number(number_format( $closingBalance  ,2)) !!}</td>
-                        </tr>
-                        <tr class="bg-gray-100">
-                            <td class="font-semibold">মোট</td>
-                            <td class="font-semibold text-end"> {!! bn_number(number_format( ($totalIncomes + $totalpreviousBalance ) ,2)) !!} </td>
-                            <td class="font-semibold">মোট</td>
-                            <td class="font-semibold text-end"> {!! bn_number(number_format( $closingBalance + $totalExpenses ,2)) !!} </td>
                         </tr>
                         
                     </tbody>
@@ -628,40 +577,28 @@
         </div>
 
         <div class="mb-12 order-1">
-            <h2 class="text-2xl font-semibold text-center mb-6">সংক্ষিপ্ত নগদ প্রবাহ বিবরণী</h2>
+            <h2 class="text-2xl font-semibold text-center mb-6">সংক্ষিপ্ত আয় ও ব্যয় বিবরণী</h2>
             <div class="overflow-x-auto">
                 <table class="w-full bg-white shadow-lg rounded-lg report-table border-collapse">
                     <thead>
                         <tr>
                             <th class="w-2/3 md:w-3/4 rounded-tl-lg">বিবরণ</th>
-                            <th class="w-1/3 md:w-1/4 rounded-tr-lg">টাকার পরিমাণ</th>
+                            <th class="w-1/3 md:w-1/4 rounded-tr-lg">টাকা</th>
                         </tr>
                     </thead>
 
-                    @php
-                        // Correct bank balance logic
-                        $bankBalance = $totalBankDeposit - $totalBankWithdraw;
-
-                        
-                        $handcash = $closingBalance - $bankBalance;
-                        
-
-                        // Total cash (hand + bank)
-                        $totalCash = $handcash + $bankBalance;
-                    @endphp
-
                     <tbody>
                         <tr>
-                            <td>মোট নগদ স্থিতি</td>
-                            <td class="text-end">{!! bn_number(number_format($totalCash, 2)) !!}</td>
+                            <td>আয় সমূহ </td>
+                            <td class="text-end">{!! bn_number(number_format($totalIncomes, 2)) !!}</td>
                         </tr>
                         <tr>
-                            <td>হাতে নগদ স্থিতি</td>
-                            <td class="text-end">{!! bn_number(number_format($handcash, 2)) !!}</td>
+                            <td>ব্যয় সমূহ</td>
+                            <td class="text-end">{!! bn_number(number_format($totalExpenses, 2)) !!}</td>
                         </tr>
                         <tr>
-                            <td class="rounded-bl-lg">ব্যাংক জমা স্থিতি</td>
-                            <td class="rounded-br-lg text-end">{!! bn_number(number_format($bankBalance, 2)) !!}</td>
+                            <td class="rounded-bl-lg">নীট লাভ বা ক্ষতি</td>
+                            <td class="rounded-br-lg text-end">{!! bn_number(number_format(($totalIncomes - $totalExpenses ), 2)) !!}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -739,10 +676,7 @@
     </script>
 
 
-    <!-- Print Section -->
-    <div class="text-center no-print">
-            <button onclick="window.print()" class="btn btn-primary mt-3">প্রিন্ট করুন</button>
-        </div>
+   
 
 </body>
 </html>
