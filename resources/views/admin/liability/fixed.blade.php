@@ -24,7 +24,7 @@
                                 <th>Liability Name</th>
                                 @endif
 
-                                <th>Liability Issued Name </th>
+                                
                                 <th>Amount</th>
                                 <th>Description</th>
                                 
@@ -43,16 +43,19 @@
                                 @if($categorysettings->liability_name_table == 2)
                                 <td>{{ $liability->name }}</td>
                                 @endif
+
+                                @php
+
+                                    $totalDeposits = $liability->transactions->where('transaction_type', 'Deposit')->sum('amount');
+                                    $totalWithdrawals = $liability->transactions->where('transaction_type', 'Withdraw')->sum('amount');
+
+                                    $initialAmount = $liability->transactions->first()->amount ?? 0;
+                                    $currentAmount = $totalDeposits - $totalWithdrawals;
+                                @endphp
                                 
-                                <td>{{ $liability->user_name }} </td>
                                 <td>
-                                    @if ($liability->amount < 0)
-                                    <span class="badge bg-danger">OverPaid : {{ number_format(abs($liability->amount), 2) }} Tk</span>
-                                @elseif ($liability->amount > 0)
-                                    <span class="badge bg-danger">Liability: {{ number_format($liability->amount, 2) }} Tk</span>
-                                @else
-                                    <span class="badge bg-warning">Settled </span>
-                                @endif
+                                    {{ number_format($currentAmount, 2) }} Tk
+                                
                                 </td>
                                 <td>{{ $liability->description ?? 'N/A' }}</td>
                                 
@@ -68,9 +71,9 @@
                                                         class="bx bx-wallet me-1"></i> Update Liability Transaction</a>
                                                         <a class=" btn btn-sm btn-outline-primary" href="{{ route('seeLiabilityTrans', $liability->slug) }}" ><i
                                                         class="bx bx-wallet me-1"></i> See All Liability Transactions</a>
-                                                <a class=" btn btn-sm btn-outline-secondary" href="" data-bs-toggle="modal"
+                                                {{-- <a class=" btn btn-sm btn-outline-secondary" href="" data-bs-toggle="modal"
                                                 data-bs-target="#viewModal{{ $liability->id }}"><i
-                                                        class="bx bx-show me-1"></i> See Details</a>
+                                                        class="bx bx-show me-1"></i> See Details</a> --}}
                                                     <a class=" btn btn-sm btn-outline-secondary {{ Auth::user()->access->liability == 1 ? 'disabled' : '' }}" href="" data-bs-toggle="modal"
                                                     data-bs-target="#editModal{{ $liability->id }}"><i
                                                             class="bx bx-edit-alt me-1"></i> Edit</a>
@@ -113,9 +116,9 @@
                     @csrf
             
                     <!-- Step 1: Asset Details -->
-                    <div id="step1">
+                    <div>
                         <div class="row">
-                            <h4>Step 1: Liability Details</h4>
+                            <h4>Liability Details</h4>
             
                             <div class="col-6 mb-3">
                                 <label>Name</label>
@@ -137,7 +140,7 @@
                             </div>
 
                             
-                            <input type="hidden" value="5" name="category_id">
+                            <input type="hidden" value="4" name="category_id">
                 
                             <div class="col-6 mb-3">
                                 <label for="add_income_category_id" class="form-label">Category</label>
@@ -161,13 +164,13 @@
                             </div>
                 
                             <div class="col-12">
-                                <button type="button" class="btn btn-primary" onclick="nextStep()">Next</button>
+                                <button type="submit" class="btn btn-primary">Submit</button>
                             </div>
                         </div>
                     </div>
             
                     <!-- Step 2: User Details -->
-                    <div id="step2" style="display: none;">
+                    {{-- <div id="step2" style="display: none;">
                         <div class="row">
                             <h4>Step 2: User Details</h4>
 
@@ -237,10 +240,10 @@
 
                             <div class="col-12 mb-3">
                                 <button type="button" class="btn btn-secondary" onclick="prevStep()">Back</button>
-                                <button type="submit" class="btn btn-primary">Submit</button>
+                                
                             </div>
                         </div>
-                    </div>
+                    </div> --}}
                 </form>
                 </div>
             </div>  
@@ -265,9 +268,9 @@
                         @method('PUT')
                         <div class="modal-body">
                             <!-- Step 1: Asset Details -->
-                                <div id="step11{{ $liability->id }}">
+                                <div>
                                     <div class="row">
-                                        <h4>Step 1: Liability Details</h4>
+                                        <h4>Liability Details</h4>
                         
                                         <div class="col-6 mb-3">
                                             <label>Name</label>
@@ -279,10 +282,7 @@
                                             <input type="text" name="slug" class="form-control slug-output" required value="{{ $liability->slug }}" >
                                         </div>
                             
-                                        <div class="col-6 mb-3">
-                                            <label>Amount</label>
-                                            <input type="number" name="amount" class="form-control" required value="{{ $liability->amount }}" >
-                                        </div>
+                                        
 
                                         <div class="col-6 mb-3">
                                             <label>Entry Date</label>
@@ -293,7 +293,7 @@
                                         
                                         <input type="hidden" value="{{ $liability->category_id }}" name="category_id">
                             
-                                        <div class="col-6 mb-3">
+                                        <div class="col-12 mb-3">
                                             <label for="add_income_category_id" class="form-label">Category</label>
                                             <select class="form-select category-select" id="edit_income_category_id{{ $liability->id }}" name="subcategory_id" required>
                                                 <option value="">Select Category</option>
@@ -322,13 +322,13 @@
                                         </div>
                             
                                         <div class="col-12">
-                                            <button type="button" class="btn btn-primary" onclick="nextStep1({{ $liability->id }})">Next</button>
+                                            <button type="submit" class="btn btn-primary">Submit</button>
                                         </div>
                                     </div>
                                 </div>
                         
                                 <!-- Step 2: User Details -->
-                                <div id="step21{{ $liability->id }}" style="display: none;">
+                                {{-- <div id="step21{{ $liability->id }}" style="display: none;">
                                     <div class="row">
                                         <h4>Step 2: User Details</h4>
 
@@ -401,10 +401,10 @@
 
                                         <div class="col-12 mb-3">
                                             <button type="button" class="btn btn-secondary" onclick="prevStep1({{ $liability->id }})">Back</button>
-                                            <button type="submit" class="btn btn-primary">Submit</button>
+                                            
                                         </div>
                                     </div>
-                                </div>
+                                </div> --}}
 
 
                         </div>
@@ -418,7 +418,7 @@
     @endif
     <!-- / Modal -->
 
-    @if($liabilities->isNotEmpty())
+    {{-- @if($liabilities->isNotEmpty())
         @foreach ($liabilities as $liability )
 
         <div class="modal fade" id="viewModal{{ $liability->id }}">
@@ -463,7 +463,7 @@
             </div>
         </div>
         @endforeach
-    @endif
+    @endif --}}
 
     @if($liabilities->isNotEmpty())
         @foreach ($liabilities as $liability )
@@ -516,7 +516,7 @@
     @endif
 
 
-    @if($liabilities->isNotEmpty())
+    {{-- @if($liabilities->isNotEmpty())
         @foreach ($liabilities as $liability )
 
         <div class="modal fade" id="seeModal{{ $liability->id }}">
@@ -578,9 +578,9 @@
             </div>
         </div>
         @endforeach
-    @endif
+    @endif --}}
 
-    @if($liabilityTransactions->isNotEmpty())
+    {{-- @if($liabilityTransactions->isNotEmpty())
         @foreach ($liabilityTransactions as $liabilityTransaction )
 
         <div class="modal fade" id="edittranModal{{ $liabilityTransaction->id }}">
@@ -628,7 +628,7 @@
             </div>
         </div>
         @endforeach
-    @endif
+    @endif --}}
 
     <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
@@ -1187,7 +1187,7 @@
     });
     </script>
     
-<script>
+{{-- <script>
     $(document).on('change', '.contact-select', function () {
         // Get selected subcategory name
         let subcategoryName = $(this).find('option:selected').text();
@@ -1204,5 +1204,5 @@
             $form.find('.slug-output').val(slug);
         }
     });
-</script>
+</script> --}}
 @endsection

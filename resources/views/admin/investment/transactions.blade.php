@@ -11,48 +11,104 @@
             </div>
             <div class="card-body position-relative ">
                 <div class="table-responsive text-nowrap">
-                    <table class="table" id="myTable">
+                    <table class="table table-bordered" id="myTable">
                                     <thead>
-                                        <tr>
-                                            <th>Sl</th>
-                                            <th>Transaction Type</th>
-                                            <th>Amount</th>
-                                            <th>Transaction Date </th>
-                                            <th>Description</th>
-                                            <th>Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody class="table-border-bottom-0">
-                                        @if($transactions->isNotEmpty())
-                                        @foreach ($transactions as $investmentTransaction )
-                                        <tr>
-                                            <td>{{ $loop->iteration }}</td>
-                                            <td>{{ $investmentTransaction->transaction_type }}</td>
-                                            <td>{{ $investmentTransaction->amount }}</td>
-                                            <td>{{ $investmentTransaction->transaction_date }} </td>
-                                            <td>{{ $investmentTransaction->description }}</td>
-                                            
-                                            <td>
-                                                <div class="d-flex align-items-center gap-1 cursor-pointer">
-                                                        <a class=" btn btn-sm btn-outline-secondary {{ Auth::user()->access->investment == 1 ? 'disabled' : '' }}" href="" data-bs-toggle="modal"
-                                                        data-bs-target="#edittranModal{{ $investmentTransaction->id }}"><i
-                                                                class="bx bx-edit-alt me-1"></i> Edit</a>
-                                                    <form action="{{ route('investmenttransaction.destroy', $investmentTransaction->id) }}" method="POST" class="d-inline">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <button type="submit" class="btn btn-sm btn-outline-danger delete-confirm {{ Auth::user()->access->investment == 1 ? 'disabled' : '' }}" ><i
-                                                                class="bx bx-trash me-1"></i> Delete</button>
-                                                    </form>
-                                                </div>
-                                            </td>
-                                        </tr> 
-                                        @endforeach
-                                        @else
-                                        <tr>
-                                            <td colspan="4" class="text-center">No investment Transaction found.</td>
-                                        </tr>
-                                        @endif
-                                    </tbody>
+    <tr>
+        <th colspan="5" class="w-50">
+                                            <div class="text-center w-full py-2">Deposit</div>
+                                        </th>
+                                        <th colspan="5" class="w-50">
+                                            <div class="text-center w-full py-2">Withdraw</div>
+                                        </th>
+    </tr>
+    <tr>
+        <th>SL</th>
+        <th>Date</th>
+        <th>Amount</th>
+        <th>Description</th>
+        <th>Action</th>
+
+        <th>SL</th>
+        <th>Date</th>
+        <th>Amount</th>
+        <th>Description</th>
+        <th>Action</th>
+    </tr>
+</thead>
+<tbody class="table-border-bottom-0">
+    @php
+        $depositTransactions = $transactions->where('transaction_type', 'Deposit')->values();
+        $withdrawTransactions = $transactions->where('transaction_type', 'Withdraw')->values();
+        $maxCount = max($depositTransactions->count(), $withdrawTransactions->count());
+    @endphp
+
+    @if ($maxCount > 0)
+        @for ($i = 0; $i < $maxCount; $i++)
+            <tr>
+                {{-- Deposit Column --}}
+                @if (isset($depositTransactions[$i]))
+                    <td>{{ $i + 1 }}</td>
+                    <td>{{ $depositTransactions[$i]->transaction_date }}</td>
+                    <td>{{ $depositTransactions[$i]->amount }}</td>
+                    <td>{{ $depositTransactions[$i]->description }}</td>
+                    <td>
+                        <div class="d-flex align-items-center gap-1">
+                            <a class="btn btn-sm btn-outline-secondary {{ Auth::user()->access->investment == 1 ? 'disabled' : '' }}"
+                               href="#" data-bs-toggle="modal"
+                               data-bs-target="#edittranModal{{ $depositTransactions[$i]->id }}">
+                                <i class="bx bx-edit-alt me-1"></i> Edit
+                            </a>
+                            <form action="{{ route('investmenttransaction.destroy', $depositTransactions[$i]->id) }}"
+                                  method="POST" class="d-inline">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit"
+                                        class="btn btn-sm btn-outline-danger delete-confirm {{ Auth::user()->access->investment == 1 ? 'disabled' : '' }}">
+                                    <i class="bx bx-trash me-1"></i> Delete
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                @else
+                    <td colspan="5" class="text-center text-muted">-</td>
+                @endif
+
+                {{-- Withdraw Column --}}
+                @if (isset($withdrawTransactions[$i]))
+                    <td>{{ $i + 1 }}</td>
+                    <td>{{ $withdrawTransactions[$i]->transaction_date }}</td>
+                    <td>{{ $withdrawTransactions[$i]->amount }}</td>
+                    <td>{{ $withdrawTransactions[$i]->description }}</td>
+                    <td>
+                        <div class="d-flex align-items-center gap-1">
+                            <a class="btn btn-sm btn-outline-secondary {{ Auth::user()->access->investment == 1 ? 'disabled' : '' }}"
+                               href="#" data-bs-toggle="modal"
+                               data-bs-target="#edittranModal{{ $withdrawTransactions[$i]->id }}">
+                                <i class="bx bx-edit-alt me-1"></i> Edit
+                            </a>
+                            <form action="{{ route('investmenttransaction.destroy', $withdrawTransactions[$i]->id) }}"
+                                  method="POST" class="d-inline">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit"
+                                        class="btn btn-sm btn-outline-danger delete-confirm {{ Auth::user()->access->investment == 1 ? 'disabled' : '' }}">
+                                    <i class="bx bx-trash me-1"></i> Delete
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                @else
+                    <td colspan="5" class="text-center text-muted">-</td>
+                @endif
+            </tr>
+        @endfor
+    @else
+        <tr>
+            <td colspan="10" class="text-center">No Investment Transactions Found.</td>
+        </tr>
+    @endif
+</tbody>
+
                                 </table>
                 </div>
                 
@@ -178,30 +234,7 @@
 @section('scripts')
 
 @if ($transactions->isNotEmpty())
-<script>
-    $('#myTable').DataTable({
-        pageLength: 20,
-        dom: 'Bfrtip',
-        buttons: [
-            {
-                extend: 'csv',
-                text: 'Export CSV',
-                className: 'btn btn-sm my-custom-table-btn',
-                exportOptions: {
-                    columns: ':not(:last-child)' // exclude the last column
-                }
-            },
-            {
-                extend: 'print',
-                text: 'Print Table',
-                className: 'btn btn-sm my-custom-table-btn',
-                    exportOptions: {
-                    columns: ':not(:last-child)' // exclude the last column
-                }
-            }
-        ]
-    });
-</script>
+
     
 @endif
 <script>

@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\AssetTransaction;
 use Illuminate\Http\Request;
 use App\Models\Asset;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
 
 class AssetTransactionController extends Controller
 {
@@ -53,11 +55,28 @@ class AssetTransactionController extends Controller
             'transaction_date' => 'required|date',
         ]);
 
+
+
         // Create a new asset sub-subcategory
-        $assetTransaction = AssetTransaction::create($request->all());
+        
 
         // Update the asset amount based on the transaction type
         $asset = Asset::findOrFail($request->asset_id);
+
+        if ($request->transaction_type === 'Withdraw') {
+            // Calculate total deposits and withdrawals
+            $totalDeposit = $asset->transactions()->where('transaction_type', 'Deposit')->sum('amount');
+            $totalWithdraw = $asset->transactions()->where('transaction_type', 'Withdraw')->sum('amount');
+
+            $currentBalance = $totalDeposit - $totalWithdraw;
+
+            if ($request->amount > $currentBalance) {
+                throw ValidationException::withMessages([
+                    'amount' => ['Withdrawal amount exceeds current available balance of ' . number_format($currentBalance, 2)],
+                ]);
+            }
+        }
+        $assetTransaction = AssetTransaction::create($request->all());
 
         if ($request->transaction_type === 'Deposit') {
             $asset->amount += $request->amount;
@@ -95,49 +114,52 @@ class AssetTransactionController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        // Check if the user has permission to update asset transactions
+        // Check permission
         if (auth()->user()->access->asset != 2) {
             return redirect()->route('admin.dashboard')->with('error', 'You do not have permission to update asset transactions.');
         }
-        // Validate the request data
+
+        // Validate input
         $request->validate([
             'asset_id' => 'required|exists:assets,id',
-            'amount' => 'required|numeric|min:0',
+            'amount' => 'required|numeric|min:0.01',
             'transaction_type' => 'required|in:Deposit,Withdraw',
             'transaction_date' => 'required|date',
         ]);
 
-        // Find the existing asset transaction
+        // Get the transaction and asset
         $assetTransaction = AssetTransaction::findOrFail($id);
-        
-        // Save previous values before update
-        $previousAmount = $assetTransaction->amount;
-        $previousType = $assetTransaction->transaction_type;
-
-        // Update the transaction record
-        $assetTransaction->update($request->all());
-
-        // Fetch the associated asset
         $asset = Asset::findOrFail($request->asset_id);
 
-        // Reverse the previous transaction
-        if ($previousType === 'Deposit') {
-            $asset->amount -= $previousAmount;
-        } elseif ($previousType === 'Withdraw') {
-            $asset->amount += $previousAmount;
+        // Reverse previous transaction effect
+        if ($assetTransaction->transaction_type === 'Deposit') {
+            $asset->amount -= $assetTransaction->amount;
+        } elseif ($assetTransaction->transaction_type === 'Withdraw') {
+            $asset->amount += $assetTransaction->amount;
         }
 
-        // Apply the new transaction
-        $newAmount = $request->amount;
-        $newType = $request->transaction_type;
+        // 🔒 Check for over-withdrawal BEFORE updating transaction
+        if ($request->transaction_type === 'Withdraw') {
+            $totalDeposit = $asset->transactions()->where('id', '!=', $assetTransaction->id)->where('transaction_type', 'Deposit')->sum('amount');
+            $totalWithdraw = $asset->transactions()->where('id', '!=', $assetTransaction->id)->where('transaction_type', 'Withdraw')->sum('amount');
+            $currentBalance = $totalDeposit - $totalWithdraw;
 
-        if ($newType === 'Deposit') {
-            $asset->amount += $newAmount;
-        } elseif ($newType === 'Withdraw') {
-            $asset->amount -= $newAmount;
+            if ($request->amount > $currentBalance) {
+                throw ValidationException::withMessages([
+                    'amount' => ['Withdrawal amount exceeds current available balance of ' . number_format($currentBalance, 2)],
+                ]);
+            }
         }
 
-        // Save the updated asset amount
+        // Apply new transaction values
+        $assetTransaction->update($request->all());
+
+        if ($request->transaction_type === 'Deposit') {
+            $asset->amount += $request->amount;
+        } elseif ($request->transaction_type === 'Withdraw') {
+            $asset->amount -= $request->amount;
+        }
+
         $asset->save();
 
         return response()->json([
@@ -145,6 +167,7 @@ class AssetTransactionController extends Controller
             'id' => $assetTransaction->id,
         ]);
     }
+
 
 
     /**
@@ -158,19 +181,6 @@ class AssetTransactionController extends Controller
         }
         // Find the asset transaction
         $assetTransaction = AssetTransaction::findOrFail($id);
-
-        // Get the associated asset
-        $asset = Asset::findOrFail($assetTransaction->asset_id);
-
-        // Reverse the transaction effect on the asset amount
-        if ($assetTransaction->transaction_type === 'Deposit') {
-            $asset->amount -= $assetTransaction->amount;
-        } elseif ($assetTransaction->transaction_type === 'Withdraw') {
-            $asset->amount += $assetTransaction->amount;
-        }
-
-        // Save the updated asset
-        $asset->save();
 
         // Now delete the transaction
         $assetTransaction->delete();

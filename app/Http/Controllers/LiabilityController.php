@@ -67,79 +67,82 @@ class LiabilityController extends Controller
             'subcategory_id' => 'required',
             'amount' => 'required|numeric',
             'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:512',
-            'user_name' => 'nullable|string',
-            'mobile' => 'nullable|string',
+            'user_name' => 'required_if:category_id,3|nullable|string',
+            'mobile' => 'required_if:category_id,3|nullable|string',
             'email' => 'nullable|email',
-            'contact_id' => 'nullable|exists:contacts,id',
-
+            'contact_id' => 'required_if:category_id,3|nullable|exists:contacts,id',
+            'entry_date' => 'required',
         ]);
 
-        $data = $request->all();
+        $data = $request->except('amount');
         $photoPath = null;
 
-        // If contact_id is provided, use contact's image as asset photo
-        if (!empty($request->contact_id)) {
-            $contact = Contact::find($request->contact_id);
-            if ($contact) {
-                $data['photo'] = $contact->image;
-            }
-        } else {
-            // Handle photo upload
-            if ($request->hasFile('photo')) {
-                $imageFile = $request->file('photo');
-                $imageName = time() . '_' . uniqid() . '.' . $imageFile->getClientOriginalExtension();
-                $destinationPath = public_path('admin-assets/img/Liability');
-                $imageFile->move($destinationPath, $imageName);
-                $photoPath = 'admin-assets/img/Liability/' . $imageName;
-                $data['photo'] = $photoPath;
-            }
-
-            // Find or create contact
-            $existingContact = Contact::where('name', $request->user_name)
-                ->where('mobile_number', $request->mobile)
-                ->where('email', $request->email)
-                ->first();
-
-            if ($existingContact) {
-                $data['contact_id'] = $existingContact->id;
-                $data['photo'] = $existingContact->image;
+        if( $request->category_id == 3){
+            // If contact_id is provided, use contact's image as asset photo
+            if (!empty($request->contact_id)) {
+                $contact = Contact::find($request->contact_id);
+                if ($contact) {
+                    $data['photo'] = $contact->image;
+                }
             } else {
-                $baseSlug = Str::slug($this->convertToEnglish($request->user_name));
-                $slug = $baseSlug;
-                $counter = 1;
-
-                // Check if slug exists in the contacts table
-                while (Contact::where('slug', $slug)->exists()) {
-                    $slug = $baseSlug . '-' . $counter++;
+                // Handle photo upload
+                if ($request->hasFile('photo')) {
+                    $imageFile = $request->file('photo');
+                    $imageName = time() . '_' . uniqid() . '.' . $imageFile->getClientOriginalExtension();
+                    $destinationPath = public_path('admin-assets/img/Liability');
+                    $imageFile->move($destinationPath, $imageName);
+                    $photoPath = 'admin-assets/img/Liability/' . $imageName;
+                    $data['photo'] = $photoPath;
                 }
 
-                $contact = new Contact();
-                $contact->name = $request->user_name;
-                $contact->mobile_number = $request->mobile;
-                $contact->email = $request->email;
-                $contact->slug = $slug;
+                // Find or create contact
+                $existingContact = Contact::where('name', $request->user_name)
+                    ->where('mobile_number', $request->mobile)
+                    ->where('email', $request->email)
+                    ->first();
+
+                if ($existingContact) {
+                    $data['contact_id'] = $existingContact->id;
+                    $data['photo'] = $existingContact->image;
+                } else {
+                    $baseSlug = Str::slug($this->convertToEnglish($request->user_name));
+                    $slug = $baseSlug;
+                    $counter = 1;
+
+                    // Check if slug exists in the contacts table
+                    while (Contact::where('slug', $slug)->exists()) {
+                        $slug = $baseSlug . '-' . $counter++;
+                    }
+
+                    $contact = new Contact();
+                    $contact->name = $request->user_name;
+                    $contact->mobile_number = $request->mobile;
+                    $contact->email = $request->email;
+                    $contact->slug = $slug;
+                    if ($photoPath) {
+                        $contact->image = $photoPath;
+                    }
+                    $contact->national_id = $request->national_id;
+                    $contact->father_name = $request->father_name;
+                    $contact->father_mobile = $request->father_mobile;
+                    $contact->mother_name = $request->mother_name;
+                    $contact->mother_mobile = $request->mother_mobile;
+                    $contact->spouse_name = $request->spouse_name;
+                    $contact->spouse_mobile = $request->spouse_mobile;
+                    $contact->present_address = $request->present_address;
+                    $contact->permanent_address = $request->permanent_address;
+                    $contact->save();
+                    $data['contact_id'] = $contact->id;
+                }
+            }
+            // If contact_id exists but no photo uploaded, do not override photo
+            if ($request->hasFile('photo') && empty($data['photo'])) {
                 if ($photoPath) {
-                    $contact->image = $photoPath;
+                    $data['photo'] = $photoPath;
                 }
-                $contact->national_id = $request->national_id;
-                $contact->father_name = $request->father_name;
-                $contact->father_mobile = $request->father_mobile;
-                $contact->mother_name = $request->mother_name;
-                $contact->mother_mobile = $request->mother_mobile;
-                $contact->spouse_name = $request->spouse_name;
-                $contact->spouse_mobile = $request->spouse_mobile;
-                $contact->present_address = $request->present_address;
-                $contact->permanent_address = $request->permanent_address;
-                $contact->save();
-                $data['contact_id'] = $contact->id;
             }
         }
-        // If contact_id exists but no photo uploaded, do not override photo
-        if ($request->hasFile('photo') && empty($data['photo'])) {
-            if ($photoPath) {
-                $data['photo'] = $photoPath;
-            }
-        }
+        
         
         // Generate a unique slug for the liability
         $baseSlug = Str::slug($this->convertToEnglish($request->name));
@@ -152,6 +155,13 @@ class LiabilityController extends Controller
         $data['slug'] = $slug;
 
         $assetsfdf = Liability::create($data);
+
+        $firsttransaction = new LiabilityTransaction();
+        $firsttransaction->liability_id = $assetsfdf->id;
+        $firsttransaction->amount = $request->amount;
+        $firsttransaction->transaction_type = 'Deposit';
+        $firsttransaction->transaction_date = $request->entry_date;
+        $firsttransaction->save();
 
         return response()->json([
             'status' => 'success',
@@ -187,99 +197,103 @@ class LiabilityController extends Controller
         $request->validate([
             'name' => 'required',
             'subcategory_id' => 'required',
-            
-            'amount' => 'required|numeric',
+            'entry_date' => 'required',
+            'contact_id' => 'required_if:category_id,3|nullable|exists:contacts,id',
             'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:512',
+            'user_name' => 'required_if:category_id,3|nullable|string',
+            'mobile' => 'required_if:category_id,3|nullable|string',
         ]);
 
         $asset = Liability::findOrFail($id);
         $data = $request->except('amount'); // Exclude amount from update
         $photoPath = null;
 
-        // --- Contact logic ---
-        if (!empty($request->contact_id)) {
-            $contact = Contact::find($request->contact_id);
-            if ($contact) {
-                $data['photo'] = $contact->image;
-                $data['contact_id'] = $contact->id;
-            }
-        } else {
-            // If no contact_id, try to find or create contact
-            $existingContact = Contact::where('name', $request->user_name)
-                ->where('mobile_number', $request->mobile)
-                ->where('email', $request->email)
-                ->first();
-
-            if ($existingContact) {
-                $data['contact_id'] = $existingContact->id;
-                $data['photo'] = $existingContact->image;
+        if( $request->category_id == 3){
+            // --- Contact logic ---
+            if (!empty($request->contact_id)) {
+                $contact = Contact::find($request->contact_id);
+                if ($contact) {
+                    $data['photo'] = $contact->image;
+                    $data['contact_id'] = $contact->id;
+                }
             } else {
-                // Upload new image if available
-                if ($request->hasFile('photo')) {
-                    if ($asset->photo && file_exists(public_path($asset->photo))) {
-                        unlink(public_path($asset->photo));
+                // If no contact_id, try to find or create contact
+                $existingContact = Contact::where('name', $request->user_name)
+                    ->where('mobile_number', $request->mobile)
+                    ->where('email', $request->email)
+                    ->first();
+
+                if ($existingContact) {
+                    $data['contact_id'] = $existingContact->id;
+                    $data['photo'] = $existingContact->image;
+                } else {
+                    // Upload new image if available
+                    if ($request->hasFile('photo')) {
+                        if ($asset->photo && file_exists(public_path($asset->photo))) {
+                            unlink(public_path($asset->photo));
+                        }
+
+                        $imageFile = $request->file('photo');
+                        $imageName = time() . '_' . uniqid() . '.' . $imageFile->getClientOriginalExtension();
+                        $destinationPath = public_path('admin-assets/img/Liability');
+                        $imageFile->move($destinationPath, $imageName);
+                        $photoPath = 'admin-assets/img/Liability/' . $imageName;
+                        $data['photo'] = $photoPath;
                     }
 
-                    $imageFile = $request->file('photo');
-                    $imageName = time() . '_' . uniqid() . '.' . $imageFile->getClientOriginalExtension();
-                    $destinationPath = public_path('admin-assets/img/Liability');
-                    $imageFile->move($destinationPath, $imageName);
-                    $photoPath = 'admin-assets/img/Liability/' . $imageName;
-                    $data['photo'] = $photoPath;
+                    // Create new contact
+                    $baseSlug = Str::slug($this->convertToEnglish($request->user_name));
+                    $slug = $baseSlug;
+                    $counter = 1;
+
+                    // Check if slug exists in the contacts table
+                    while (Contact::where('slug', $slug)->exists()) {
+                        $slug = $baseSlug . '-' . $counter++;
+                    }
+
+                    $contact = new Contact();
+                    $contact->name = $request->user_name;
+                    $contact->mobile_number = $request->mobile;
+                    $contact->email = $request->email;
+                    $contact->slug = $slug;
+                    if ($photoPath) {
+                        $contact->image = $photoPath;
+                    }
+
+                    $contact->national_id = $request->national_id;
+                    $contact->father_name = $request->father_name;
+                    $contact->father_mobile = $request->father_mobile;
+                    $contact->mother_name = $request->mother_name;
+                    $contact->mother_mobile = $request->mother_mobile;
+                    $contact->spouse_name = $request->spouse_name;
+                    $contact->spouse_mobile = $request->spouse_mobile;
+                    $contact->present_address = $request->present_address;
+                    $contact->permanent_address = $request->permanent_address;
+
+                    $contact->save();
+
+                    $data['contact_id'] = $contact->id;
+                }
+            }
+
+            // If contact_id exists but no photo uploaded, do not override photo
+            if ($request->hasFile('photo') && empty($data['photo'])) {
+                if ($asset->photo && file_exists(public_path($asset->photo))) {
+                    unlink(public_path($asset->photo));
                 }
 
-                // Create new contact
-                $baseSlug = Str::slug($this->convertToEnglish($request->user_name));
-                $slug = $baseSlug;
-                $counter = 1;
+                $imageFile = $request->file('photo');
+                $imageName = time() . '_' . uniqid() . '.' . $imageFile->getClientOriginalExtension();
+                $destinationPath = public_path('admin-assets/img/Liability');
+                $imageFile->move($destinationPath, $imageName);
+                $photoPath = 'admin-assets/img/Liability/' . $imageName;
+                $data['photo'] = $photoPath;
 
-                // Check if slug exists in the contacts table
-                while (Contact::where('slug', $slug)->exists()) {
-                    $slug = $baseSlug . '-' . $counter++;
-                }
-
-                $contact = new Contact();
-                $contact->name = $request->user_name;
-                $contact->mobile_number = $request->mobile;
-                $contact->email = $request->email;
-                $contact->slug = $slug;
-                if ($photoPath) {
+                // If contact exists, update its image too
+                if (isset($contact) && $contact instanceof Contact) {
                     $contact->image = $photoPath;
+                    $contact->save();
                 }
-
-                $contact->national_id = $request->national_id;
-                $contact->father_name = $request->father_name;
-                $contact->father_mobile = $request->father_mobile;
-                $contact->mother_name = $request->mother_name;
-                $contact->mother_mobile = $request->mother_mobile;
-                $contact->spouse_name = $request->spouse_name;
-                $contact->spouse_mobile = $request->spouse_mobile;
-                $contact->present_address = $request->present_address;
-                $contact->permanent_address = $request->permanent_address;
-
-                $contact->save();
-
-                $data['contact_id'] = $contact->id;
-            }
-        }
-
-        // If contact_id exists but no photo uploaded, do not override photo
-        if ($request->hasFile('photo') && empty($data['photo'])) {
-            if ($asset->photo && file_exists(public_path($asset->photo))) {
-                unlink(public_path($asset->photo));
-            }
-
-            $imageFile = $request->file('photo');
-            $imageName = time() . '_' . uniqid() . '.' . $imageFile->getClientOriginalExtension();
-            $destinationPath = public_path('admin-assets/img/Liability');
-            $imageFile->move($destinationPath, $imageName);
-            $photoPath = 'admin-assets/img/Liability/' . $imageName;
-            $data['photo'] = $photoPath;
-
-            // If contact exists, update its image too
-            if (isset($contact) && $contact instanceof Contact) {
-                $contact->image = $photoPath;
-                $contact->save();
             }
         }
         // --- Generate a unique slug for the liability ---
@@ -294,22 +308,6 @@ class LiabilityController extends Controller
 
         // --- Update asset (except amount) ---
         $asset->update($data);
-
-        // --- Recalculate amount with transaction logic ---
-        $finalAmount = $request->amount;
-
-        $transactions = LiabilityTransaction::where('liability_id', $id)->get();
-
-        foreach ($transactions as $transaction) {
-            if ($transaction->transaction_type === 'Deposit') {
-                $finalAmount += $transaction->amount;
-            } elseif ($transaction->transaction_type === 'Withdraw') {
-                $finalAmount -= $transaction->amount;
-            }
-        }
-
-        $asset->amount = $finalAmount;
-        $asset->save();
 
         return response()->json([
             'status' => 'success',
@@ -333,6 +331,13 @@ class LiabilityController extends Controller
         if ($asset->photo && file_exists($oldPath)) {
             unlink($oldPath);
         }
+
+        $transactions = LiabilityTransaction::where('liability_id' , $asset->id )->get();
+        foreach ($transactions as $transaction) {
+            // Delete each transaction
+            $transaction->delete();
+        }
+
         $asset->delete();
 
         return back()->with('success', 'liability deleted successfully.');
@@ -458,19 +463,11 @@ class LiabilityController extends Controller
                     $withdrawInRange = $liability->transactions->where('transaction_type', 'Withdraw')->sum('amount');
                     $currentAmount = $depositInRange - $withdrawInRange;
 
-                    // Sum all transactions
-                    $totalDeposits = $liability->allTransactions->where('transaction_type', 'Deposit')->sum('amount');
-                    $totalWithdrawals = $liability->allTransactions->where('transaction_type', 'Withdraw')->sum('amount');
-                    $initialAmount = $liability->amount - $totalDeposits + $totalWithdrawals;
+                    $initialAmount = $liability->allTransactions->first()->amount ?? 0;
 
-                    
-                    
-
-                    if ($startDate <= $liability->entry_date ) {
+                    if ($liability->allTransactions->isNotEmpty() && $liability->allTransactions->first()->transaction_date >= $startDate) {
                         // Start date is before investment, or no previous transactions, so no previous amount
-                        $currentAmount += $initialAmount;
-                        $depositInRange += $initialAmount;
-                        $previousAmount = null;
+                        $previousAmount = $initialAmount;
                     } else {
                         // Start date is on or after investment date, so calculate previous
                         $depositBeforeStart = $liability->allTransactions
@@ -483,14 +480,14 @@ class LiabilityController extends Controller
                             ->where('transaction_date', '<', $startDate)
                             ->sum('amount');
 
-                        $previousAmount = $initialAmount + $depositBeforeStart - $withdrawBeforeStart;
+                        $previousAmount = $depositBeforeStart - $withdrawBeforeStart;
                     }
             return [
                 'slug' => $liability->slug,
                 'subcategory_name' => $liability->subcategory->name ?? 'N/A',
                 'name' => $liability->name,
                 'description' => $liability->description,
-                'value' => $currentAmount,
+                'value' => number_format($currentAmount,2),
                 'formatted_date' => \Carbon\Carbon::parse($liability->entry_date)->format('d M, Y'),
                 'start_date' => $startDate,
                 'end_date' => $endDate,

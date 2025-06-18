@@ -146,35 +146,24 @@ class AccountsController extends Controller
         foreach ($allCurrentAssets as $asset) {
             $allTxns = $asset->allTransactions;
 
-            $allTotalAssetDeposit  = $allTxns->where('transaction_type', 'Deposit')->sum('amount');
-            $allTotalAssetWithdraw = $allTxns->where('transaction_type', 'Withdraw')->sum('amount');
-            $initialAmount         = $asset->amount - $allTotalAssetDeposit + $allTotalAssetWithdraw;
-
-            $entryDate = $asset->entry_date ? Carbon::parse($asset->entry_date) : null;
+            
 
             // Current transactions (from eager-loaded relationship)
-            $deposit  = $asset->transactions->where('transaction_type', 'Deposit')->sum('amount');
-            $withdraw = $asset->transactions->where('transaction_type', 'Withdraw')->sum('amount');
+            $totalCurrentAssetDeposit  += $asset->transactions->where('transaction_type', 'Deposit')->sum('amount');
+            $totalCurrentAssetWithdraw += $asset->transactions->where('transaction_type', 'Withdraw')->sum('amount');
 
-            if ($entryDate && $entryDate->between($startDate, $endDate)) {
-                $deposit += $initialAmount;
-            } else {
+            
                 // Previous period totals
-                $prevDeposits = $asset->transactions()
+                $previousCurrentAssetDeposit += $asset->allTransactions()
                     ->where('transaction_type', 'Deposit')
                     ->where('transaction_date', '<', $startDate)
                     ->sum('amount');
 
-                $prevWithdraws = $asset->transactions()
+                $previousCurrentAssetWithdraw += $asset->allTransactions()
                     ->where('transaction_type', 'Withdraw')
                     ->where('transaction_date', '<', $startDate)
                     ->sum('amount');
 
-                if ($entryDate && $entryDate->lessThan($startDate)) {
-                    $prevDeposits += $initialAmount;
-                }
-                $previousCurrentAssetDeposit  += $prevDeposits;
-                $previousCurrentAssetWithdraw += $prevWithdraws;
 
                 // Last month
                 $lastMonthCurrentAssetDeposit += $allTxns
@@ -182,9 +171,7 @@ class AccountsController extends Controller
                     ->whereBetween('transaction_date', [$lastMonthStart, $lastMonthEnd])
                     ->sum('amount');
 
-                if ($entryDate && $entryDate->between($lastMonthStart, $lastMonthEnd)) {
-                    $lastMonthCurrentAssetDeposit += $initialAmount;
-                }
+                
 
                 $lastMonthCurrentAssetWithdraw += $allTxns
                     ->where('transaction_type', 'Withdraw')
@@ -197,18 +184,12 @@ class AccountsController extends Controller
                     ->whereBetween('transaction_date', [$lastYearStart, $lastYearEnd])
                     ->sum('amount');
 
-                if ($entryDate && $entryDate->between($lastYearStart, $lastYearEnd)) {
-                    $lastYearCurrentAssetDeposit += $initialAmount;
-                }
 
                 $lastYearCurrentAssetWithdraw += $allTxns
                     ->where('transaction_type', 'Withdraw')
                     ->whereBetween('transaction_date', [$lastYearStart, $lastYearEnd])
                     ->sum('amount');
-            }
-
-            $totalCurrentAssetDeposit  += $deposit;
-            $totalCurrentAssetWithdraw += $withdraw;
+            
         }
 
 
@@ -258,36 +239,24 @@ class AccountsController extends Controller
         foreach ($allLiabilities as $liability) {
             $allTxns = $liability->allTransactions;
 
-            $allDeposit  = $allTxns->where('transaction_type', 'Deposit')->sum('amount');
-            $allWithdraw = $allTxns->where('transaction_type', 'Withdraw')->sum('amount');
-
-            $initialAmount = $liability->amount - $allDeposit + $allWithdraw;
-
-            $entryDate = $liability->entry_date ? Carbon::parse($liability->entry_date) : null;
+            
 
             // Current transactions (from eager-loaded relationship)
-            $deposit  = $liability->transactions->where('transaction_type', 'Deposit')->sum('amount');
-            $withdraw = $liability->transactions->where('transaction_type', 'Withdraw')->sum('amount');
+            $totalLiabilityDeposit  += $liability->transactions->where('transaction_type', 'Deposit')->sum('amount');
+            $totalLiabilityWithdraw += $liability->transactions->where('transaction_type', 'Withdraw')->sum('amount');
 
-            if ($entryDate && $entryDate->between($startDate, $endDate)) {
-                $deposit += $initialAmount;
-            } else {
+            
                 // Previous Period (before startDate)
-                $prevDeposits = $liability->transactions()
+                $totalPreviousLiabilityDeposit += $liability->allTransactions()
                     ->where('transaction_type', 'Deposit')
                     ->where('transaction_date', '<', $startDate)
                     ->sum('amount');
 
-                $prevWithdraws = $liability->transactions()
+                $totalPreviousLiabilityWithdraw += $liability->allTransactions()
                     ->where('transaction_type', 'Withdraw')
                     ->where('transaction_date', '<', $startDate)
                     ->sum('amount');
 
-                if ($entryDate && $entryDate->lessThan($startDate)) {
-                    $prevDeposits += $initialAmount;
-                }
-                $totalPreviousLiabilityDeposit  += $prevDeposits;
-                $totalPreviousLiabilityWithdraw += $prevWithdraws;
 
                 // Last Month
                 $monthDeposit = $allTxns
@@ -300,9 +269,7 @@ class AccountsController extends Controller
                     ->whereBetween('transaction_date', [$lastMonthStart, $lastMonthEnd])
                     ->sum('amount');
 
-                if ($entryDate && $entryDate->between($lastMonthStart, $lastMonthEnd)) {
-                    $monthDeposit += $initialAmount;
-                }
+                
 
                 $lastMonthLiabilityDeposit  += $monthDeposit;
                 $lastMonthLiabilityWithdraw += $monthWithdraw;
@@ -318,16 +285,11 @@ class AccountsController extends Controller
                     ->whereBetween('transaction_date', [$lastYearStart, $lastYearEnd])
                     ->sum('amount');
 
-                if ($entryDate && $entryDate->between($lastYearStart, $lastYearEnd)) {
-                    $yearDeposit += $initialAmount;
-                }
+                
 
                 $lastYearLiabilityDeposit  += $yearDeposit;
                 $lastYearLiabilityWithdraw += $yearWithdraw;
-            }
 
-            $totalLiabilityDeposit  += $deposit;
-            $totalLiabilityWithdraw += $withdraw;
         }
 
 
@@ -451,34 +413,27 @@ class AccountsController extends Controller
         foreach ($allFixedAssets as $asset) {
             $allTxns = $asset->allTransactions();
 
-            $allTotalAssetDeposit = $asset->allTransactions()->where('transaction_type', 'Deposit')->sum('amount');
-            $allTotalAssetWithdraw = $asset->allTransactions()->where('transaction_type', 'Withdraw')->sum('amount');
-            // If asset was created between the dates, include its initial amount
-            $initialAmount = $asset->amount - $allTotalAssetDeposit + $allTotalAssetWithdraw;
+            
 
             // Transactions between the dates
             $deposits = $asset->transactions->where('transaction_type', 'Deposit')->sum('amount');
             $withdraws = $asset->transactions->where('transaction_type', 'Withdraw')->sum('amount');
 
-            $entryDate = $asset->entry_date ? Carbon::parse($asset->entry_date) : null;
+            
 
-            if ($entryDate && $entryDate->between($startDate, $endDate)) {
-                $deposits += $initialAmount;
-            } else {
+            
                 // Calculate previous value
-                $prevDeposits = $asset->transactions()
+                $prevDeposits = $asset->allTransactions()
                     ->where('transaction_type', 'Deposit')
                     ->where('transaction_date', '<', $startDate)
                     ->sum('amount');
 
-                $prevWithdraws = $asset->transactions()
+                $prevWithdraws = $asset->allTransactions()
                     ->where('transaction_type', 'Withdraw')
                     ->where('transaction_date', '<', $startDate)
                     ->sum('amount');
 
-                if ($entryDate && $entryDate->lessThan($startDate)) {
-                    $prevDeposits += $initialAmount;
-                }
+                
                 $totalPreviousFixedAssetAmount += ($prevDeposits - $prevWithdraws);
 
                 // === Last Month ===
@@ -493,9 +448,7 @@ class AccountsController extends Controller
                     ->sum('amount');
 
                 // If the asset was created last month, include its initial amount
-                if ($entryDate && $entryDate->between($lastMonthStart, $lastMonthEnd)) {
-                    $monthDeposits += $initialAmount;
-                }
+                
 
                 $totallastMonthFixedAssetAmount += ($monthDeposits - $monthWithdraws);
 
@@ -512,12 +465,10 @@ class AccountsController extends Controller
                     ->sum('amount');
 
                 // If the asset was created last year, include its initial amount
-                if ($entryDate && $entryDate->between($lastYearStart, $lastYearEnd)) {
-                    $yearDeposits += $initialAmount;
-                }
+                
 
                 $totallastYearFixedAssetAmount += ($yearDeposits - $yearWithdraws);
-            }
+            
 
             $totalFixedAsset += ($deposits - $withdraws);
         }

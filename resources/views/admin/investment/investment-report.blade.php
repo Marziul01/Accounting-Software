@@ -83,7 +83,7 @@
                         @foreach ($filteredInvestments as $investment)
                         @php
                             // 1. Total transactions (all time)
-                            $initialAmount = $investment->transactions->first()->amount ?? 0;
+                            $initialAmount = $investment->allTransactions->first()->amount ?? 0;
 
                             // 2. Filtered transactions (between start and end)
                             $depositInRange = $investment->transactions->where('transaction_type', 'Deposit')->sum('amount');
@@ -92,7 +92,7 @@
 
                             
 
-                            if ($investment->transactions->isNotEmpty() && $investment->transactions->first()->transaction_date >= $startDate) {
+                            if ($investment->allTransactions->isNotEmpty() && $investment->allTransactions->first()->transaction_date >= $startDate) {
                                 // If the first transaction is on or after the start date, previous amount is just the initial amount
                                 $previousAmount = $initialAmount;
                             } else {
@@ -122,7 +122,7 @@
                             <td>
                                 <a href="{{ route('admin.report.investment', ['slug' => $investment->slug, 'start_date' => $startDate, 'end_date' => $endDate]) }}"
                                 class="btn btn-sm btn-outline-secondary {{ Auth::user()->access->income == 1 ? 'disabled' : '' }}">
-                                    <i class="bx bx-edit-alt me-1"></i> View Report
+                                     View Report
                                 </a>
 
                             </td>

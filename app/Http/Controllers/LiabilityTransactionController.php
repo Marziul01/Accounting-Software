@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Liability;
 use App\Models\LiabilityTransaction;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
 
 class LiabilityTransactionController extends Controller
 {
@@ -54,11 +56,27 @@ class LiabilityTransactionController extends Controller
             'transaction_date' => 'required|date',
         ]);
 
+        $asset = Liability::findOrFail($request->liability_id);
+
+        if ($request->transaction_type === 'Withdraw') {
+            // Calculate total deposits and withdrawals
+            $totalDeposit = $asset->transactions()->where('transaction_type', 'Deposit')->sum('amount');
+            $totalWithdraw = $asset->transactions()->where('transaction_type', 'Withdraw')->sum('amount');
+
+            $currentBalance = $totalDeposit - $totalWithdraw;
+
+            if ($request->amount > $currentBalance) {
+                throw ValidationException::withMessages([
+                    'amount' => ['Withdrawal amount exceeds current available balance of ' . number_format($currentBalance, 2)],
+                ]);
+            }
+        }
+
         // Create a new asset sub-subcategory
         $assetTransaction = LiabilityTransaction::create($request->all());
 
         // Update the asset amount based on the transaction type
-        $asset = Liability::findOrFail($request->liability_id);
+        
 
         if ($request->transaction_type === 'Deposit') {
             $asset->amount += $request->amount;
@@ -109,6 +127,19 @@ class LiabilityTransactionController extends Controller
 
         // Find the existing asset transaction
         $assetTransaction = LiabilityTransaction::findOrFail($id);
+        $asset = Liability::findOrFail($request->liability_id);
+
+        if ($request->transaction_type === 'Withdraw') {
+            $totalDeposit = $asset->transactions()->where('id', '!=', $assetTransaction->id)->where('transaction_type', 'Deposit')->sum('amount');
+            $totalWithdraw = $asset->transactions()->where('id', '!=', $assetTransaction->id)->where('transaction_type', 'Withdraw')->sum('amount');
+            $currentBalance = $totalDeposit - $totalWithdraw;
+
+            if ($request->amount > $currentBalance) {
+                throw ValidationException::withMessages([
+                    'amount' => ['Withdrawal amount exceeds current available balance of ' . number_format($currentBalance, 2)],
+                ]);
+            }
+        }
         
         // Save previous values before update
         $previousAmount = $assetTransaction->amount;
@@ -118,7 +149,7 @@ class LiabilityTransactionController extends Controller
         $assetTransaction->update($request->all());
 
         // Fetch the associated asset
-        $asset = Liability::findOrFail($request->liability_id);
+        
 
         // Reverse the previous transaction
         if ($previousType === 'Deposit') {
@@ -156,19 +187,6 @@ class LiabilityTransactionController extends Controller
             return redirect()->route('admin.dashboard')->with('error', 'You do not have permission to delete liability transactions.');
         }
         $assetTransaction = LiabilityTransaction::findOrFail($id);
-
-        // Get the associated asset
-        $asset = Liability::findOrFail($assetTransaction->asset_id);
-
-        // Reverse the transaction effect on the asset amount
-        if ($assetTransaction->transaction_type === 'Deposit') {
-            $asset->amount -= $assetTransaction->amount;
-        } elseif ($assetTransaction->transaction_type === 'Withdraw') {
-            $asset->amount += $assetTransaction->amount;
-        }
-
-        // Save the updated asset
-        $asset->save();
 
         // Now delete the transaction
         $assetTransaction->delete();

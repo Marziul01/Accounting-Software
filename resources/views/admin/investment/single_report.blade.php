@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="1024">
     <title>{{ $investment->name }} বিনিয়োগ রিপোর্ট</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
@@ -114,6 +114,8 @@
         .signature_img {
             width: 10%;
             height: auto;
+            padding-bottom: 3px;
+            border-bottom: #000 solid 1px;
         }
     </style>
 </head>
@@ -134,8 +136,8 @@
                             $initialAmount = $investment->allTransactions->first()->amount ?? 0;
 
                             // 2. Filtered transactions (between start and end)
-                            $depositInRange = $investment->transactions->where('transaction_type', 'Deposit')->sum('amount');
-                            $withdrawInRange = $investment->transactions->where('transaction_type', 'Withdraw')->sum('amount');
+                            $depositInRange = $transactions->where('transaction_type', 'Deposit')->sum('amount');
+                            $withdrawInRange = $transactions->where('transaction_type', 'Withdraw')->sum('amount');
                             $currentAmount = $depositInRange - $withdrawInRange;
 
                             
@@ -166,8 +168,8 @@
     <div class="container-fluid my-4">
         <div class="report-header">
             <img src="{{ asset($setting->site_logo) }}" height="100%" class="img" alt="">
-            <h2>{{ $setting->site_name_bangla }}</h2>
-            <h4>{{ $investment->name }} এর বিনিয়োগ রিপোর্ট</h4>
+            <h3>{{ $setting->site_name_bangla }}</h2>
+            <h5>{{ $investment->name }} এর বিনিয়োগ রিপোর্ট</h4>
             <p> {!! bn_number($startDate ?? 'সর্বপ্রথম') !!} থেকে {!! bn_number($endDate ?? now()->format('Y-m-d')) !!} পর্যন্ত </p>
             {{-- <p><strong>নাম:</strong> {{ $investment->name }}</p>
             <p><strong>বিনিয়োগ তারিখ:</strong> {!! bn_number($investment->date) !!}</p> --}}
@@ -182,30 +184,69 @@
                 <div class="table-responsive">
                     <table class="table table-bordered m-0">
                         <thead class="table-light">
-                            <tr>
-                                <th>ক্রমিক নম্বর</th>
-                                <th>তারিখ</th>
-                                <th>ধরণ</th>
-                                <th>বিবরণী</th>
-                                <th class="text-end">পরিমাণ</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse($transactions->sortBy('transaction_date') as $txn)
-                                @php $isLast = $loop->last; @endphp
-                                <tr class="{{ $isLast ? 'last-row' : '' }}">
-                                    <td>{!! bn_number($loop->iteration) !!}</td>
-                                    <td>{!! bn_number(\Carbon\Carbon::parse($txn->transaction_date)->format('d-m-y')) !!}</td>
-                                    <td>{{ $txn->transaction_type == 'Deposit' ? 'জমা' : 'উত্তোলন' }}</td>
-                                    <td>{{ $txn->description}}</td>
-                                    <td class="text-end">{!! bn_number(number_format($txn->amount, 2)) !!} টাকা</td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="4" class="text-center">কোনো লেনদেন পাওয়া যায়নি</td>
-                                </tr>
-                            @endforelse
-                        </tbody>
+    <tr>
+        <th colspan="4" class="w-50">
+                                            <div class="text-center w-full py-2">জমা</div>
+                                        </th>
+                                        <th colspan="4" class="w-50">
+                                            <div class="text-center w-full py-2">উত্তোলন</div>
+                                        </th>
+    </tr>
+    <tr>
+        <th>ক্রমিক</th>
+        <th>তারিখ</th>
+        <th>বিবরণী</th>
+        <th>পরিমাণ</th>
+
+        <th>ক্রমিক</th>
+        <th>তারিখ</th>
+        <th>বিবরণী</th>
+        <th>পরিমাণ</th>
+    </tr>
+</thead>
+<tbody>
+    @php
+        $deposits = $transactions->where('transaction_type', 'Deposit')->sortBy('transaction_date')->values();
+        $withdrawals = $transactions->where('transaction_type', 'Withdraw')->sortBy('transaction_date')->values();
+        $maxCount = max($deposits->count(), $withdrawals->count());
+
+        $totalDeposit = 0;
+        $totalWithdraw = 0;
+    @endphp
+
+    @for ($i = 0; $i < $maxCount; $i++)
+        <tr>
+            {{-- জমা সide --}}
+            @if (isset($deposits[$i]))
+                @php $deposit = $deposits[$i]; $totalDeposit += $deposit->amount; @endphp
+                <td>{!! bn_number($i + 1) !!}</td>
+                <td>{!! bn_number(\Carbon\Carbon::parse($deposit->transaction_date)->format('d-m-y')) !!}</td>
+                <td >{{ $deposit->description }} </td>
+                <td class="text-end">{!! bn_number(number_format($deposit->amount, 2)) !!} টাকা</td>
+            @else
+                <td colspan="344"></td>
+            @endif
+
+            {{-- উত্তোলন side --}}
+            @if (isset($withdrawals[$i]))
+                @php $withdraw = $withdrawals[$i]; $totalWithdraw += $withdraw->amount; @endphp
+                <td>{!! bn_number($i + 1) !!}</td>
+                <td>{!! bn_number(\Carbon\Carbon::parse($withdraw->transaction_date)->format('d-m-y')) !!}</td>
+                <td class="text-end">{{ $withdraw->description }}</td>
+                <td class="text-end">{!! bn_number(number_format($withdraw->amount, 2)) !!} টাকা</td>
+            @else
+                <td colspan="4"></td>
+            @endif
+        </tr>
+    @endfor
+
+    <tr class="table-info">
+        <td colspan="4" class="text-end"><strong>মোট জমা:</strong> {!! bn_number(number_format($totalDeposit, 2)) !!} টাকা</td>
+        <td colspan="4" class="text-end"><strong>মোট উত্তোলন:</strong> {!! bn_number(number_format($totalWithdraw, 2)) !!} টাকা</td>
+    </tr>
+    
+</tbody>
+
                     </table>
                 </div>
             </div>
@@ -217,30 +258,68 @@
                 <div class="table-responsive">
                     <table class="table table-bordered m-0">
                         <thead class="table-light">
-                            <tr>
-                                <th>ক্রমিক নম্বর</th>
-                                <th>তারিখ</th>
-                                <th>ধরণ</th>
-                                <th>বিবরণী</th>
-                                <th class="text-end">পরিমাণ</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse($merged as $record)
-                                @php $isLast = $loop->last; @endphp
-                                <tr class="{{ $isLast ? 'last-row' : '' }}">
-                                    <td>{!! bn_number($loop->iteration) !!}</td>
-                                    <td>{!! bn_number(\Carbon\Carbon::parse($record->date)->format('d-m-y')) !!}</td>
-                                    <td>{{ $record->category_id == '13' ? 'আয়' : 'ব্যয়' }}</td>
-                                    <td>{{ $record->description}}</td>
-                                    <td class="text-end">{!! bn_number(number_format($record->amount, 2)) !!} টাকা</td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="4" class="text-center">কোনো বিনিয়োগ আয়/ব্যায় পাওয়া যায়নি</td>
-                                </tr>
-                            @endforelse
-                        </tbody>
+    <tr>
+        <th colspan="4" class="w-50">
+                                            <div class="text-center w-full py-2">জমা</div>
+                                        </th>
+                                        <th colspan="4" class="w-50">
+                                            <div class="text-center w-full py-2">উত্তোলন</div>
+                                        </th>
+    </tr>
+    <tr>
+        <th>ক্রমিক</th>
+        <th>তারিখ</th>
+        <th>বিবরণী</th>
+        <th>পরিমাণ</th>
+        <th>ক্রমিক</th>
+        <th>তারিখ</th>
+        <th>বিবরণী</th>
+        <th>পরিমাণ</th>
+    </tr>
+</thead>
+<tbody>
+    @php
+        $incomes = $investmentIncomes;
+        $expenses = $investmentExpeses;
+
+        $maxCount = max($incomes->count(), $expenses->count());
+        $totalIncome = 0;
+        $totalExpense = 0;
+    @endphp
+
+    @for ($i = 0; $i < $maxCount; $i++)
+        <tr>
+            {{-- আয় --}}
+            @if(isset($incomes[$i]))
+                @php $income = $incomes[$i]; $totalIncome += $income->amount; @endphp
+                <td>{!! bn_number($i + 1) !!}</td>
+                <td>{!! bn_number(\Carbon\Carbon::parse($income->date)->format('d-m-y')) !!}</td>
+                <td >{{ $deposit->description }} </td>
+                <td class="text-end">{!! bn_number(number_format($income->amount, 2)) !!} টাকা</td>
+            @else
+                <td colspan="4"></td>
+            @endif
+
+            {{-- ব্যয় --}}
+            @if(isset($expenses[$i]))
+                @php $expense = $expenses[$i]; $totalExpense += $expense->amount; @endphp
+                <td>{!! bn_number($i + 1) !!}</td>
+                <td>{!! bn_number(\Carbon\Carbon::parse($expense->date)->format('d-m-y')) !!}</td>
+                <td >{{ $deposit->description }} </td>
+                <td class="text-end">{!! bn_number(number_format($expense->amount, 2)) !!} টাকা</td>
+            @else
+                <td colspan="4"></td>
+            @endif
+        </tr>
+    @endfor
+
+    {{-- Summary Row --}}
+    <tr class="table-info">
+        <td colspan="4" class="text-end"><strong>মোট আয়:</strong> {!! bn_number(number_format($totalIncome, 2)) !!} টাকা</td>
+        <td colspan="4" class="text-end"><strong>মোট ব্যয়:</strong> {!! bn_number(number_format($totalExpense, 2)) !!} টাকা</td>
+    </tr>
+</tbody>
+
                     </table>
                 </div>
             </div>
@@ -259,22 +338,7 @@
                         <td><strong>শুরুর পরিমাণ / পূর্বের ব্যালেন্স</strong></td>
                         <td>{!! bn_number(number_format($previousAmount, 2)) !!} টাকা</td>
                     </tr>
-                    <tr>
-                        <td><strong>মোট জমা</strong></td>
-                        <td>{!! bn_number(number_format($depositInRange, 2)) !!} টাকা</td>
-                    </tr>
-                    <tr>
-                        <td><strong>মোট উত্তোলন</strong></td>
-                        <td>{!! bn_number(number_format($withdrawInRange, 2)) !!} টাকা</td>
-                    </tr>
-                    <tr>
-                        <td><strong>মোট বিনিয়োগ হতে আয়</strong></td>
-                        <td>{!! bn_number(number_format($totalinvestmentIncomes, 2)) !!} টাকা</td>
-                    </tr>
-                    <tr>
-                        <td><strong>মোট বিনিয়োগ হতে ব্যায়</strong></td>
-                        <td>{!! bn_number(number_format($totalinvestmentExpeses, 2)) !!} টাকা</td>
-                    </tr>
+                    
                     <tr>
                         <td><strong>লাভ / ক্ষতি</strong></td>
                         <td>
@@ -290,7 +354,7 @@
                 <div class="d-flex justify-content-start mb-3">
                     <img src="{{ asset($setting->signature) }}" height="100%" class="signature_img" alt="">
                 </div>
-                <p class="signature_text mb-3">স্বাক্ষর</p>
+                
 
                 <p class="bangla-text">{{ $setting->site_owner }}</p>
 
@@ -356,7 +420,7 @@
                 $banglaDateTime = bn_number($formatted);
             @endphp
 
-            <p class="mt-4">রাসেল বুক দ্বারা প্রস্তুতকৃত - {!! $banglaDateTime !!} </p>
+            <p class="mt-4 text-center">রাসেল বুক দ্বারা প্রস্তুতকৃত - {!! $banglaDateTime !!} </p>
         </div>
 
         <div class="text-center no-print">

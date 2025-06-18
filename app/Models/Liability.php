@@ -35,11 +35,11 @@ class Liability extends Model
 
     public function transactions()
     {
-        return $this->hasMany(LiabilityTransaction::class, 'liability_id');
+        return $this->hasMany(LiabilityTransaction::class, 'liability_id')->orderBy('transaction_date', 'asc');;
     }
 
     public function allTransactions()
     {
-        return $this->hasMany(LiabilityTransaction::class, 'liability_id');
+        return $this->hasMany(LiabilityTransaction::class, 'liability_id')->orderBy('transaction_date', 'asc');;
     }
 }

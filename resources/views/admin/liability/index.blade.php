@@ -45,14 +45,17 @@
                                 @endif
 
                                 <td>{{ $liability->user_name }} </td>
+                                 @php
+
+                                    $totalDeposits = $liability->transactions->where('transaction_type', 'Deposit')->sum('amount');
+                                    $totalWithdrawals = $liability->transactions->where('transaction_type', 'Withdraw')->sum('amount');
+
+                                    $initialAmount = $liability->transactions->first()->amount ?? 0;
+                                    $currentAmount = $totalDeposits - $totalWithdrawals;
+                                @endphp
                                 <td> 
-                                    @if ($liability->amount < 0)
-                                    <span class="badge bg-danger">OverPaid : {{ number_format(abs($liability->amount), 2) }} Tk</span>
-                                @elseif ($liability->amount > 0)
-                                    <span class="badge bg-danger">Liability: {{ number_format($liability->amount, 2) }} Tk</span>
-                                @else
-                                    <span class="badge bg-warning">Settled </span>
-                                @endif
+                                     {{ number_format($currentAmount, 2) }} Tk
+                                
                                 </td>
                                 <td>{{ $liability->description ?? 'N/A' }}</td>
                                 
@@ -118,9 +121,37 @@
                         <div class="row">
                             <h4>Step 1: Liability Details</h4>
             
-                            <div class="col-6 mb-3">
+                            <div class="col-6 mb-3 d-none">
                                 <label>Name</label>
                                 <input type="text" name="name" class="form-control name-input" required>
+                            </div>
+
+                            <div class="col-6 mb-3">
+                                <label>Select Person From Contacts </label>
+                                <select name="contact_id" class="form-select contact-select" id="contact_id">
+                                    <option value=""> Select an User </option>
+                                    @if ($users)
+                                        @foreach ($users as $user )
+                                        <option 
+                                            value="{{ $user->id }}" 
+                                            data-name="{{ $user->name }}" 
+                                            data-mobile="{{ $user->mobile_number }}" 
+                                            data-email="{{ $user->email }}"
+                                            data-national_id="{{ $user->national_id ?? '' }}"
+                                            data-father_name="{{ $user->father_name ?? '' }}"
+                                            data-father_mobile="{{ $user->father_mobile ?? '' }}"
+                                            data-mother_name="{{ $user->mother_name ?? '' }}"
+                                            data-mother_mobile="{{ $user->mother_mobile ?? '' }}"
+                                            data-spouse_name="{{ $user->spouse_name ?? '' }}"
+                                            data-spouse_mobile="{{ $user->spouse_mobile ?? '' }}"
+                                            data-present_address="{{ $user->present_address ?? '' }}"
+                                            data-permanent_address="{{ $user->permanent_address ?? '' }}"
+                                            >
+                                            {{ $user->name }}
+                                        </option>
+                                        @endforeach
+                                    @endif
+                                </select>
                             </div>
                 
                             <div class="col-6 mb-3 d-none">
@@ -172,33 +203,7 @@
                         <div class="row">
                             <h4>Step 2: User Details</h4>
 
-                            <div class="col-6 mb-3">
-                                <label>Select Person From Contacts </label>
-                                <select name="contact_id" class="form-select contact-select" id="contact_id">
-                                    <option value=""> Select an User </option>
-                                    @if ($users)
-                                        @foreach ($users as $user )
-                                        <option 
-                                            value="{{ $user->id }}" 
-                                            data-name="{{ $user->name }}" 
-                                            data-mobile="{{ $user->mobile_number }}" 
-                                            data-email="{{ $user->email }}"
-                                            data-national_id="{{ $user->national_id ?? '' }}"
-                                            data-father_name="{{ $user->father_name ?? '' }}"
-                                            data-father_mobile="{{ $user->father_mobile ?? '' }}"
-                                            data-mother_name="{{ $user->mother_name ?? '' }}"
-                                            data-mother_mobile="{{ $user->mother_mobile ?? '' }}"
-                                            data-spouse_name="{{ $user->spouse_name ?? '' }}"
-                                            data-spouse_mobile="{{ $user->spouse_mobile ?? '' }}"
-                                            data-present_address="{{ $user->present_address ?? '' }}"
-                                            data-permanent_address="{{ $user->permanent_address ?? '' }}"
-                                            >
-                                            {{ $user->name }}
-                                        </option>
-                                        @endforeach
-                                    @endif
-                                </select>
-                            </div>
+                            
 
                             <div class="col-6 mb-3">
                                 <label>Photo</label>
@@ -270,9 +275,37 @@
                                     <div class="row">
                                         <h4>Step 1: Liability Details</h4>
                         
-                                        <div class="col-6 mb-3">
+                                        <div class="col-6 mb-3 d-none">
                                             <label>Name</label>
                                             <input type="text" name="name" class="form-control name-input" required value="{{ $liability->name }}">
+                                        </div>
+
+                                        <div class="col-6 mb-3">
+                                            <label>Select Person From Contacts </label>
+                                            <select name="contact_id" class="form-select contact-select" id="contact_id">
+                                                <option value=""> Select an User </option>
+                                                @if ($users)
+                                                    @foreach ($users as $user )
+                                                    <option 
+                                                        value="{{ $user->id }}" 
+                                                        data-name="{{ $user->name }}" 
+                                                        data-mobile="{{ $user->mobile_number }}" 
+                                                        data-email="{{ $user->email }}"
+                                                        data-national_id="{{ $user->national_id ?? '' }}"
+                                                        data-father_name="{{ $user->father_name ?? '' }}"
+                                                        data-father_mobile="{{ $user->father_mobile ?? '' }}"
+                                                        data-mother_name="{{ $user->mother_name ?? '' }}"
+                                                        data-mother_mobile="{{ $user->mother_mobile ?? '' }}"
+                                                        data-spouse_name="{{ $user->spouse_name ?? '' }}"
+                                                        data-spouse_mobile="{{ $user->spouse_mobile ?? '' }}"
+                                                        data-present_address="{{ $user->present_address ?? '' }}"
+                                                        data-permanent_address="{{ $user->permanent_address ?? '' }}"
+                                                        {{ $liability->contact_id == $user->id ? 'selected' : '' }} >
+                                                        {{ $user->name }}
+                                                    </option>
+                                                    @endforeach
+                                                @endif
+                                            </select>
                                         </div>
                             
                                         <div class="col-6 mb-3 d-none">
@@ -280,10 +313,7 @@
                                             <input type="text" name="slug" class="form-control slug-output" required value="{{ $liability->slug }}" >
                                         </div>
                             
-                                        <div class="col-6 mb-3">
-                                            <label>Amount</label>
-                                            <input type="number" name="amount" class="form-control" required value="{{ $liability->amount }}" >
-                                        </div>
+                                        
 
                                         <div class="col-6 mb-3">
                                             <label>Entry Date</label>
@@ -294,7 +324,7 @@
                                         
                                         <input type="hidden" value="{{ $liability->category_id }}" name="category_id">
                             
-                                        <div class="col-6 mb-3">
+                                        <div class="col-12 mb-3">
                                             <label for="add_income_category_id" class="form-label">Category</label>
                                             <select class="form-select category-select" id="edit_income_category_id{{ $liability->id }}" name="subcategory_id" required>
                                                 <option value="">Select Category</option>
@@ -333,33 +363,7 @@
                                     <div class="row">
                                         <h4>Step 2: User Details</h4>
 
-                                        <div class="col-6 mb-3">
-                                            <label>Select Person From Contacts </label>
-                                            <select name="contact_id" class="form-select contact-select" id="contact_id">
-                                                <option value=""> Select an User </option>
-                                                @if ($users)
-                                                    @foreach ($users as $user )
-                                                    <option 
-                                                        value="{{ $user->id }}" 
-                                                        data-name="{{ $user->name }}" 
-                                                        data-mobile="{{ $user->mobile_number }}" 
-                                                        data-email="{{ $user->email }}"
-                                                        data-national_id="{{ $user->national_id ?? '' }}"
-                                                        data-father_name="{{ $user->father_name ?? '' }}"
-                                                        data-father_mobile="{{ $user->father_mobile ?? '' }}"
-                                                        data-mother_name="{{ $user->mother_name ?? '' }}"
-                                                        data-mother_mobile="{{ $user->mother_mobile ?? '' }}"
-                                                        data-spouse_name="{{ $user->spouse_name ?? '' }}"
-                                                        data-spouse_mobile="{{ $user->spouse_mobile ?? '' }}"
-                                                        data-present_address="{{ $user->present_address ?? '' }}"
-                                                        data-permanent_address="{{ $user->permanent_address ?? '' }}"
-                                                        {{ $liability->contact_id == $user->id ? 'selected' : '' }} >
-                                                        {{ $user->name }}
-                                                    </option>
-                                                    @endforeach
-                                                @endif
-                                            </select>
-                                        </div>
+                                        
             
                                         <div class="col-6 mb-3">
                                             <label>Photo</label>
@@ -518,7 +522,7 @@
     @endif
 
 
-    @if($liabilities->isNotEmpty())
+    {{-- @if($liabilities->isNotEmpty())
         @foreach ($liabilities as $liability )
 
         <div class="modal fade" id="seeModal{{ $liability->id }}">
@@ -580,9 +584,9 @@
             </div>
         </div>
         @endforeach
-    @endif
+    @endif --}}
 
-    @if($liabilityTransactions->isNotEmpty())
+    {{-- @if($liabilityTransactions->isNotEmpty())
         @foreach ($liabilityTransactions as $liabilityTransaction )
 
         <div class="modal fade" id="edittranModal{{ $liabilityTransaction->id }}">
@@ -631,7 +635,7 @@
             </div>
         </div>
         @endforeach
-    @endif
+    @endif --}}
 
     <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
@@ -1088,15 +1092,20 @@
             const presentAddressInput = form.querySelector('input[name="present_address"]');
             const permanentAddressInput = form.querySelector('input[name="permanent_address"]');
     
-            if (this.value && name && mobile && email) {
+            if (this.value && name) {
                 userNameInput.value = name;
                 userNameInput.readOnly = true;
     
-                mobileInput.value = mobile;
-                mobileInput.readOnly = true;
-    
-                emailInput.value = email;
-                emailInput.readOnly = true;
+                if(mobileInput){
+                    mobileInput.value = mobile;
+                    mobileInput.readOnly = true;
+                }
+                
+                if(emailInput){
+                    emailInput.value = email;
+                    emailInput.readOnly = true;
+                }
+                
     
                 if (photoInput) {
                     photoInput.disabled = true;
@@ -1193,7 +1202,7 @@
     </script>
     
 
-    <script>
+<script>
     $(document).on('change', '.contact-select', function () {
         // Get selected subcategory name
         let subcategoryName = $(this).find('option:selected').text();

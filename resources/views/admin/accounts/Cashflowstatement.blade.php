@@ -126,6 +126,7 @@
             <button type="button" class="btn btn-warning no-print" onclick="resetFilters()">Reset</button>
 
             <a href="{{ route('admin.dashboard') }}" class="btn btn-dark no-print">Go Back</a>
+            <button onclick="window.print()" class="btn btn-primary">প্রিন্ট করুন</button>
         </form>
     </div>
     @php
@@ -741,7 +742,7 @@
 
     <!-- Print Section -->
     <div class="text-center no-print">
-            <button onclick="window.print()" class="btn btn-primary mt-3">প্রিন্ট করুন</button>
+            
         </div>
 
 </body>

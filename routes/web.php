@@ -26,6 +26,7 @@ use App\Http\Controllers\BankAccountController;
 use App\Http\Controllers\BankTransactionController;
 use App\Http\Controllers\CategoryTableSettings;
 use App\Http\Controllers\DetailedFinancialStatement;
+use App\Http\Controllers\ExportData;
 use App\Http\Controllers\FinancialStatement;
 use App\Http\Controllers\IncomeExpenseStatementController;
 use App\Http\Controllers\InvestmentCategoryController;
@@ -37,8 +38,10 @@ use App\Http\Controllers\InvestmentTransactionController;
 use App\Http\Controllers\LiabilityTransactionController;
 use App\Http\Controllers\UserController;
 use App\Models\AssetSubSubCategory;
+use App\Models\ExpenseCategory;
 use App\Models\Investment;
 use App\Models\InvestmentTransaction;
+use PHPUnit\Util\Exporter;
 
 Route::get('/', [Homecontroller::class, 'index'])->name('home');
 
@@ -161,5 +164,15 @@ Route::prefix('admin')->middleware(['auth:admin', 'admin.only'])->group(function
     Route::get('/income/expense/statement', [IncomeExpenseStatementController::class, 'incomeExpenseStatement'])->name('income-expense-statement');
     Route::get('/financial/statement', [FinancialStatement::class, 'financialStatement'])->name('financial-statement');
     Route::get('/detailed/financial/statement', [DetailedFinancialStatement::class, 'detailedfinancialStatement'])->name('detailed-financial-statement');
+
+    Route::get('/export/data', [ExportData::class, 'ExportData'])->name('Export-Data');
+    Route::get('/investments/export/{format}', [ExportData::class, 'exportInvestment'])->name('investments.export');
+    Route::get('/income/export/{format}', [ExportData::class, 'exportincome'])->name('income.export');
+    Route::get('/expense/export/{format}', [ExportData::class, 'exportexpense'])->name('expense.export');
+    Route::get('/asset/export/{format}', [ExportData::class, 'exportasset'])->name('asset.export');
+    Route::get('/liability/export/{format}', [ExportData::class, 'exportliability'])->name('liability.export');
+    Route::get('/bank/export/{format}', [ExportData::class, 'exportbank'])->name('bank.export');
+    Route::get('/expense/${id}/edit', [ExpenseController::class, 'editMdals'])->name('expenseeditMdals');
+
 });
 

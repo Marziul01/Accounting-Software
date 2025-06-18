@@ -155,19 +155,6 @@ class InvestmentTransactionController extends Controller
         }
         $investmentTransaction = InvestmentTransaction::findOrFail($id);
 
-        // Get the associated asset
-        $investment = Investment::findOrFail($investmentTransaction->asset_id);
-
-        // Reverse the transaction effect on the asset amount
-        if ($investmentTransaction->transaction_type === 'Deposit') {
-            $investment->amount -= $investmentTransaction->amount;
-        } elseif ($investmentTransaction->transaction_type === 'Withdraw') {
-            $investment->amount += $investmentTransaction->amount;
-        }
-
-        // Save the updated asset
-        $investment->save();
-
         // Now delete the transaction
         $investmentTransaction->delete();
 

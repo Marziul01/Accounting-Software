@@ -9,16 +9,16 @@
             <h5 class="mb-0">Bank Account Transactions Report</h5>
         </div>
         <div class="card-body d-flex flex-column justify-content-between flex-md-row gap-2 align-items-start align-items-md-end">
-            <div class="d-flex flex-column flex-md-row gap-2 align-items-start align-items-md-end">
-                <div>
+            <div class="d-flex flex-column flex-md-row gap-2 align-items-start align-items-md-end mobile-reports-filter">
+                <div class="mobile-reports-filter-group">
                     <label for="start_date">Start Date:</label>
                     <input type="date" id="start_date" class="form-control" value="{{ $startDate }}">
                 </div>
-                <div>
+                <div class="mobile-reports-filter-group">
                     <label for="end_date">End Date:</label>
                     <input type="date" id="end_date" class="form-control" value="{{ $endDate }}">
                 </div>
-                <div>
+                <div class="mobile-reports-filter-group1">
                     <label for="bank_account_id">Bank Account:</label>
                     <select class="form-select category-select" name="bank_account_id" id="bank_account_id">
                         @foreach($bankAccounts as $account)
@@ -28,12 +28,13 @@
                         @endforeach
                     </select>
                 </div>
+                
+            </div>
+            <div class="mobile-reports-filter-btns">
                 <button id="filterButton" class="btn btn-primary"
                     data-url="{{ route('admin.filteredBankTransactions') }}">
                     Filter Transactions
                 </button>
-            </div>
-            <div>
                 <button
                     id="bankAccountReportBtn"
                     data-base-url="{{ route('admin.report.bankaccount', ['id' => 'BANKACCOUNT_ID']) }}"

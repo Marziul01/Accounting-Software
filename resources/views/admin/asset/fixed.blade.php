@@ -24,7 +24,6 @@
                                 <th>Asset Name</th>
                                 @endif
 
-                                <th>Assets Issued Name </th>
                                 <th>Amount</th>
                                 <th>Description</th>
                                 
@@ -38,22 +37,25 @@
                                 <td>{{ $loop->iteration }}</td>
 
                                 @if($categorysettings->asset_category_table == 2)
-                                <td>{{ $asset->category->name ?? 'Asset Category Not Assigned' }} - ( {{ $asset->subcategory->name ?? 'Asset Category Not Assigned' }} ) - ( {{ $asset->subsubcategory->name ?? 'Asset Sub Category not Assigned' }} )</td>
+                                <td>{{ $asset->category->name ?? 'Asset Category Not Assigned' }} - ( {{ $asset->subcategory->name ?? 'Asset Category Not Assigned' }} )</td>
                                 @endif
                                 
                                 @if($categorysettings->asset_name_table == 2)
                                 <td>{{ $asset->name }}</td>
                                 @endif
 
-                                <td>{{ $asset->user_name }} </td>
+                                @php
+
+                                    $totalDeposits = $asset->transactions->where('transaction_type', 'Deposit')->sum('amount');
+                                    $totalWithdrawals = $asset->transactions->where('transaction_type', 'Withdraw')->sum('amount');
+
+                                    $initialAmount = $asset->transactions->first()->amount ?? 0;
+                                    $currentAmount = $totalDeposits - $totalWithdrawals;
+                                @endphp
+
                                 <td>
-                                    @if ($asset->amount < 0)
-                                    <span class="badge bg-danger">Sale of Asset  : {{ number_format(abs($asset->amount), 2) }} Tk</span>
-                                @elseif ($asset->amount > 0)
-                                    <span class="badge bg-success">Asset: {{ number_format($asset->amount, 2) }} Tk</span>
-                                @else
-                                    <span class="badge bg-warning">No Transactions / Asset Completed</span>
-                                @endif
+                                    {{ number_format($currentAmount, 2) }} Tk</span>
+                                
                                 </td>
                                 <td>{{ $asset->description ?? 'N/A' }}</td>
                                 
@@ -71,10 +73,10 @@
                                                 <a class=" btn btn-sm btn-outline-primary d-block" href="{{ route('seeAssetTrans', $asset->slug) }}" ><i
                                                     class="bx bx-wallet me-1"></i> See All Asset Transactions
                                                 </a>
-                                                <a class=" btn btn-sm btn-outline-secondary d-block" href="" data-bs-toggle="modal"
+                                                {{-- <a class=" btn btn-sm btn-outline-secondary d-block" href="" data-bs-toggle="modal"
                                                     data-bs-target="#viewModal{{ $asset->id }}"><i
                                                     class="bx bx-show me-1"></i> See Details
-                                                </a>
+                                                </a> --}}
                                                 <a class=" btn btn-sm btn-outline-secondary d-block {{ Auth::user()->access->asset == 1 ? 'disabled' : '' }}" href="" data-bs-toggle="modal"
                                                         data-bs-target="#editModal{{ $asset->id }}"><i
                                                         class="bx bx-edit-alt me-1"></i> Edit
@@ -118,14 +120,41 @@
                     @csrf
             
                     <!-- Step 1: Asset Details -->
-                    <div id="step1">
+                    <div>
                         <div class="row">
-                            <h4>Step 1: Asset Details</h4>
+                            <h4>Asset Details</h4>
             
                             <div class="col-6 mb-3">
                                 <label>Name</label>
                                 <input type="text" name="name" class="form-control name-input" required>
                             </div>
+
+                            {{-- <div class="col-6 mb-3">
+                                <label>Select Person From Contacts </label>
+                                <select name="contact_id" class="form-select contact-select" id="contact_id">
+                                    <option value=""> Select an User </option>
+                                    @if ($users)
+                                        @foreach ($users as $user )
+                                        <option 
+                                            value="{{ $user->id }}" 
+                                            data-name="{{ $user->name }}" 
+                                            data-mobile="{{ $user->mobile_number }}" 
+                                            data-email="{{ $user->email }}"
+                                            data-national_id="{{ $user->national_id ?? '' }}"
+                                            data-father_name="{{ $user->father_name ?? '' }}"
+                                            data-father_mobile="{{ $user->father_mobile ?? '' }}"
+                                            data-mother_name="{{ $user->mother_name ?? '' }}"
+                                            data-mother_mobile="{{ $user->mother_mobile ?? '' }}"
+                                            data-spouse_name="{{ $user->spouse_name ?? '' }}"
+                                            data-spouse_mobile="{{ $user->spouse_mobile ?? '' }}"
+                                            data-present_address="{{ $user->present_address ?? '' }}"
+                                            data-permanent_address="{{ $user->permanent_address ?? '' }}">
+                                            {{ $user->name }}
+                                        </option>
+                                        @endforeach
+                                    @endif
+                                </select>
+                            </div> --}}
                 
                             <div class="col-6 mb-3 d-none">
                                 <label>Slug</label>
@@ -166,42 +195,17 @@
                             </div>
                 
                             <div class="col-12">
-                                <button type="button" class="btn btn-primary" onclick="nextStep()">Next</button>
+                                <button type="submit" class="btn btn-primary">Submit</button>
                             </div>
                         </div>
                     </div>
             
                     <!-- Step 2: User Details -->
-                    <div id="step2" style="display: none;">
+                    {{-- <div id="step2" style="display: none;">
                         <div class="row">
                             <h4>Step 2: User Details</h4>
 
-                            <div class="col-6 mb-3">
-                                <label>Select Person From Contacts </label>
-                                <select name="contact_id" class="form-select contact-select" id="contact_id">
-                                    <option value=""> Select an User </option>
-                                    @if ($users)
-                                        @foreach ($users as $user )
-                                        <option 
-                                            value="{{ $user->id }}" 
-                                            data-name="{{ $user->name }}" 
-                                            data-mobile="{{ $user->mobile_number }}" 
-                                            data-email="{{ $user->email }}"
-                                            data-national_id="{{ $user->national_id ?? '' }}"
-                                            data-father_name="{{ $user->father_name ?? '' }}"
-                                            data-father_mobile="{{ $user->father_mobile ?? '' }}"
-                                            data-mother_name="{{ $user->mother_name ?? '' }}"
-                                            data-mother_mobile="{{ $user->mother_mobile ?? '' }}"
-                                            data-spouse_name="{{ $user->spouse_name ?? '' }}"
-                                            data-spouse_mobile="{{ $user->spouse_mobile ?? '' }}"
-                                            data-present_address="{{ $user->present_address ?? '' }}"
-                                            data-permanent_address="{{ $user->permanent_address ?? '' }}">
-                                            {{ $user->name }}
-                                        </option>
-                                        @endforeach
-                                    @endif
-                                </select>
-                            </div>
+                            
 
                             <div class="col-6 mb-3">
                                 <label>Photo</label>
@@ -239,12 +243,9 @@
                                 </div>
                             </div>
 
-                            <div class="col-12 mb-3">
-                                <button type="button" class="btn btn-secondary" onclick="prevStep()">Back</button>
-                                <button type="submit" class="btn btn-primary">Submit</button>
-                            </div>
+                            
                         </div>
-                    </div>
+                    </div> --}}
                 </form>
                 </div>
             </div>  
@@ -269,24 +270,49 @@
                         @method('PUT')
                         <div class="modal-body">
                             <!-- Step 1: Asset Details -->
-                                <div id="step11{{ $asset->id }}">
+                                <div>
                                     <div class="row">
-                                        <h4>Step 1: Asset Details</h4>
+                                        <h4>Asset Details</h4>
                         
                                         <div class="col-6 mb-3">
                                             <label>Name</label>
                                             <input type="text" name="name" class="form-control name-input" required value="{{ $asset->name }}">
                                         </div>
+
+                                        {{-- <div class="col-6 mb-3">
+                                            <label>Select Person From Contacts </label>
+                                            <select name="contact_id" class="form-select contact-select" id="contact_id">
+                                                <option value=""> Select an User </option>
+                                                @if ($users)
+                                                    @foreach ($users as $user )
+                                                    <option 
+                                                        value="{{ $user->id }}" 
+                                                        data-name="{{ $user->name }}" 
+                                                        data-mobile="{{ $user->mobile_number }}" 
+                                                        data-email="{{ $user->email }}" 
+                                                        data-national_id="{{ $user->national_id ?? '' }}"
+                                                        data-father_name="{{ $user->father_name ?? '' }}"
+                                                        data-father_mobile="{{ $user->father_mobile ?? '' }}"
+                                                        data-mother_name="{{ $user->mother_name ?? '' }}"
+                                                        data-mother_mobile="{{ $user->mother_mobile ?? '' }}"
+                                                        data-spouse_name="{{ $user->spouse_name ?? '' }}"
+                                                        data-spouse_mobile="{{ $user->spouse_mobile ?? '' }}"
+                                                        data-present_address="{{ $user->present_address ?? '' }}"
+                                                        data-permanent_address="{{ $user->permanent_address ?? '' }}"
+                                                        {{ $asset->contact_id == $user->id ? 'selected' : '' }} >
+                                                        {{ $user->name }}
+                                                    </option>
+                                                    @endforeach
+                                                @endif
+                                            </select>
+                                        </div> --}}
                             
                                         <div class="col-6 mb-3 d-none">
                                             <label>Slug</label>
                                             <input type="text" name="slug" class="form-control slug-output" required value="{{ $asset->slug }}" >
                                         </div>
                             
-                                        <div class="col-6 mb-3">
-                                            <label>Amount</label>
-                                            <input type="number" name="amount" class="form-control" required value="{{ $asset->amount }}" >
-                                        </div>
+                                        
 
                                         <div class="col-6 mb-3">
                                             <label>Entry Date</label>
@@ -297,7 +323,7 @@
                                         
                                         <input type="hidden" value="{{ $asset->category_id }}" name="category_id">
                             
-                                        <div class="col-6 mb-3">
+                                        <div class="col-12 mb-3">
                                             <label for="add_income_category_id" class="form-label">Category</label>
                                             <select class="form-select category-select" id="edit_income_category_id{{ $asset->id }}" name="subcategory_id" required>
                                                 <option value="">Select Category</option>
@@ -326,43 +352,17 @@
                                         </div>
                             
                                         <div class="col-12">
-                                            <button type="button" class="btn btn-primary" onclick="nextStep1({{ $asset->id }})">Next</button>
+                                            <button type="submit" class="btn btn-primary">Submit</button>
                                         </div>
                                     </div>
                                 </div>
                         
                                 <!-- Step 2: User Details -->
-                                <div id="step21{{ $asset->id }}" style="display: none;">
+                                {{-- <div id="step21{{ $asset->id }}" style="display: none;">
                                     <div class="row">
                                         <h4>Step 2: User Details</h4>
 
-                                        <div class="col-6 mb-3">
-                                            <label>Select Person From Contacts </label>
-                                            <select name="contact_id" class="form-select contact-select" id="contact_id">
-                                                <option value=""> Select an User </option>
-                                                @if ($users)
-                                                    @foreach ($users as $user )
-                                                    <option 
-                                                        value="{{ $user->id }}" 
-                                                        data-name="{{ $user->name }}" 
-                                                        data-mobile="{{ $user->mobile_number }}" 
-                                                        data-email="{{ $user->email }}" 
-                                                        data-national_id="{{ $user->national_id ?? '' }}"
-                                                        data-father_name="{{ $user->father_name ?? '' }}"
-                                                        data-father_mobile="{{ $user->father_mobile ?? '' }}"
-                                                        data-mother_name="{{ $user->mother_name ?? '' }}"
-                                                        data-mother_mobile="{{ $user->mother_mobile ?? '' }}"
-                                                        data-spouse_name="{{ $user->spouse_name ?? '' }}"
-                                                        data-spouse_mobile="{{ $user->spouse_mobile ?? '' }}"
-                                                        data-present_address="{{ $user->present_address ?? '' }}"
-                                                        data-permanent_address="{{ $user->permanent_address ?? '' }}"
-                                                        {{ $asset->contact_id == $user->id ? 'selected' : '' }} >
-                                                        {{ $user->name }}
-                                                    </option>
-                                                    @endforeach
-                                                @endif
-                                            </select>
-                                        </div>
+                                        
             
                                         <div class="col-6 mb-3">
                                             <label>Photo</label>
@@ -416,7 +416,7 @@
 
                                         
                             
-                                        <div class="col-12 row mx-0 mb-3">
+                                        {{-- {{ -- <div class="col-12 row mx-0 mb-3">
                                 
                                             <div class="col-6 form-check">
                                                 <input class="form-check-input" type="checkbox" name="send_sms" value="1" id="sendSms1"
@@ -433,10 +433,10 @@
 
                                         <div class="col-12 mb-3">
                                             <button type="button" class="btn btn-secondary" onclick="prevStep1({{ $asset->id }})">Back</button>
-                                            <button type="submit" class="btn btn-primary">Submit</button>
+                                            
                                         </div>
                                     </div>
-                                </div>
+                                </div> --}}
 
 
                         </div>
@@ -453,7 +453,7 @@
     @endif
     <!-- / Modal -->
 
-    @if($assets->isNotEmpty())
+    {{-- @if($assets->isNotEmpty())
         @foreach ($assets as $asset )
 
         <div class="modal fade" id="viewModal{{ $asset->id }}">
@@ -498,7 +498,7 @@
             </div>
         </div>
         @endforeach
-    @endif
+    @endif --}}
 
     @if($assets->isNotEmpty())
         @foreach ($assets as $asset )
@@ -552,7 +552,7 @@
     @endif
 
 
-    @if($assets->isNotEmpty())
+    {{-- @if($assets->isNotEmpty())
         @foreach ($assets as $asset )
 
         <div class="modal fade" id="seeModal{{ $asset->id }}">
@@ -614,9 +614,9 @@
             </div>
         </div>
         @endforeach
-    @endif
+    @endif --}}
 
-    @if($assetTransactions->isNotEmpty())
+    {{-- @if($assetTransactions->isNotEmpty())
         @foreach ($assetTransactions as $assetTransaction )
 
         <div class="modal fade" id="edittranModal{{ $assetTransaction->id }}">
@@ -665,7 +665,7 @@
             </div>
         </div>
         @endforeach
-    @endif
+    @endif --}}
 
     <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
@@ -1225,7 +1225,7 @@
     });
     </script>
     
-<script>
+{{-- <script>
     $(document).on('change', '.contact-select', function () {
         // Get selected subcategory name
         let subcategoryName = $(this).find('option:selected').text();
@@ -1242,5 +1242,5 @@
             $form.find('.slug-output').val(slug);
         }
     });
-</script>
+</script> --}}
 @endsection

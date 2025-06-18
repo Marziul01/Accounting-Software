@@ -94,9 +94,8 @@
                         @foreach ($filteredAssets as $asset)
                         @php
                             // 1. Total transactions (all time)
-                            $totalDeposits = $asset->allTransactions->where('transaction_type', 'Deposit')->sum('amount');
-                            $totalWithdrawals = $asset->allTransactions->where('transaction_type', 'Withdraw')->sum('amount');
-                            $initialAmount = $asset->amount - $totalDeposits + $totalWithdrawals;
+                            
+                            $initialAmount = $asset->allTransactions->first()->amount ?? 0;
 
                             // 2. Filtered transactions (between start and end)
                             $depositInRange = $asset->transactions->where('transaction_type', 'Deposit')->sum('amount');
@@ -105,11 +104,8 @@
 
                             
 
-                            if ($startDate <= $asset->entry_date ) {
-                                // Start date is before investment was created, so only show current with initial
-                                $currentAmount += $initialAmount;
-                                $depositInRange += $initialAmount;
-                                $previousAmount = null;
+                            if ($asset->allTransactions->isNotEmpty() && $asset->allTransactions->first()->transaction_date >= $startDate) {
+                                $previousAmount = $initialAmount;
                             } else {
                                 // Start date is on or after investment date
                                 $depositBeforeStart = $asset->allTransactions
@@ -122,7 +118,7 @@
                                     ->where('transaction_date', '<', $startDate)
                                     ->sum('amount');
 
-                                $previousAmount = $initialAmount + $depositBeforeStart - $withdrawBeforeStart;
+                                $previousAmount = $depositBeforeStart - $withdrawBeforeStart;
                             }
                         @endphp
                         <tr>
@@ -130,19 +126,14 @@
                             <td>{{ $asset->name }}</td>
                             <td>{{ $asset->description ?? 'N/A' }}</td>
                             <td>
-                                @if ($currentAmount < 0)
-                                    <span class="badge bg-success">Sale of Asset : {{ number_format(abs($currentAmount), 2) }} Tk</span>
-                                @elseif ($currentAmount > 0)
-                                    <span class="badge bg-success">Asset: {{ number_format($currentAmount, 2) }} Tk</span>
-                                @else
-                                    <span class="badge bg-warning">Break even</span>
-                                @endif
+                                {{ number_format($currentAmount, 2) }} Tk</span>
+                                
                             </td>
                             <td>{{ \Carbon\Carbon::parse($asset->entry_date)->format('d M, Y') }}</td>
                             <td>
                                 <a href="{{ route('admin.asset.assetreport', ['slug' => $asset->slug, 'start_date' => $startDate, 'end_date' => $endDate]) }}"
                                    class="btn btn-sm btn-outline-secondary {{ Auth::user()->access->asset == 1 ? 'disabled' : '' }}">
-                                   <i class="bx bx-edit-alt me-1"></i> View Report
+                                    View Report
                                 </a>
                             </td>
                         </tr>
@@ -335,14 +326,6 @@ function fetchFilteredAssetData() {
         if (data.length > 0) {
             data.forEach((asset, index) => {
 
-                if (asset.value < 0) {
-                    badge = `<span class="badge bg-success">Sale of Asset : ${Math.abs(asset.value).toFixed(2)} Tk</span>`;
-                } else if (asset.value > 0) {
-                    badge = `<span class="badge bg-success">Asset: ${asset.value.toFixed(2)} Tk</span>`;
-                } else {
-                    badge = `<span class="badge bg-warning">Break Even</span>`;
-                }
-
                 const reportUrl = `${routeTemplate.replace('SLUG', asset.slug)}?start_date=${encodeURIComponent(asset.start_date)}&end_date=${encodeURIComponent(asset.end_date)}`;
 
                 rows += `
@@ -351,7 +334,7 @@ function fetchFilteredAssetData() {
                         
                         <td>${asset.name}</td>
                         <td>${asset.description ?? 'N/A'}</td>
-                        <td>${badge}</td>
+                        <td>${asset.value} Tk </td>
                         <td>${asset.formatted_date}</td>
                         <td>
                             <a href="${reportUrl}" class="btn btn-sm btn-outline-secondary">

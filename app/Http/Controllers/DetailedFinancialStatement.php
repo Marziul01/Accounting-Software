@@ -123,39 +123,31 @@ class DetailedFinancialStatement extends Controller
         foreach ($allCurrentAssets as $asset) {
             $allTxns = $asset->allTransactions;
 
-            $allTotalAssetDeposit  = $allTxns->where('transaction_type', 'Deposit')->sum('amount');
-            $allTotalAssetWithdraw = $allTxns->where('transaction_type', 'Withdraw')->sum('amount');
-            $initialAmount         = $asset->amount - $allTotalAssetDeposit + $allTotalAssetWithdraw;
-
-            $entryDate = $asset->entry_date ? Carbon::parse($asset->entry_date) : null;
+            
 
             // Current transactions (from eager-loaded relationship)
             $deposit  = $asset->transactions->where('transaction_type', 'Deposit')->sum('amount');
             $withdraw = $asset->transactions->where('transaction_type', 'Withdraw')->sum('amount');
 
-            if ($entryDate && $entryDate->between($startDate, $endDate)) {
-                $deposit += $initialAmount;
-            } else {
+            
                 // Previous period totals
-                $prevDeposits = $asset->transactions()
+                $prevDeposits = $asset->allTransactions()
                     ->where('transaction_type', 'Deposit')
                     ->where('transaction_date', '<', $startDate)
                     ->sum('amount');
 
-                $prevWithdraws = $asset->transactions()
+                $prevWithdraws = $asset->allTransactions()
                     ->where('transaction_type', 'Withdraw')
                     ->where('transaction_date', '<', $startDate)
                     ->sum('amount');
 
-                if ($entryDate && $entryDate->lessThan($startDate)) {
-                    $prevDeposits += $initialAmount;
-                }
+                
                 $previousCurrentAssetDeposit  += $prevDeposits;
                 $previousCurrentAssetWithdraw += $prevWithdraws;
                 $previousCurrentAssetAmount += ($prevDeposits - $prevWithdraws);
 
                 
-            }
+            
 
             $totalCurrentAssetDeposit  += $deposit;
             $totalCurrentAssetWithdraw += $withdraw;
@@ -204,40 +196,31 @@ class DetailedFinancialStatement extends Controller
         foreach ($allShortLiabilities as $liability) {
             $allTxns = $liability->allTransactions;
 
-            $allDeposit  = $allTxns->where('transaction_type', 'Deposit')->sum('amount');
-            $allWithdraw = $allTxns->where('transaction_type', 'Withdraw')->sum('amount');
-
-            $initialAmount = $liability->amount - $allDeposit + $allWithdraw;
-
-            $entryDate = $liability->entry_date ? Carbon::parse($liability->entry_date) : null;
+            
 
             // Current transactions (from eager-loaded relationship)
             $deposit  = $liability->transactions->where('transaction_type', 'Deposit')->sum('amount');
             $withdraw = $liability->transactions->where('transaction_type', 'Withdraw')->sum('amount');
 
-            if ($entryDate && $entryDate->between($startDate, $endDate)) {
-                $deposit += $initialAmount;
-            } else {
+            
                 // Previous Period (before startDate)
-                $prevDeposits = $liability->transactions()
+                $prevDeposits = $liability->allTransactions()
                     ->where('transaction_type', 'Deposit')
                     ->where('transaction_date', '<', $startDate)
                     ->sum('amount');
 
-                $prevWithdraws = $liability->transactions()
+                $prevWithdraws = $liability->allTransactions()
                     ->where('transaction_type', 'Withdraw')
                     ->where('transaction_date', '<', $startDate)
                     ->sum('amount');
 
-                if ($entryDate && $entryDate->lessThan($startDate)) {
-                    $prevDeposits += $initialAmount;
-                }
+                
                 $totalPreviousShortLiabilityDeposit  += $prevDeposits;
                 $totalPreviousShortLiabilityWithdraw += $prevWithdraws;
 
                 $totalPreviousShortLiabilityAmount += ($prevDeposits - $prevWithdraws);
 
-            }
+            
 
             $totalShortLiabilityDeposit  += $deposit;
             $totalShortLiabilityWithdraw += $withdraw;
@@ -259,40 +242,31 @@ class DetailedFinancialStatement extends Controller
         foreach ($allLongLiabilities as $liability) {
             $allTxns = $liability->allTransactions;
 
-            $allDeposit  = $allTxns->where('transaction_type', 'Deposit')->sum('amount');
-            $allWithdraw = $allTxns->where('transaction_type', 'Withdraw')->sum('amount');
-
-            $initialAmount = $liability->amount - $allDeposit + $allWithdraw;
-
-            $entryDate = $liability->entry_date ? Carbon::parse($liability->entry_date) : null;
+            
 
             // Current transactions (from eager-loaded relationship)
             $deposit  = $liability->transactions->where('transaction_type', 'Deposit')->sum('amount');
             $withdraw = $liability->transactions->where('transaction_type', 'Withdraw')->sum('amount');
 
-            if ($entryDate && $entryDate->between($startDate, $endDate)) {
-                $deposit += $initialAmount;
-            } else {
+            
                 // Previous Period (before startDate)
-                $prevDeposits = $liability->transactions()
+                $prevDeposits = $liability->allTransactions()
                     ->where('transaction_type', 'Deposit')
                     ->where('transaction_date', '<', $startDate)
                     ->sum('amount');
 
-                $prevWithdraws = $liability->transactions()
+                $prevWithdraws = $liability->allTransactions()
                     ->where('transaction_type', 'Withdraw')
                     ->where('transaction_date', '<', $startDate)
                     ->sum('amount');
 
-                if ($entryDate && $entryDate->lessThan($startDate)) {
-                    $prevDeposits += $initialAmount;
-                }
+                
                 $totalPreviousLongLiabilityDeposit  += $prevDeposits;
                 $totalPreviousLongLiabilityWithdraw += $prevWithdraws;
 
                 $totalPreviousLongLiabilityAmount += ($prevDeposits - $prevWithdraws);
 
-            }
+            
 
             // Total amount for the liability
             $totalLongLiabilityDeposit  += $deposit;
@@ -402,20 +376,15 @@ class DetailedFinancialStatement extends Controller
         foreach ($allFixedAssets as $asset) {
             $allTxns = $asset->allTransactions();
 
-            $allTotalAssetDeposit = $asset->allTransactions()->where('transaction_type', 'Deposit')->sum('amount');
-            $allTotalAssetWithdraw = $asset->allTransactions()->where('transaction_type', 'Withdraw')->sum('amount');
-            // If asset was created between the dates, include its initial amount
-            $initialAmount = $asset->amount - $allTotalAssetDeposit + $allTotalAssetWithdraw;
+            
 
             // Transactions between the dates
             $deposits = $asset->transactions->where('transaction_type', 'Deposit')->sum('amount');
             $withdraws = $asset->transactions->where('transaction_type', 'Withdraw')->sum('amount');
 
-            $entryDate = $asset->entry_date ? Carbon::parse($asset->entry_date) : null;
+            
 
-            if ($entryDate && $entryDate->between($startDate, $endDate)) {
-                $deposits += $initialAmount;
-            } else {
+            
                 // Calculate previous value
                 $prevDeposits = $asset->transactions()
                     ->where('transaction_type', 'Deposit')
@@ -427,12 +396,8 @@ class DetailedFinancialStatement extends Controller
                     ->where('transaction_date', '<', $startDate)
                     ->sum('amount');
 
-                if ($entryDate && $entryDate->lessThan($startDate)) {
-                    $prevDeposits += $initialAmount;
-                }
+                
                 $totalPreviousFixedAssetAmount += ($prevDeposits - $prevWithdraws);
-
-            }
 
             $totalFixedAsset += ($deposits - $withdraws);
         }

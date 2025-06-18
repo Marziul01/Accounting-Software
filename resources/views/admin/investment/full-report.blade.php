@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="1024">
     <title>সম্পূর্ণ বিনিয়োগ রিপোর্ট</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
@@ -118,6 +118,8 @@
         .signature_img {
             width: 10%;
             height: auto;
+            padding-bottom: 3px;
+            border-bottom: #000 solid 1px;
         }
     </style>
 </head>
@@ -344,7 +346,7 @@
                 <div class="d-flex justify-content-start mb-3">
                     <img src="{{ asset($setting->signature) }}" height="100%" class="signature_img" alt="">
                 </div>
-                <p class="signature_text mb-3">স্বাক্ষর</p>
+                
 
                 <p class="bangla-text">{{ $setting->site_owner }}</p>
 
@@ -410,7 +412,7 @@
                 $banglaDateTime = bn_number($formatted);
             @endphp
 
-            <p class="mt-4">রাসেল বুক দ্বারা প্রস্তুতকৃত - {!! $banglaDateTime !!} </p>
+            <p class="mt-4 text-center">রাসেল বুক দ্বারা প্রস্তুতকৃত - {!! $banglaDateTime !!} </p>
         </div>
 
 

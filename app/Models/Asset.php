@@ -34,12 +34,12 @@ class Asset extends Model
     }
     public function transactions()
     {
-        return $this->hasMany(AssetTransaction::class, 'asset_id');
+        return $this->hasMany(AssetTransaction::class, 'asset_id')->orderBy('transaction_date', 'asc');;
     }
 
     public function allTransactions()
     {
         return $this->hasMany(AssetTransaction::class, 'asset_id')
-            ->orderBy('transaction_date', 'desc');
+            ->orderBy('transaction_date', 'asc');
     }
 }

@@ -32,12 +32,14 @@ class Investment extends Model
     }
     public function transactions()
     {
-        return $this->hasMany(InvestmentTransaction::class , 'investment_id');
+        return $this->hasMany(InvestmentTransaction::class, 'investment_id')
+                    ->orderBy('transaction_date', 'asc');
     }
 
     public function allTransactions()
     {
-        return $this->hasMany(InvestmentTransaction::class, 'investment_id');
+        return $this->hasMany(InvestmentTransaction::class, 'investment_id')
+                    ->orderBy('transaction_date', 'asc');
     }
 
     public function investIncome()

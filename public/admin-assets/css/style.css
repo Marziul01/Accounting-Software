@@ -345,8 +345,19 @@ div.dataTables_wrapper{
     width: 100% !important;
   }
   .mobile-reports-filter-btns{
-    overflow-x: auto !important;
+    
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr); /* always 2 columns */
+    gap: 10px;
+    width: 100%;
   }
+  .mobile-reports-filter-btns button {
+        width: 100%;
+        display: block !important;
+        padding: 5px;
+        font-size: 14px;
+    
+    }
   .dataTables_length {
     display: flex;
     justify-content: center;

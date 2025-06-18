@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="1024">
     <title>{{ $subcategory->name }} সম্পদ রিপোর্ট</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
@@ -118,6 +118,8 @@
         .signature_img {
             width: 10%;
             height: auto;
+            padding-bottom: 3px;
+            border-bottom: #000 solid 1px;
         }
     </style>
 </head>
@@ -138,8 +140,8 @@
     <div class="container-fluid my-4">
         <div class="report-header text-center border-bottom mb-4">
             <img src="{{ asset($setting->site_logo) }}" height="100%" class="img" alt="">
-            <h2>{{ $setting->site_name_bangla }}</h2>
-            <h4>{{ $subcategory->name }} এর সম্পদের রিপোর্ট</h4>
+            <h3>{{ $setting->site_name_bangla }}</h2>
+            <h5>{{ $subcategory->name }} এর সম্পদের রিপোর্ট</h4>
             <p class=""> {!! bn_number($startDate ?? 'সর্বপ্রথম') !!} থেকে {!! bn_number($endDate ?? now()->format('Y-m-d')) !!} পর্যন্ত </p>
         </div>
 
@@ -165,43 +167,29 @@
                             <tbody>
                                 @foreach ($assets->where('subcategory_id' , $subcategory->id ) as $asset)
                                     @php
-                                        $totalDeposits = $asset->allTransactions
-                                            ->where('transaction_type', 'Deposit')
-                                            ->sum('amount');
-                                        $totalWithdrawals = $asset->allTransactions
-                                            ->where('transaction_type', 'Withdraw')
-                                            ->sum('amount');
-                                        $initialAmount = $asset->amount - $totalDeposits + $totalWithdrawals;
+                                        $initialAmount = $asset->allTransactions->first()->amount ?? 0;
 
-                                        // 2. Filtered transactions (between start and end)
-                                        $depositInRange = $asset->transactions
-                                            ->where('transaction_type', 'Deposit')
-                                            ->sum('amount');
-                                        $withdrawInRange = $asset->transactions
-                                            ->where('transaction_type', 'Withdraw')
-                                            ->sum('amount');
-                                        $currentAmount = $depositInRange - $withdrawInRange;
+        // 2. Filtered transactions (between start and end)
+        $depositInRange = $asset->transactions->where('transaction_type', 'Deposit')->sum('amount');
+        $withdrawInRange = $asset->transactions->where('transaction_type', 'Withdraw')->sum('amount');
+        $currentAmount = $depositInRange - $withdrawInRange;
 
-                                        if ($startDate <= $asset->entry_date) {
-                                            // Start date is before investment was created, so only show current with initial
-                                            $currentAmount += $initialAmount;
-                                            $depositInRange += $initialAmount;
-                                            $previousAmount = null;
-                                        } else {
-                                            // Start date is on or after investment date
-                                            $depositBeforeStart = $asset->allTransactions
-                                                ->where('transaction_type', 'Deposit')
-                                                ->where('transaction_date', '<', $startDate)
-                                                ->sum('amount');
+        if ($asset->allTransactions->isNotEmpty() && $asset->allTransactions->first()->transaction_date >= $startDate) {
+            $previousAmount = $initialAmount;
+        } else {
+            // Start date is on or after investment date
+            $depositBeforeStart = $asset->allTransactions
+                ->where('transaction_type', 'Deposit')
+                ->where('transaction_date', '<', $startDate)
+                ->sum('amount');
 
-                                            $withdrawBeforeStart = $asset->allTransactions
-                                                ->where('transaction_type', 'Withdraw')
-                                                ->where('transaction_date', '<', $startDate)
-                                                ->sum('amount');
+            $withdrawBeforeStart = $asset->allTransactions
+                ->where('transaction_type', 'Withdraw')
+                ->where('transaction_date', '<', $startDate)
+                ->sum('amount');
 
-                                            $previousAmount =
-                                                $initialAmount + $depositBeforeStart - $withdrawBeforeStart;
-                                        }
+            $previousAmount = $depositBeforeStart - $withdrawBeforeStart;
+        }
 
                                         $subdeposit += $depositInRange;
                                         $subwithdraw += $withdrawInRange;
@@ -216,14 +204,7 @@
                                         <td class="text-end tiro">{!! bn_number(number_format($depositInRange, 2)) !!} টাকা</td>
                                         <td class="text-end tiro">{!! bn_number(number_format($withdrawInRange, 2)) !!} টাকা</td>
                                         <td class="text-end tiro">
-                                            @if ($currentAmount < 0)
-                                                <span class="text-success">সম্পদের বিক্রয়: {!! bn_number(number_format(abs($currentAmount), 2)) !!}
-                                                    টাকা</span>
-                                            @elseif ($currentAmount > 0)
-                                                <span class="text-success">সম্পদ: {!! bn_number(number_format(abs($currentAmount), 2)) !!} টাকা</span>
-                                            @else
-                                                <span class="text-secondary">লাভ বা ক্ষতি নেই</span>
-                                            @endif
+                                            {!! bn_number(number_format($currentAmount, 2)) !!} টাকা
                                         </td>
                                     </tr>
                                 @endforeach
@@ -256,13 +237,7 @@
                     <tr class="grand-total">
                         <td><strong>{{ $subcategory->name }} সর্বমোট  </strong></td>
                         <td class="tiro text-end"><strong>
-                                @if ($subtotal < 0)
-                                    <span class="text-success">সম্পদের বিক্রয়: {!! bn_number(number_format(abs($subtotal), 2)) !!} টাকা</span>
-                                @elseif ($subtotal > 0)
-                                    <span class="text-success">সম্পদ: {!! bn_number(number_format(abs($subtotal), 2)) !!} টাকা</span>
-                                @else
-                                    <span class="text-secondary">লাভ বা ক্ষতি নেই</span>
-                                @endif
+                                {!! bn_number(number_format($subtotal, 2)) !!} টাকা
                             </strong></td>
                     </tr>
                 </tbody>
@@ -274,7 +249,7 @@
                 <div class="d-flex justify-content-start mb-3">
                     <img src="{{ asset($setting->signature) }}" height="100%" class="signature_img" alt="">
                 </div>
-                <p class="signature_text mb-3">স্বাক্ষর</p>
+                
 
                 <p class="bangla-text">{{ $setting->site_owner }}</p>
 
@@ -340,7 +315,7 @@
                 $banglaDateTime = bn_number($formatted);
             @endphp
 
-            <p class="mt-4">রাসেল বুক দ্বারা প্রস্তুতকৃত - {!! $banglaDateTime !!} </p>
+            <p class="mt-4 text-center">রাসেল বুক দ্বারা প্রস্তুতকৃত - {!! $banglaDateTime !!} </p>
         </div>
 
         <div class="text-center no-print">

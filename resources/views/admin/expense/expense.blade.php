@@ -36,8 +36,19 @@
                                 <td>
                                     @if($expense->expense_category_id != 7)
                                     <div class="d-flex align-items-center gap-1 cursor-pointer">
-                                        <a class="btn btn-sm btn-outline-secondary {{ Auth::user()->access->expense == 1 ? 'disabled' : '' }}" href="#" data-bs-toggle="modal"
-                                           data-bs-target="#editModal{{ $expense->id }}"><i class="bx bx-edit-alt me-1"></i> Edit</a>
+                                        <button class="btn btn-sm btn-outline-secondary openEditModal" 
+    data-id="{{ $expense->id }}"
+    data-name="{{ $expense->name }}"
+    data-slug="{{ $expense->slug }}"
+    data-category-id="{{ $expense->expense_category_id }}"
+    data-sub-category-id="{{ $expense->expense_sub_category_id }}"
+    data-amount="{{ $expense->amount }}"
+    data-date="{{ $expense->date }}"
+    data-description="{{ $expense->description }}"
+    {{ Auth::user()->access->expense == 1 ? 'disabled' : '' }}>
+    <i class="bx bx-edit-alt me-1"></i> Edit
+</button>
+
                                         <form action="{{ route('expense.destroy', $expense->id) }}" method="POST" class="d-inline">
                                             @csrf
                                             @method('DELETE')
@@ -87,7 +98,7 @@
                         </div>
                         <div class="mb-3">
                             <label for="add_income_category_id" class="form-label">Category</label>
-                            <select class="form-select category-select" id="add_income_category_id" name="expense_category_id" required>
+                            <select class="form-select category-select" id="editCategory" name="expense_category_id" required>
                                 <option value="">Select Category</option>
                                 @foreach ($expenseCategories as $category)
                                     <option value="{{ $category->id }}">{{ $category->name }}</option>
@@ -128,7 +139,7 @@
     <!-- / Modal -->
       
 
-    @if($expenses->isNotEmpty())
+    {{-- @if($expenses->isNotEmpty())
         @foreach ($expenses as $expense )
 
         <div class="modal fade" id="editModal{{ $expense->id }}">
@@ -201,7 +212,7 @@
             </div>
         </div>
         @endforeach
-    @endif
+    @endif --}}
     <!-- / Modal -->
 
 
@@ -219,6 +230,68 @@
             </div>
         </div>
     </div>
+
+    <div class="modal fade" id="editExpenseModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <form id="editExpenseForm" method="POST" action="">
+      @csrf
+      @method('PUT')
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Edit Expense</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" name="expense_id" id="editExpenseId">
+          <div class="mb-3">
+            <label for="editName" class="form-label">Name</label>
+            <input type="text" class="form-control name-input" id="editName" name="name" required>
+          </div>
+          <div class="mb-3 d-none">
+                                <label for="slug" class="form-label">Slug</label>
+                                <input type="text" class="form-control slug-output" id="editslug" name="slug" readonly>
+                            </div>
+          <div class="mb-3">
+            <label for="editCategory" class="form-label">Category</label>
+            <select class="form-select" id="editCategory1" name="expense_category_id" required>
+              <option value="">Select Category</option>
+              @foreach ($expenseCategories as $category)
+                <option value="{{ $category->id }}">{{ $category->name }}</option>
+              @endforeach
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="editSubCategory" class="form-label">Sub Category</label>
+            <select class="form-select subcategory-select" 
+                                        id="editSubCategory" 
+                                        name="expense_sub_category_id" 
+                                        data-selected="{{ $expense->expense_sub_category_id }}" 
+                                        required>
+                                    <option value="">Select Sub Category</option>
+                                </select>
+          </div>
+          <div class="mb-3">
+            <label for="editAmount" class="form-label">Amount</label>
+            <input type="number" class="form-control" id="editAmount" name="amount" required>
+          </div>
+          <div class="mb-3">
+            <label for="editDate" class="form-label">Expense Date</label>
+            <input type="date" class="form-control" id="editDate" name="date" required>
+          </div>
+          <div class="mb-3">
+            <label for="editDescription" class="form-label">Description</label>
+            <textarea class="form-control" id="editDescription" name="description" rows="3"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Confirm</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+    
 
 @endsection
 
@@ -359,7 +432,7 @@
 </script>
 
 
-<script>
+{{-- <script>
     $(document).ready(function () {
         $('form[id^="editIncomeCategoryForms"] button[type="submit"]').on('click', function (e) {
             e.preventDefault();
@@ -408,7 +481,138 @@
         });
     });
 
+</script> --}}
+
+
+<script>
+    $(document).ready(function () {
+        $('#editExpenseForm').on('submit', function (e) {
+            e.preventDefault();
+
+            toastr.clear();
+
+            let form = this;
+            let formData = new FormData(form);
+            let actionUrl = form.getAttribute('action');
+
+            $.ajax({
+                url: actionUrl,
+                method: "POST",
+                data: formData,
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    $('#successMessage').text(response.message);
+                    $('#successModal').modal('show');
+                    $('#editExpenseModal').modal('hide');
+                    form.reset();
+
+                    setTimeout(function () {
+                        window.location.reload();
+                    }, 2000);
+                },
+                error: function (xhr) {
+                    if (xhr.status === 422) {
+                        let errors = xhr.responseJSON.errors;
+                        for (let key in errors) {
+                            toastr.error(errors[key][0]);
+                        }
+                    } else {
+                        toastr.error("An error occurred. Please try again.");
+                    }
+                }
+            });
+        });
+    });
 </script>
+
+<script>
+    $(document).ready(function () {
+        // On Edit button click
+        $(document).on('click', '.openEditModal', function () {
+            let button = $(this);
+
+            // Get data from button
+            let id = button.data('id');
+            let name = button.data('name');
+            let slug = button.data('slug');
+            let amount = button.data('amount');
+            let date = button.data('date');
+            let description = button.data('description');
+            let categoryId = button.data('category-id');
+            let subCategoryId = button.data('sub-category-id');
+
+            // Set form action and field values
+            let actionUrl = "{{ route('expense.update', ':id') }}".replace(':id', id);
+$('#editExpenseForm').attr('action', actionUrl);
+            $('#editExpenseId').val(id);
+            $('#editName').val(name);
+            $('#editslug').val(slug);
+            $('#editAmount').val(amount);
+            $('#editDate').val(date);
+            $('#editDescription').val(description);
+            $('#editCategory1').val(categoryId); // Set category directly first
+
+            // Load subcategories for that category
+            let subCategorySelect = $('#editSubCategory');
+            let url = "{{ route('get.expensesubcategories', ':id') }}".replace(':id', categoryId);
+            subCategorySelect.html('<option value="">Loading...</option>');
+
+            $.ajax({
+                url: url,
+                type: 'GET',
+                success: function (data) {
+                    let options = '<option value="">Select Sub Category</option>';
+                    data.forEach(function (subCategory) {
+                        let selected = subCategory.id == subCategoryId ? 'selected' : '';
+                        options += `<option value="${subCategory.id}" ${selected}>${subCategory.name}</option>`;
+                    });
+                    subCategorySelect.html(options);
+                },
+                error: function () {
+                    subCategorySelect.html('<option value="">Error loading subcategories</option>');
+                }
+            });
+
+            // Show modal
+            $('#editExpenseModal').modal('show');
+        });
+
+        // On category change, load related subcategories
+        $(document).on('change', '#editCategory1', function () {
+            let categoryId = $(this).val();
+            let subCategorySelect = $('#editSubCategory');
+            let url = "{{ route('get.expensesubcategories', ':id') }}".replace(':id', categoryId);
+
+            subCategorySelect.html('<option value="">Loading...</option>');
+
+            if (categoryId) {
+                $.ajax({
+                    url: url,
+                    type: 'GET',
+                    success: function (data) {
+                        let options = '<option value="">Select Sub Category</option>';
+                        data.forEach(function (subCategory) {
+                            options += `<option value="${subCategory.id}">${subCategory.name}</option>`;
+                        });
+                        subCategorySelect.html(options);
+                    },
+                    error: function () {
+                        subCategorySelect.html('<option value="">Error loading subcategories</option>');
+                    }
+                });
+            } else {
+                subCategorySelect.html('<option value="">Select Sub Category</option>');
+            }
+        });
+    });
+</script>
+
+
+
 
 <script>
     $(document).on('click', '.delete-confirm', function (e) {
@@ -515,6 +719,7 @@
         }
     });
 </script>
+
 
     
     

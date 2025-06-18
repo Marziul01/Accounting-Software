@@ -226,4 +226,12 @@ class ExpenseController extends Controller
 
         return view('admin.expense.full-report', compact('expenses', 'startDate', 'endDate' , 'expenseCategories'));
     }
+
+    public function editMdals($id)
+    {
+        $expense = Expense::findOrFail($id);
+        $categories = ExpenseCategory::all();
+
+        return view('admin.expense.edit-form', compact('expense', 'categories'));
+    }
 }

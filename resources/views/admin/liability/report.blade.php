@@ -93,9 +93,7 @@
                         @foreach ($filteredLiabilities as $liability)
                         @php
                             // 1. Total transactions (all time)
-                            $totalDeposits = $liability->allTransactions->where('transaction_type', 'Deposit')->sum('amount');
-                            $totalWithdrawals = $liability->allTransactions->where('transaction_type', 'Withdraw')->sum('amount');
-                            $initialAmount = $liability->amount - $totalDeposits + $totalWithdrawals;
+                            $initialAmount = $liability->allTransactions->first()->amount ?? 0;
 
                             // 2. Filtered transactions (between start and end)
                             $depositInRange = $liability->transactions->where('transaction_type', 'Deposit')->sum('amount');
@@ -104,11 +102,8 @@
 
                             
 
-                            if ($startDate <= $liability->entry_date ) {
-                                // Start date is before investment was created, so only show current with initial
-                                $currentAmount += $initialAmount;
-                                $depositInRange += $initialAmount;
-                                $previousAmount = null;
+                            if ($liability->allTransactions->isNotEmpty() && $liability->allTransactions->first()->transaction_date >= $startDate) {
+                                $previousAmount = $initialAmount;
                             } else {
                                 // Start date is on or after investment date
                                 $depositBeforeStart = $liability->allTransactions
@@ -121,7 +116,7 @@
                                     ->where('transaction_date', '<', $startDate)
                                     ->sum('amount');
 
-                                $previousAmount = $initialAmount + $depositBeforeStart - $withdrawBeforeStart;
+                                $previousAmount = $depositBeforeStart - $withdrawBeforeStart;
                             }
                         @endphp
                         <tr>
@@ -129,19 +124,13 @@
                             <td>{{ $liability->name }}</td>
                             <td>{{ $liability->description ?? 'N/A' }}</td>
                             <td>
-                                @if ($currentAmount < 0)
-                                    <span class="badge bg-danger">OverPaid : {{ number_format(abs($currentAmount), 2) }} Tk</span>
-                                @elseif ($currentAmount > 0)
-                                    <span class="badge bg-danger">Liability: {{ number_format($currentAmount, 2) }} Tk</span>
-                                @else
-                                    <span class="badge bg-warning">Settled </span>
-                                @endif
+                                {{ number_format($currentAmount, 2) }} Tk
                             </td>
                             <td>{{ \Carbon\Carbon::parse($liability->entry_date)->format('d M, Y') }}</td>
                             <td>
                                 <a href="{{ route('admin.liability.liabilityreport', ['slug' => $liability->slug, 'start_date' => $startDate, 'end_date' => $endDate]) }}"
                                    class="btn btn-sm btn-outline-secondary {{ Auth::user()->access->liability == 1 ? 'disabled' : '' }}">
-                                   <i class="bx bx-edit-alt me-1"></i> View Report
+                                    View Report
                                 </a>
                             </td>
                         </tr>
@@ -328,13 +317,7 @@ function fetchFilteredLiabilityData() {
         let rows = '';
         if (data.length > 0) {
             data.forEach((liability, index) => {
-                if (liability.value < 0) {
-                    badge = `<span class="badge bg-success">OverPaid : ${Math.abs(liability.value).toFixed(2)} Tk</span>`;
-                } else if (liability.value > 0) {
-                    badge = `<span class="badge bg-success">Liability: ${liability.value.toFixed(2)} Tk</span>`;
-                } else {
-                    badge = `<span class="badge bg-warning">Settled</span>`;
-                }
+                
 
                 const reportUrl = `${routeTemplate.replace('SLUG', liability.slug)}?start_date=${encodeURIComponent(liability.start_date)}&end_date=${encodeURIComponent(liability.end_date)}`;
 
@@ -343,7 +326,7 @@ function fetchFilteredLiabilityData() {
                         <td>${index + 1}</td>
                         <td>${liability.name}</td>
                         <td>${liability.description ?? 'N/A'}</td>
-                        <td>${badge}</td>
+                        <td>${liability.value} Tk </td>
                         <td>${liability.formatted_date}</td>
                         <td>
                             <a href="${reportUrl}" class="btn btn-sm btn-outline-secondary">

@@ -322,7 +322,7 @@ class InvestmentController extends Controller
                         'id' => $investment->id,
                         'name' => $investment->name,
                         'description' => $investment->description,
-                        'amount' => $currentAmount ?? 'No Transactions',
+                        'amount' => number_format($currentAmount,2) ?? 'No Transactions',
                         'date' => $investment->date,
                         'formatted_date' => \Carbon\Carbon::parse($investment->date)->format('d M, Y'),
                         'category_name' => $investment->investmentCategory->name ?? 'N/A',
