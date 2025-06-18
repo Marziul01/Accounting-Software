@@ -7,13 +7,14 @@ use App\Models\Expense;
 use App\Models\ExpenseCategory;
 use App\Models\ExpenseSubCategory;
 use Illuminate\Support\Facades\Auth;
+use Yajra\DataTables\Facades\DataTables;
 
 class ExpenseController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         if (Auth::user()->access->expense == 3) {
             return redirect()->route('admin.dashboard')->with('error', 'You do not have permission to access this page.');
@@ -21,6 +22,26 @@ class ExpenseController extends Controller
         // Fetch all expenses from the database
         $expenses = Expense::all();
 
+        if ($request->ajax()) {
+            $expenses = Expense::with(['expenseCategory', 'expenseSubCategory'])->orderByDesc('date');
+
+            return DataTables::of($expenses)
+                ->addIndexColumn()
+                ->editColumn('expense_category', function ($row) {
+                    return $row->expenseCategory->name ?? 'Not Assigned';
+                })
+                ->editColumn('expense_sub_category', function ($row) {
+                    return $row->expenseSubCategory->name ?? 'Not Assigned';
+                })
+                ->editColumn('date', function ($row) {
+                    return \Carbon\Carbon::parse($row->date)->format('d M, Y');
+                })
+                ->addColumn('action', function ($row) {
+                    return view('admin.expense._actions', compact('row'))->render();
+                })
+                ->rawColumns(['action']) // so buttons don’t get escaped
+                ->make(true);
+        }
 
 
         return view('admin.expense.expense', [

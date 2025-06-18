@@ -23,7 +23,7 @@
                                 <th>Actions</th>
                             </tr>
                         </thead>
-                        <tbody class="table-border-bottom-0">
+                        {{-- <tbody class="table-border-bottom-0">
                             @if($expenses->isNotEmpty())
                             @foreach ($expenses->sortByDesc('date') as $expense )
                             <tr>
@@ -37,17 +37,17 @@
                                     @if($expense->expense_category_id != 7)
                                     <div class="d-flex align-items-center gap-1 cursor-pointer">
                                         <button class="btn btn-sm btn-outline-secondary openEditModal" 
-    data-id="{{ $expense->id }}"
-    data-name="{{ $expense->name }}"
-    data-slug="{{ $expense->slug }}"
-    data-category-id="{{ $expense->expense_category_id }}"
-    data-sub-category-id="{{ $expense->expense_sub_category_id }}"
-    data-amount="{{ $expense->amount }}"
-    data-date="{{ $expense->date }}"
-    data-description="{{ $expense->description }}"
-    {{ Auth::user()->access->expense == 1 ? 'disabled' : '' }}>
-    <i class="bx bx-edit-alt me-1"></i> Edit
-</button>
+                                            data-id="{{ $expense->id }}"
+                                            data-name="{{ $expense->name }}"
+                                            data-slug="{{ $expense->slug }}"
+                                            data-category-id="{{ $expense->expense_category_id }}"
+                                            data-sub-category-id="{{ $expense->expense_sub_category_id }}"
+                                            data-amount="{{ $expense->amount }}"
+                                            data-date="{{ $expense->date }}"
+                                            data-description="{{ $expense->description }}"
+                                            {{ Auth::user()->access->expense == 1 ? 'disabled' : '' }}>
+                                            <i class="bx bx-edit-alt me-1"></i> Edit
+                                        </button>
 
                                         <form action="{{ route('expense.destroy', $expense->id) }}" method="POST" class="d-inline">
                                             @csrf
@@ -67,7 +67,7 @@
                                 <td colspan="7" class="text-center">No Expense found.</td>
                             </tr>
                             @endif
-                        </tbody>
+                        </tbody> --}}
                     </table>
                 </div>
                 
@@ -265,7 +265,7 @@
             <select class="form-select subcategory-select" 
                                         id="editSubCategory" 
                                         name="expense_sub_category_id" 
-                                        data-selected="{{ $expense->expense_sub_category_id }}" 
+                                        
                                         required>
                                     <option value="">Select Sub Category</option>
                                 </select>
@@ -298,8 +298,49 @@
 
 @section('scripts')
 
-@if ($expenses->isNotEmpty())
 <script>
+$(document).ready(function () {
+    $('#myTable').DataTable({
+        processing: true,
+        serverSide: true,
+        ajax: "{{ route('expense.index') }}",
+        pageLength: 25,
+        lengthMenu: [[25, 50, 100], [25, 50, 100]],
+        dom: 'Blfrtip',
+        buttons: [
+            {
+                extend: 'csv',
+                text: 'Export CSV',
+                className: 'btn btn-sm my-custom-table-btn',
+                exportOptions: {
+                    columns: ':not(:last-child)'
+                }
+            },
+            {
+                extend: 'print',
+                text: 'Print Table',
+                className: 'btn btn-sm my-custom-table-btn',
+                exportOptions: {
+                    columns: ':not(:last-child)'
+                }
+            }
+        ],
+        columns: [
+            { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
+            { data: 'expense_category', name: 'expenseCategory.name' },
+            { data: 'name', name: 'name' },
+            { data: 'description', name: 'description' },
+            { data: 'amount', name: 'amount' },
+            { data: 'date', name: 'date' },
+            { data: 'action', name: 'action', orderable: false, searchable: false }
+        ],
+        order: [[5, 'desc']]
+    });
+});
+</script>
+
+@if ($expenses->isNotEmpty())
+{{-- <script>
     $('#myTable').DataTable({
         pageLength: 25, // default page length
         lengthMenu: [ [25, 50, 100], [25, 50, 100] ], // dropdown options
@@ -323,7 +364,7 @@
             }
         ]
     });
-</script>
+</script> --}}
 
     
 @endif
