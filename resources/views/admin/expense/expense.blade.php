@@ -297,7 +297,7 @@
 
 
 @section('scripts')
-
+@if ($expenses->isNotEmpty())
 <script>
 $(document).ready(function () {
     $('#myTable').DataTable({
@@ -339,7 +339,7 @@ $(document).ready(function () {
 });
 </script>
 
-@if ($expenses->isNotEmpty())
+
 {{-- <script>
     $('#myTable').DataTable({
         pageLength: 25, // default page length

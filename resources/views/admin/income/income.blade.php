@@ -23,7 +23,7 @@
                                 <th>Actions</th>
                             </tr>
                         </thead>
-                        <tbody class="table-border-bottom-0">
+                        {{-- <tbody class="table-border-bottom-0">
                             @if($incomes->isNotEmpty())
                             @foreach ($incomes->sortByDesc('date') as $income )
                             <tr>
@@ -56,7 +56,7 @@
                                 <td colspan="7" class="text-center">No income found.</td>
                             </tr>
                             @endif
-                        </tbody>
+                        </tbody> --}}
                     </table>
                 </div>
                 
@@ -128,7 +128,7 @@
     <!-- / Modal -->
       
 
-    @if($incomes->isNotEmpty())
+    {{-- @if($incomes->isNotEmpty())
         @foreach ($incomes as $income )
 
         <div class="modal fade" id="editModal{{ $income->id }}">
@@ -201,7 +201,7 @@
             </div>
         </div>
         @endforeach
-    @endif
+    @endif --}}
     <!-- / Modal -->
 
 
@@ -220,6 +220,66 @@
         </div>
     </div>
 
+    <div class="modal fade" id="editExpenseModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <form id="editExpenseForm" method="POST" action="">
+      @csrf
+      @method('PUT')
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Edit Income</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" name="income_id" id="editExpenseId">
+          <div class="mb-3">
+            <label for="editName" class="form-label">Name</label>
+            <input type="text" class="form-control name-input" id="editName" name="name" required>
+          </div>
+          <div class="mb-3 d-none">
+                                <label for="slug" class="form-label">Slug</label>
+                                <input type="text" class="form-control slug-output" id="editslug" name="slug" readonly>
+                            </div>
+          <div class="mb-3">
+            <label for="editCategory" class="form-label">Category</label>
+            <select class="form-select" id="editCategory1" name="income_category_id" required>
+              <option value="">Select Category</option>
+              @foreach ($incomeCategories as $category)
+                <option value="{{ $category->id }}">{{ $category->name }}</option>
+              @endforeach
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="editSubCategory" class="form-label">Sub Category</label>
+            <select class="form-select subcategory-select" 
+                                        id="editSubCategory" 
+                                        name="income_sub_category_id" 
+                                        
+                                        required>
+                                    <option value="">Select Sub Category</option>
+                                </select>
+          </div>
+          <div class="mb-3">
+            <label for="editAmount" class="form-label">Amount</label>
+            <input type="number" class="form-control" id="editAmount" name="amount" required>
+          </div>
+          <div class="mb-3">
+            <label for="editDate" class="form-label">Income Date</label>
+            <input type="date" class="form-control" id="editDate" name="date" required>
+          </div>
+          <div class="mb-3">
+            <label for="editDescription" class="form-label">Description</label>
+            <textarea class="form-control" id="editDescription" name="description" rows="3"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Confirm</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
 @endsection
 
 
@@ -227,6 +287,46 @@
 
 @if ($incomes->isNotEmpty())
 <script>
+$(document).ready(function () {
+    $('#myTable').DataTable({
+        processing: true,
+        serverSide: true,
+        ajax: "{{ route('income.index') }}",
+        pageLength: 25,
+        lengthMenu: [[25, 50, 100], [25, 50, 100]],
+        dom: 'Blfrtip',
+        buttons: [
+            {
+                extend: 'csv',
+                text: 'Export CSV',
+                className: 'btn btn-sm my-custom-table-btn',
+                exportOptions: {
+                    columns: ':not(:last-child)'
+                }
+            },
+            {
+                extend: 'print',
+                text: 'Print Table',
+                className: 'btn btn-sm my-custom-table-btn',
+                exportOptions: {
+                    columns: ':not(:last-child)'
+                }
+            }
+        ],
+        columns: [
+            { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
+            { data: 'income_category', name: 'incomeCategory.name' },
+            { data: 'name', name: 'name' },
+            { data: 'description', name: 'description' },
+            { data: 'amount', name: 'amount' },
+            { data: 'date', name: 'date' },
+            { data: 'action', name: 'action', orderable: false, searchable: false }
+        ],
+        order: [[5, 'desc']]
+    });
+});
+</script>
+{{-- <script>
     $('#myTable').DataTable({
         pageLength: 25, // default page length
         lengthMenu: [ [25, 50, 100], [25, 50, 100] ], // dropdown options
@@ -250,7 +350,7 @@
             }
         ]
     });
-</script>
+</script> --}}
 
     
 @endif
@@ -359,7 +459,7 @@
 </script>
 
 
-<script>
+{{-- <script>
     $(document).ready(function () {
         $('form[id^="editIncomeCategoryForms"] button[type="submit"]').on('click', function (e) {
             e.preventDefault();
@@ -408,6 +508,133 @@
         });
     });
 
+</script> --}}
+
+<script>
+    $(document).ready(function () {
+        $('#editExpenseForm').on('submit', function (e) {
+            e.preventDefault();
+
+            toastr.clear();
+
+            let form = this;
+            let formData = new FormData(form);
+            let actionUrl = form.getAttribute('action');
+
+            $.ajax({
+                url: actionUrl,
+                method: "POST",
+                data: formData,
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    $('#successMessage').text(response.message);
+                    $('#successModal').modal('show');
+                    $('#editExpenseModal').modal('hide');
+                    form.reset();
+
+                    setTimeout(function () {
+                        window.location.reload();
+                    }, 2000);
+                },
+                error: function (xhr) {
+                    if (xhr.status === 422) {
+                        let errors = xhr.responseJSON.errors;
+                        for (let key in errors) {
+                            toastr.error(errors[key][0]);
+                        }
+                    } else {
+                        toastr.error("An error occurred. Please try again.");
+                    }
+                }
+            });
+        });
+    });
+</script>
+
+<script>
+    $(document).ready(function () {
+        // On Edit button click
+        $(document).on('click', '.openEditModal', function () {
+            let button = $(this);
+
+            // Get data from button
+            let id = button.data('id');
+            let name = button.data('name');
+            let slug = button.data('slug');
+            let amount = button.data('amount');
+            let date = button.data('date');
+            let description = button.data('description');
+            let categoryId = button.data('category-id');
+            let subCategoryId = button.data('sub-category-id');
+
+            // Set form action and field values
+            let actionUrl = "{{ route('income.update', ':id') }}".replace(':id', id);
+$('#editExpenseForm').attr('action', actionUrl);
+            $('#editExpenseId').val(id);
+            $('#editName').val(name);
+            $('#editslug').val(slug);
+            $('#editAmount').val(amount);
+            $('#editDate').val(date);
+            $('#editDescription').val(description);
+            $('#editCategory1').val(categoryId); // Set category directly first
+
+            // Load subcategories for that category
+            let subCategorySelect = $('#editSubCategory');
+            let url = "{{ route('get.incomesubcategories', ':id') }}".replace(':id', categoryId);
+            subCategorySelect.html('<option value="">Loading...</option>');
+
+            $.ajax({
+                url: url,
+                type: 'GET',
+                success: function (data) {
+                    let options = '<option value="">Select Sub Category</option>';
+                    data.forEach(function (subCategory) {
+                        let selected = subCategory.id == subCategoryId ? 'selected' : '';
+                        options += `<option value="${subCategory.id}" ${selected}>${subCategory.name}</option>`;
+                    });
+                    subCategorySelect.html(options);
+                },
+                error: function () {
+                    subCategorySelect.html('<option value="">Error loading subcategories</option>');
+                }
+            });
+
+            // Show modal
+            $('#editExpenseModal').modal('show');
+        });
+
+        // On category change, load related subcategories
+        $(document).on('change', '#editCategory1', function () {
+            let categoryId = $(this).val();
+            let subCategorySelect = $('#editSubCategory');
+            let url = "{{ route('get.incomesubcategories', ':id') }}".replace(':id', categoryId);
+
+            subCategorySelect.html('<option value="">Loading...</option>');
+
+            if (categoryId) {
+                $.ajax({
+                    url: url,
+                    type: 'GET',
+                    success: function (data) {
+                        let options = '<option value="">Select Sub Category</option>';
+                        data.forEach(function (subCategory) {
+                            options += `<option value="${subCategory.id}">${subCategory.name}</option>`;
+                        });
+                        subCategorySelect.html(options);
+                    },
+                    error: function () {
+                        subCategorySelect.html('<option value="">Error loading subcategories</option>');
+                    }
+                });
+            } else {
+                subCategorySelect.html('<option value="">Select Sub Category</option>');
+            }
+        });
+    });
 </script>
 
 <script>

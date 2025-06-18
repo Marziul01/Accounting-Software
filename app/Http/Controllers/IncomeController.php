@@ -7,16 +7,38 @@ use App\Models\Income;
 use App\Models\IncomeCategory;
 use App\Models\IncomeSubCategory;
 use Illuminate\Support\Facades\Auth;
+use Yajra\DataTables\Facades\DataTables;
 
 class IncomeController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         if(Auth::user()->access->income == 3 ){
             return redirect()->route('admin.dashboard')->with('error', 'You do not have permission to access this page.');
+        }
+
+        if ($request->ajax()) {
+            $incomes = Income::with(['incomeCategory', 'incomeSubCategory'])->orderByDesc('date');
+
+            return DataTables::of($incomes)
+                ->addIndexColumn()
+                ->editColumn('income_category', function ($row) {
+                    return $row->incomeCategory->name ?? 'Not Assigned';
+                })
+                ->editColumn('income_sub_category', function ($row) {
+                    return $row->incomeSubCategory->name ?? 'Not Assigned';
+                })
+                ->editColumn('date', function ($row) {
+                    return \Carbon\Carbon::parse($row->date)->format('d M, Y');
+                })
+                ->addColumn('action', function ($row) {
+                    return view('admin.income._actions', compact('row'))->render();
+                })
+                ->rawColumns(['action']) // so buttons don’t get escaped
+                ->make(true);
         }
         // Fetch all income records from the database
         $incomes = Income::all();
