@@ -260,10 +260,10 @@
                         <thead class="table-light">
     <tr>
         <th colspan="4" class="w-50">
-                                            <div class="text-center w-full py-2">জমা</div>
+                                            <div class="text-center w-full py-2">আয়</div>
                                         </th>
                                         <th colspan="4" class="w-50">
-                                            <div class="text-center w-full py-2">উত্তোলন</div>
+                                            <div class="text-center w-full py-2">ব্যায়</div>
                                         </th>
     </tr>
     <tr>
