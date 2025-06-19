@@ -488,11 +488,11 @@ class DetailedFinancialStatement extends Controller
 
         $totalNetGainorLossBalance = ( $totalIncomesExcludingCat13 + $totalIncomeCat13 ) - ( $totalExpensesExcludingCat7 + $totalExpensesCat7 );
 
-        $totalpreviousBalance = ( $previousTotalIncomeExcluding13 + $previousTotalIncome13 + $previousTotalInvestDeposit + $previousCurrentAssetWithdraw  + $totalPreviousLongLiabilityDeposit + $totalPreviousShortLiabilityDeposit + $previousTotalBankWithdraw )
-            - ( $previousTotalExpensesExcluding7 + $previousTotalExpenses7 + $previousTotalInvestWithdraw + $previousCurrentAssetDeposit + $totalPreviousLongLiabilityWithdraw + $totalPreviousShortLiabilityWithdraw + $previousTotalBankDeposit + $totalPreviousFixedAssetAmount );
+        $totalpreviousBalance = ( $previousTotalIncomeExcluding13 + $previousTotalIncome13 + $previousTotalInvestWithdraw + $previousCurrentAssetWithdraw  + $totalPreviousLongLiabilityDeposit + $totalPreviousShortLiabilityDeposit + $previousTotalBankWithdraw )
+            - ( $previousTotalExpensesExcluding7 + $previousTotalExpenses7 + $previousTotalInvestDeposit + $previousCurrentAssetDeposit + $totalPreviousLongLiabilityWithdraw + $totalPreviousShortLiabilityWithdraw + $previousTotalBankDeposit + $totalPreviousFixedAssetAmount );
         
-        $currrentBalance = ( $totalIncomesExcludingCat13 + $totalIncomeCat13 + $totalInvestDeposit + $totalCurrentAssetWithdraw + $totalLongLiabilityDeposit + $totalShortLiabilityDeposit + $totalBankWithdraw )
-            - ( $totalExpensesExcludingCat7 + $totalExpensesCat7 + $totalInvestWithdraw + $totalCurrentAssetDeposit + $totalLongLiabilityWithdraw + $totalShortLiabilityWithdraw + $totalBankDeposit + $totalFixedAsset ) + $totalpreviousBalance ;
+        $currrentBalance = ( $totalIncomesExcludingCat13 + $totalIncomeCat13 + $totalInvestWithdraw + $totalCurrentAssetWithdraw + $totalLongLiabilityDeposit + $totalShortLiabilityDeposit + $totalBankWithdraw )
+            - ( $totalExpensesExcludingCat7 + $totalExpensesCat7 + $totalInvestDeposit + $totalCurrentAssetDeposit + $totalLongLiabilityWithdraw + $totalShortLiabilityWithdraw + $totalBankDeposit + $totalFixedAsset ) + $totalpreviousBalance ;
 
         $handCash = $currrentBalance - ($totalBankDeposit - $totalBankWithdraw);
 
