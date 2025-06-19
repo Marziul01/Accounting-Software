@@ -24,7 +24,7 @@ class AssetTransactionController extends Controller
         $asset = Asset::where('slug', $slug)->firstOrFail();
 
         // Fetch all transactions related to the asset
-        $transactions = AssetTransaction::where('asset_id', $asset->id)->get();
+        $transactions = AssetTransaction::where('asset_id', $asset->id)->orderBy('transaction_date' , 'asc' )->get();
 
         // Return the view with the asset and its transactions
         return view('admin.asset.transactions', compact('asset', 'transactions'));

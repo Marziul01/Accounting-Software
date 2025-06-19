@@ -24,7 +24,7 @@ class LiabilityTransactionController extends Controller
         $liability = Liability::where('slug', $slug)->firstOrFail();
 
         // Fetch all transactions related to the liability
-        $transactions = LiabilityTransaction::where('liability_id', $liability->id)->get();
+        $transactions = LiabilityTransaction::where('liability_id', $liability->id)->orderBy('transaction_date' , 'asc' )->get();
 
         // Return the view with the liability and its transactions
         return view('admin.liability.transactions', compact('liability', 'transactions'));
