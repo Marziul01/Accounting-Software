@@ -209,7 +209,7 @@
                               মালিকানা সত্ত্ব  
                             </td>
                             @php
-                                $totalEquity = (($totalBankDeposit - $totalBankWithdraw ) + $totalInvestAmount + $totalFixedAsset + $handCash + ($totalCurrentAssetDeposit - $totalCurrentAssetWithdraw)) - (($totalShortLiabilityDeposit - $totalShortLiabilityWithdraw) + $totalNetGainorLossBalance + ($totalLongLiabilityDeposit - $totalLongLiabilityWithdraw));
+                                $totalEquity = (($totalBankDeposit - $totalBankWithdraw ) + $totalInvestAmount + $totalFixedAsset + $handCash + ($totalCurrentAssetDeposit - $totalCurrentAssetWithdraw)) - (($totalShortLiabilityDeposit - $totalShortLiabilityWithdraw) + ($totalLongLiabilityDeposit - $totalLongLiabilityWithdraw)) + $totalNetGainorLossBalance;
                             @endphp
                             <td class="text-end">{!! bn_number(number_format($totalEquity, 2)) !!}</td>
                         </tr>

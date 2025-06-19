@@ -138,7 +138,7 @@
                             // 2. Filtered transactions (between start and end)
                             $depositInRange = $transactions->where('transaction_type', 'Deposit')->sum('amount');
                             $withdrawInRange = $transactions->where('transaction_type', 'Withdraw')->sum('amount');
-                            $currentAmount = $depositInRange - $withdrawInRange;
+                            $currentAmount = $depositInRange - $withdrawInRange - $totalinvestmentExpeses;
 
                             
 
@@ -156,8 +156,11 @@
                                     ->where('transaction_type', 'Withdraw')
                                     ->where('transaction_date', '<', $startDate)
                                     ->sum('amount');
+                                $beforeinvestExpense = $investment->allinvestExpense
+                                                        ->where('date', '<', $startDate)
+                                                        ->sum('amount');
 
-                                $previousAmount = $depositBeforeStart - $withdrawBeforeStart;
+                                $previousAmount = $depositBeforeStart - $withdrawBeforeStart - $beforeinvestExpense;
                             }
 
         $deposits = $transactions->where('transaction_type', 'Deposit')->sum('amount');

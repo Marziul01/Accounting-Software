@@ -219,6 +219,18 @@ class InvestmentController extends Controller
             }
         }]);
 
+        $query->with(['investIncome' => function ($q) use ($startDate, $endDate) {
+            if ($startDate && $endDate) {
+                $q->whereBetween('date', [$startDate, $endDate]);
+            }
+        }]);
+
+        $query->with(['investExpense' => function ($q) use ($startDate, $endDate) {
+            if ($startDate && $endDate) {
+                $q->whereBetween('date', [$startDate, $endDate]);
+            }
+        }]);
+
         $filteredInvestments = $query->orderBy('date', 'desc')->get();
 
         return view('admin.investment.investment-report', [
@@ -283,6 +295,18 @@ class InvestmentController extends Controller
             }
         }]);
 
+        $query->with(['investIncome' => function ($q) use ($startDate, $endDate) {
+            if ($startDate && $endDate) {
+                $q->whereBetween('date', [$startDate, $endDate]);
+            }
+        }]);
+
+        $query->with(['investExpense' => function ($q) use ($startDate, $endDate) {
+            if ($startDate && $endDate) {
+                $q->whereBetween('date', [$startDate, $endDate]);
+            }
+        }]);
+
         $investments = $query->orderBy('date', 'desc')->get();
 
         // Only return JSON for AJAX
@@ -294,7 +318,12 @@ class InvestmentController extends Controller
                             // 2. Filtered transactions (between start and end)
                             $depositInRange = $investment->transactions->where('transaction_type', 'Deposit')->sum('amount');
                             $withdrawInRange = $investment->transactions->where('transaction_type', 'Withdraw')->sum('amount');
-                            $currentAmount = $depositInRange - $withdrawInRange;
+
+
+                            $investIncome = $investment->investIncome->sum('amount');
+                            $investExpense = $investment->investExpense->sum('amount');
+
+                            $currentAmount = $depositInRange - $withdrawInRange - $investExpense;
 
                             
 
@@ -358,6 +387,18 @@ class InvestmentController extends Controller
             }
         }]);
 
+        $query->with(['investIncome' => function ($q) use ($startDate, $endDate) {
+            if ($startDate && $endDate) {
+                $q->whereBetween('date', [$startDate, $endDate]);
+            }
+        }]);
+
+        $query->with(['investExpense' => function ($q) use ($startDate, $endDate) {
+            if ($startDate && $endDate) {
+                $q->whereBetween('date', [$startDate, $endDate]);
+            }
+        }]);
+
         $investments = $query->orderBy('date', 'desc')->get();
 
         $Categoryinvestments = Investment::where('investment_category_id', $category->id)
@@ -398,6 +439,18 @@ class InvestmentController extends Controller
         $query->with(['transactions' => function ($q) use ($startDate, $endDate) {
             if ($startDate && $endDate) {
                 $q->whereBetween('transaction_date', [$startDate, $endDate]);
+            }
+        }]);
+
+        $query->with(['investIncome' => function ($q) use ($startDate, $endDate) {
+            if ($startDate && $endDate) {
+                $q->whereBetween('date', [$startDate, $endDate]);
+            }
+        }]);
+
+        $query->with(['investExpense' => function ($q) use ($startDate, $endDate) {
+            if ($startDate && $endDate) {
+                $q->whereBetween('date', [$startDate, $endDate]);
             }
         }]);
 
@@ -492,6 +545,18 @@ class InvestmentController extends Controller
         $query->with(['transactions' => function ($q) use ($startDate, $endDate) {
             if ($startDate && $endDate) {
                 $q->whereBetween('transaction_date', [$startDate, $endDate]);
+            }
+        }]);
+
+        $query->with(['investIncome' => function ($q) use ($startDate, $endDate) {
+            if ($startDate && $endDate) {
+                $q->whereBetween('date', [$startDate, $endDate]);
+            }
+        }]);
+
+        $query->with(['investExpense' => function ($q) use ($startDate, $endDate) {
+            if ($startDate && $endDate) {
+                $q->whereBetween('date', [$startDate, $endDate]);
             }
         }]);
 

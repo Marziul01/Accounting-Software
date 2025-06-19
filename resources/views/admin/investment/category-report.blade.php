@@ -188,7 +188,10 @@
                                         $withdrawInRange = $investment->transactions
                                             ->where('transaction_type', 'Withdraw')
                                             ->sum('amount');
-                                        $currentAmount = $depositInRange - $withdrawInRange;
+                                        $investIncome = $investment->investIncome->sum('amount');
+                                        $investExpense = $investment->investExpense->sum('amount');
+
+                                        $currentAmount = $depositInRange - $withdrawInRange - $investExpense;
 
                                         if (
                                             $investment->allTransactions->isNotEmpty() &&
@@ -208,7 +211,11 @@
                                                 ->where('transaction_date', '<', $startDate)
                                                 ->sum('amount');
 
-                                            $previousAmount = $depositBeforeStart - $withdrawBeforeStart;
+                                            $beforeinvestExpense = $investment->allinvestExpense
+                                                        ->where('date', '<', $startDate)
+                                                        ->sum('amount');
+                                                    
+                                            $previousAmount = $depositBeforeStart - $withdrawBeforeStart - $beforeinvestExpense ;
                                         }
 
                                         // 3. Calculate gain/loss

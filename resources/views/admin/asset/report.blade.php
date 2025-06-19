@@ -338,7 +338,7 @@ function fetchFilteredAssetData() {
                         <td>${asset.formatted_date}</td>
                         <td>
                             <a href="${reportUrl}" class="btn btn-sm btn-outline-secondary">
-                                <i class="bx bx-edit-alt me-1"></i> View Report
+                                 View Report
                             </a>
                         </td>
                     </tr>

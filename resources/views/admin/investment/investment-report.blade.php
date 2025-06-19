@@ -88,7 +88,10 @@
                             // 2. Filtered transactions (between start and end)
                             $depositInRange = $investment->transactions->where('transaction_type', 'Deposit')->sum('amount');
                             $withdrawInRange = $investment->transactions->where('transaction_type', 'Withdraw')->sum('amount');
-                            $currentAmount = $depositInRange - $withdrawInRange;
+                            $investIncome = $investment->investIncome->sum('amount');
+                            $investExpense = $investment->investExpense->sum('amount');
+
+                            $currentAmount = $depositInRange - $withdrawInRange - $investExpense;
 
                             
 
@@ -279,7 +282,7 @@ function fetchFilteredData() {
                         <td>${investment.formatted_date}</td>
                         <td>
                             <a href="${reportUrl}" class="btn btn-sm btn-outline-secondary">
-                                <i class="bx bx-edit-alt me-1"></i> View Report
+                                 View Report
                             </a>
                         </td>
                     </tr>

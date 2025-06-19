@@ -44,12 +44,18 @@ class FinancialStatement extends Controller
         $endDate = Carbon::parse($endDate);
 
         // Fetch all investments and their transactions between the dates
-        $allInvestments = Investment::with(['transactions' => function ($query) use ($startDate, $endDate) {
-            $query->whereBetween('transaction_date', [$startDate, $endDate]);
-        }])->get();
+        $allInvestments = Investment::with([
+            'transactions' => function ($query) use ($startDate, $endDate) {
+                $query->whereBetween('transaction_date', [$startDate, $endDate]);
+            },
+            'investExpense' => function ($query) use ($startDate, $endDate) {
+                $query->whereBetween('date', [$startDate, $endDate]);
+            }
+        ])->get();
 
         $totalInvestDeposit  = 0;
         $totalInvestWithdraw = 0;
+        $totalInvestExpenses = 0;
         $totalInvestAmount = 0;
 
         $previousTotalInvestDeposit = 0;
@@ -64,11 +70,14 @@ class FinancialStatement extends Controller
             $withdraw = $investment->transactions
                         ->where('transaction_type', 'Withdraw')
                         ->sum('amount');
+            
+            $expenses = $investment->investExpense->sum('amount');
 
             $totalInvestDeposit += $deposit;
             $totalInvestWithdraw += $withdraw;
+            $totalInvestExpenses += $expenses;
 
-            $totalInvestAmount += ($deposit - $withdraw); // ✅ correct
+            $totalInvestAmount += ($deposit - $withdraw - $expenses) ; // ✅ correct
 
             // Previous period
             $prevDeposit = $investment->allTransactions()
@@ -80,11 +89,15 @@ class FinancialStatement extends Controller
                 ->where('transaction_type', 'Withdraw')
                 ->where('transaction_date', '<', $startDate)
                 ->sum('amount');
+            
+            $prevexpese = $investment->allinvestExpense()
+                ->where('date', '<', $startDate)
+                ->sum('amount');
 
             $previousTotalInvestDeposit += $prevDeposit;
             $previousTotalInvestWithdraw += $prevWithdraw;
 
-            $previousTotalInvestAmount += ($prevDeposit - $prevWithdraw);
+            $previousTotalInvestAmount += ($prevDeposit - $prevWithdraw - $prevexpese);
         }
 
 

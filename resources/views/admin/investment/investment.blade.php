@@ -41,8 +41,11 @@
                                     $totalDeposits = $transactions->where('transaction_type', 'Deposit')->sum('amount');
                                     $totalWithdrawals = $transactions->where('transaction_type', 'Withdraw')->sum('amount');
 
+                                    $investIncome = $investment->investIncome->sum('amount');
+                                    $investExpense = $investment->investExpense->sum('amount');
+
                                     $initialAmount = $transactions->first()->amount ?? 0;
-                                    $currentAmount = $totalDeposits - $totalWithdrawals;
+                                    $currentAmount = $totalDeposits - $totalWithdrawals - $investExpense;
                                 @endphp
 
                                 <td>{{ number_format($initialAmount, 2) }} Tk</td>
