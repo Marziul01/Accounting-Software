@@ -613,7 +613,7 @@
                             <td class="font-semibold text-end">{!! bn_number(number_format($longTermInvestTotal,2)) !!}</td>
                             <td class="font-semibold text-right">মূলধন বা মালিকানা সত্ত্ব</td>
                             @php
-                                $totalEquity = (($totalBankDeposit - $totalBankWithdraw ) + $totalInvestAmount + $totalFixedAsset + $handCash + ($totalCurrentAssetDeposit - $totalCurrentAssetWithdraw)) - (($totalShortLiabilityDeposit - $totalShortLiabilityWithdraw)  + ($totalLongLiabilityDeposit - $totalLongLiabilityWithdraw)) + $totalNetGainorLossBalance;
+                                $totalEquity = (($totalBankDeposit - $totalBankWithdraw ) + $totalInvestAmount + $totalFixedAsset + $handCash + ($totalCurrentAssetDeposit - $totalCurrentAssetWithdraw)) - (($totalShortLiabilityDeposit - $totalShortLiabilityWithdraw) + $totalNetGainorLossBalance + ($totalLongLiabilityDeposit - $totalLongLiabilityWithdraw)) ;
                             @endphp
                             <td class="font-semibold text-end">{!! bn_number(number_format($totalEquity,2)) !!}</td>
                         </tr>
