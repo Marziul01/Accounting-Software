@@ -691,8 +691,8 @@ class AccountsController extends Controller
             - ( $previousTotalExpensesExcluding7 + $previousTotalExpenses7 + $previousTotalInvestWithdraw + $previousCurrentAssetDeposit + $totalPreviousLiabilityWithdraw + $previousTotalBankDeposit + $totalPreviousFixedAssetAmount );
         }
         else{
-            $totalpreviousBalance = ( $previousTotalIncomeExcluding13 + $previousTotalIncome13 + $previousTotalInvestDeposit + $previousCurrentAssetWithdraw  + $totalPreviousLiabilityDeposit + $previousTotalBankWithdraw )
-            - ( $previousTotalExpensesExcluding7 + $previousTotalExpenses7 + $previousTotalInvestWithdraw + $previousCurrentAssetDeposit + $totalPreviousLiabilityWithdraw + $previousTotalBankDeposit + $totalPreviousFixedAssetAmount );
+            $totalpreviousBalance = ( $previousTotalIncomeExcluding13 + $previousTotalIncome13 + $previousTotalInvestWithdraw + $previousCurrentAssetWithdraw  + $totalPreviousLiabilityDeposit + $previousTotalBankWithdraw )
+            - ( $previousTotalExpensesExcluding7 + $previousTotalExpenses7 + $previousTotalInvestDeposit + $previousCurrentAssetDeposit + $totalPreviousLiabilityWithdraw + $previousTotalBankDeposit + $totalPreviousFixedAssetAmount );
         }
  
         // dd(  $totalpreviousBalance,

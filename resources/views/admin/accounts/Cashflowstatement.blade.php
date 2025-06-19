@@ -169,10 +169,10 @@
                     <tbody>
                         <!-- Content from the first Detailed Section -->
                         <tr>
-                            <td>বিনিয়োগ</td>
+                            <td>বিনিয়োগ উত্তোলন</td>
+                            <td class="text-end">{!! bn_number(number_format($totalInvestWithdraw), 2 ) !!} </td>
+                            <td>বিনিয়োগ জমা</td>
                             <td class="text-end"> {!! bn_number(number_format($totalInvestDeposit , 2) ) !!} </td>
-                            <td>বিনিয়োগ</td>
-                            <td class="text-end">{!! bn_number(number_format($totalInvestWithdraw), 2 ) !!}</td>
                         </tr>
                         <tr>
                             <td>চলতি সম্পদ প্রাপ্তি</td>
@@ -594,12 +594,12 @@
                         <tr class="bg-gray-100">
                             <td class="font-semibold text-right">মোট প্রাপ্তি</td>
                             @php
-                                $totalIncomes = $totalIncomesExcludingCat13 + $shortTermInvestmentIncomestotal + $LongTermInvestmentIncomestotal + $totalInvestDeposit + $totalCurrentAssettWithdraw + $totalLiabilitytDeposit + $totalBankWithdraw;
+                                $totalIncomes = $totalIncomesExcludingCat13 + $shortTermInvestmentIncomestotal + $LongTermInvestmentIncomestotal + $totalInvestWithdraw + $totalCurrentAssettWithdraw + $totalLiabilitytDeposit + $totalBankWithdraw;
                             @endphp
                             <td class="font-semibold text-end">{!! bn_number(number_format($totalIncomes,2)) !!}</td>
                             <td class="font-semibold text-right">মোট প্রদান</td>
                             @php
-                                $totalExpenses = $totalExpensesExcludingCat7 + $shortTermInvestmentexpensestotal + $LongTermInvestmentexpensestotal + $totalInvestWithdraw + $totalCurrentAssetDeposit + $totalLiabilityWithdraw + $totalBankDeposit + $totalFixedAsset;
+                                $totalExpenses = $totalExpensesExcludingCat7 + $shortTermInvestmentexpensestotal + $LongTermInvestmentexpensestotal + $totalInvestDeposit + $totalCurrentAssetDeposit + $totalLiabilityWithdraw + $totalBankDeposit + $totalFixedAsset;
                             @endphp
                             <td class="font-semibold text-end">{!! bn_number(number_format($totalExpenses,2)) !!}</td>
                         </tr>
