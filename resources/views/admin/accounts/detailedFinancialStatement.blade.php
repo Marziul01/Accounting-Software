@@ -422,9 +422,8 @@
                                                     // Current transactions (from eager-loaded relationship)
                                                                 $deposit  = $liability->transactions->where('transaction_type', 'Deposit')->sum('amount');
                                                                 $withdraw = $liability->transactions->where('transaction_type', 'Withdraw')->sum('amount');
-                                                                $expense = $investment->investExpense->sum('amount');
-                                                            
-                                                                $currentAmount = ($deposit - $withdraw -$expense);
+
+                                                                $currentAmount = $deposit - $withdraw;
 
                                                     // Check if no date filtering and asset amount is 0
                                                     if (empty($startDate) && empty($endDate) && $currentAmount == 0) {
@@ -584,8 +583,9 @@
                                                                 $deposit  = $investment->transactions->where('transaction_type', 'Deposit')->sum('amount');
                                                                 $withdraw = $investment->transactions->where('transaction_type', 'Withdraw')->sum('amount');
 
+                                                                $expense = $investment->investExpense->sum('amount');
                                                             
-                                                                $nvestmentAmount = ($deposit - $withdraw);
+                                                                $nvestmentAmount = ($deposit - $withdraw -$expense);
                                                                 $longTermInvestTotal += $nvestmentAmount;
                                                             
                                                         @endphp
