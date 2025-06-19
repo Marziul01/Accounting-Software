@@ -24,7 +24,7 @@ class InvestmentTransactionController extends Controller
         $investment = Investment::where('slug', $slug)->firstOrFail();
 
         // Fetch all transactions related to this investment
-        $transactions = InvestmentTransaction::where('investment_id', $investment->id)->get();
+        $transactions = InvestmentTransaction::where('investment_id', $investment->id)->orderBy('transaction_date' , 'asc' )->get();
 
         return view('admin.investment.transactions', compact('investment', 'transactions'));
     }

@@ -216,8 +216,14 @@
                                                 @php
                                                     $showRow = true;
 
+                                                    // Current transactions (from eager-loaded relationship)
+                                                                $deposit  = $asset->transactions->where('transaction_type', 'Deposit')->sum('amount');
+                                                                $withdraw = $asset->transactions->where('transaction_type', 'Withdraw')->sum('amount');
+
+                                                                $currentAmount = $deposit - $withdraw;
+
                                                     // Check if no date filtering and asset amount is 0
-                                                    if (empty($startDate) && empty($endDate) && $asset->amount == 0) {
+                                                    if (empty($startDate) && empty($endDate) && $currentAmount == 0) {
                                                         $showRow = false;
                                                     }
                                                 @endphp
@@ -225,31 +231,7 @@
                                                 @if ($showRow)
                                                     <tr>
                                                         <td class="pl-8">{{ $asset->name }}</td>
-                                                        @php
                                                         
-                                                            $ssetAmount = 0;
-                                                            
-                                                                $allTxns = $asset->allTransactions;
-
-                                                                $allTotalAssetDeposit  = $allTxns->where('transaction_type', 'Deposit')->sum('amount');
-                                                                $allTotalAssetWithdraw = $allTxns->where('transaction_type', 'Withdraw')->sum('amount');
-                                                                $initialAmount         = $asset->amount - $allTotalAssetDeposit + $allTotalAssetWithdraw;
-
-                                                               
-
-                                                                // Current transactions (from eager-loaded relationship)
-                                                                $deposit  = $asset->transactions->where('transaction_type', 'Deposit')->sum('amount');
-                                                                $withdraw = $asset->transactions->where('transaction_type', 'Withdraw')->sum('amount');
-
-                                                                $currentAmount = $deposit - $withdraw;
-
-                                                                if ($startDate <= $asset->entry_date ) {
-                                                                    // Start date is before investment was created, so only show current with initial
-                                                                    $currentAmount += $initialAmount;
-                                                                    
-                                                                }
-                                                            
-                                                        @endphp
                                                         <td class="text-end">{!! bn_number(number_format($currentAmount, 2)) !!}</td>
                                                     </tr>
                                                     @endif
@@ -300,8 +282,13 @@
                                                 @php
                                                     $showRow = true;
 
+                                                    // Current transactions (from eager-loaded relationship)
+                                                                $deposit  = $liability->transactions->where('transaction_type', 'Deposit')->sum('amount');
+                                                                $withdraw = $liability->transactions->where('transaction_type', 'Withdraw')->sum('amount');
+                                                                $currentAmount = $deposit - $withdraw;
+
                                                     // Check if no date filtering and asset amount is 0
-                                                    if (empty($startDate) && empty($endDate) && $liability->amount == 0) {
+                                                    if (empty($startDate) && empty($endDate) && $currentAmount == 0) {
                                                         $showRow = false;
                                                     }
                                                 @endphp
@@ -309,31 +296,7 @@
                                                 @if ($showRow)
                                                     <tr>
                                                         <td class="pl-8">{{ $liability->name }}</td>
-                                                        @php
-                                                           
-                                                            $iabilityAmount = 0;
-                                                            
-                                                                $allTxns = $liability->allTransactions;
-
-                                                                $allTotalliabilityDeposit  = $allTxns->where('transaction_type', 'Deposit')->sum('amount');
-                                                                $allTotalliabilityWithdraw = $allTxns->where('transaction_type', 'Withdraw')->sum('amount');
-                                                                $initialAmount = $liability->amount - $allTotalliabilityDeposit + $allTotalliabilityWithdraw;
-
-                                                                
-
-                                                                // Current transactions (from eager-loaded relationship)
-                                                                $deposit  = $liability->transactions->where('transaction_type', 'Deposit')->sum('amount');
-                                                                $withdraw = $liability->transactions->where('transaction_type', 'Withdraw')->sum('amount');
-                                                                $currentAmount = $deposit - $withdraw;
-
-                                                                if ($startDate <= $liability->entry_date ) {
-                                                                    // Start date is before investment was created, so only show current with initial
-                                                                    $currentAmount += $initialAmount;
-                                                                    
-                                                                }
                                                         
-                                                            
-                                                        @endphp
                                                         <td class="text-end">{!! bn_number(number_format($currentAmount, 2)) !!}</td>
                                                     </tr>
                                                     @endif
@@ -392,8 +355,14 @@
                                                 @php
                                                     $showRow = true;
 
+                                                    // Current transactions (from eager-loaded relationship)
+                                                                $deposit  = $asset->transactions->where('transaction_type', 'Deposit')->sum('amount');
+                                                                $withdraw = $asset->transactions->where('transaction_type', 'Withdraw')->sum('amount');
+
+                                                                $currentAmount = $deposit - $withdraw;
+
                                                     // Check if no date filtering and asset amount is 0
-                                                    if (empty($startDate) && empty($endDate) && $asset->amount == 0) {
+                                                    if (empty($startDate) && empty($endDate) && $currentAmount == 0) {
                                                         $showRow = false;
                                                     }
                                                 @endphp
@@ -401,31 +370,7 @@
                                                 @if ($showRow)
                                                     <tr>
                                                         <td class="pl-8">{{ $asset->name }}</td>
-                                                        @php
-                                                        
-                                                            $ssetAmount = 0;
-                                                            
-                                                                $allTxns = $asset->allTransactions;
-
-                                                                $allTotalAssetDeposit  = $allTxns->where('transaction_type', 'Deposit')->sum('amount');
-                                                                $allTotalAssetWithdraw = $allTxns->where('transaction_type', 'Withdraw')->sum('amount');
-                                                                $initialAmount         = $asset->amount - $allTotalAssetDeposit + $allTotalAssetWithdraw;
-
-                                                                
-
-                                                                // Current transactions (from eager-loaded relationship)
-                                                                $deposit  = $asset->transactions->where('transaction_type', 'Deposit')->sum('amount');
-                                                                $withdraw = $asset->transactions->where('transaction_type', 'Withdraw')->sum('amount');
-
-                                                                $currentAmount = $deposit - $withdraw;
-
-                                                                if ($startDate <= $asset->entry_date ) {
-                                                                    // Start date is before investment was created, so only show current with initial
-                                                                    $currentAmount += $initialAmount;
-                                                                    
-                                                                }
-                                                            
-                                                        @endphp
+                                                       
                                                         <td class="text-end">{!! bn_number(number_format($currentAmount, 2)) !!}</td>
                                                     </tr>
                                                     @endif
@@ -474,8 +419,14 @@
                                                 @php
                                                     $showRow = true;
 
+                                                    // Current transactions (from eager-loaded relationship)
+                                                                $deposit  = $liability->transactions->where('transaction_type', 'Deposit')->sum('amount');
+                                                                $withdraw = $liability->transactions->where('transaction_type', 'Withdraw')->sum('amount');
+
+                                                                $currentAmount = $deposit - $withdraw;
+
                                                     // Check if no date filtering and asset amount is 0
-                                                    if (empty($startDate) && empty($endDate) && $liability->amount == 0) {
+                                                    if (empty($startDate) && empty($endDate) && $currentAmount == 0) {
                                                         $showRow = false;
                                                     }
                                                 @endphp
@@ -483,31 +434,7 @@
                                                 @if ($showRow)
                                                     <tr>
                                                         <td class="pl-8">{{ $liability->name }}</td>
-                                                        @php
                                                         
-                                                            $iabilityAmount = 0;
-                                                            
-                                                                $allTxns = $liability->allTransactions;
-
-                                                                $allTotalliabilityDeposit  = $allTxns->where('transaction_type', 'Deposit')->sum('amount');
-                                                                $allTotalliabilityWithdraw = $allTxns->where('transaction_type', 'Withdraw')->sum('amount');
-                                                                $initialAmount         = $liability->amount - $allTotalliabilityDeposit + $allTotalliabilityWithdraw;
-
-                                                                $entryDate = $liability->entry_date ? \Carbon\Carbon::parse($liability->entry_date) : null;
-
-                                                                // Current transactions (from eager-loaded relationship)
-                                                                $deposit  = $liability->transactions->where('transaction_type', 'Deposit')->sum('amount');
-                                                                $withdraw = $liability->transactions->where('transaction_type', 'Withdraw')->sum('amount');
-
-                                                                $currentAmount = $deposit - $withdraw;
-
-                                                                if ($startDate <= $liability->entry_date ) {
-                                                                    // Start date is before investment was created, so only show current with initial
-                                                                    $currentAmount += $initialAmount;
-                                                                    
-                                                                }
-                                                            
-                                                        @endphp
                                                         <td class="text-end">{!! bn_number(number_format($currentAmount, 2)) !!}</td>
                                                     </tr>
                                                     @endif

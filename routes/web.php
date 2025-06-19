@@ -41,6 +41,7 @@ use App\Models\AssetSubSubCategory;
 use App\Models\ExpenseCategory;
 use App\Models\Investment;
 use App\Models\InvestmentTransaction;
+use Illuminate\Support\Facades\Mail;
 use PHPUnit\Util\Exporter;
 
 Route::get('/', [Homecontroller::class, 'index'])->name('home');
