@@ -613,7 +613,17 @@
                             <td class="font-semibold text-end">{!! bn_number(number_format($longTermInvestTotal,2)) !!}</td>
                             <td class="font-semibold text-right">মূলধন বা মালিকানা সত্ত্ব</td>
                             @php
-                                $totalEquity = (($totalBankDeposit - $totalBankWithdraw ) + $totalInvestAmount + $totalFixedAsset + $handCash + ($totalCurrentAssetDeposit - $totalCurrentAssetWithdraw)) - (($totalShortLiabilityDeposit - $totalShortLiabilityWithdraw) + $totalNetGainorLossBalance + ($totalLongLiabilityDeposit - $totalLongLiabilityWithdraw)) ;
+                               $totalEquity = (
+                                    ($totalBankDeposit - $totalBankWithdraw)
+                                + $totalInvestAmount
+                                + $totalFixedAsset
+                                + $handCash
+                                + ($totalCurrentAssetDeposit - $totalCurrentAssetWithdraw)
+                                ) - (
+                                    ($totalShortLiabilityDeposit - $totalShortLiabilityWithdraw)
+                                + ($totalLongLiabilityDeposit - $totalLongLiabilityWithdraw)
+                                );
+
                             @endphp
                             <td class="font-semibold text-end">{!! bn_number(number_format($totalEquity,2)) !!}</td>
                         </tr>
@@ -636,7 +646,11 @@
                             <td class="font-semibold text-end">{!! bn_number(number_format($ttoalassets,2)) !!} </td>
                             <td class="font-semibold">মোট</td>
                             @php
-                                $ttoallia = $totalEquity + $totalNetGainorLossBalance + ($totalLongLiabilityDeposit - $totalLongLiabilityWithdraw) + ($totalShortLiabilityDeposit - $totalShortLiabilityWithdraw)
+                               $ttoallia = 
+                                    $totalEquity
+                                + ($totalLongLiabilityDeposit - $totalLongLiabilityWithdraw)
+                                + ($totalShortLiabilityDeposit - $totalShortLiabilityWithdraw);
+
                             @endphp
                             <td class="font-semibold text-end"> {!! bn_number(number_format($ttoallia,2)) !!}</td>
                         </tr>

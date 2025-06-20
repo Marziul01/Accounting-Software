@@ -209,7 +209,16 @@
                               মালিকানা সত্ত্ব  
                             </td>
                             @php
-                                $totalEquity = (($totalBankDeposit - $totalBankWithdraw ) + $totalInvestAmount + $totalFixedAsset + $handCash + ($totalCurrentAssetDeposit - $totalCurrentAssetWithdraw)) - (($totalShortLiabilityDeposit - $totalShortLiabilityWithdraw)+ $totalNetGainorLossBalance + ($totalLongLiabilityDeposit - $totalLongLiabilityWithdraw)) ;
+                               $totalEquity = (
+                                    ($totalBankDeposit - $totalBankWithdraw)
+                                + $totalInvestAmount
+                                + $totalFixedAsset
+                                + $handCash
+                                + ($totalCurrentAssetDeposit - $totalCurrentAssetWithdraw)
+                                ) - (
+                                    ($totalShortLiabilityDeposit - $totalShortLiabilityWithdraw)
+                                + ($totalLongLiabilityDeposit - $totalLongLiabilityWithdraw)
+                                );
                             @endphp
                             <td class="text-end">{!! bn_number(number_format($totalEquity, 2)) !!}</td>
                         </tr>
@@ -231,7 +240,7 @@
                             <td class="font-semibold text-end"> {!! bn_number(number_format($totalAssets, 2)) !!} </td>
                             <td class="font-semibold text-right">মোট দায় সমূহ ও মালিকানা সত্ত্ব =</td>
                             @php
-                                $totalLiabilitiesAndEquity = (($totalShortLiabilityDeposit - $totalShortLiabilityWithdraw) + $totalLongLiabilityDeposit - $totalLongLiabilityWithdraw) + $totalNetGainorLossBalance + $totalEquity;
+                                $totalLiabilitiesAndEquity = ($totalShortLiabilityDeposit - $totalShortLiabilityWithdraw) + ($totalLongLiabilityDeposit - $totalLongLiabilityWithdraw)  + $totalEquity;
                             @endphp
                                 <td class="font-semibold text-end">{!! bn_number(number_format($totalLiabilitiesAndEquity, 2)) !!}</td>
                         </tr>
