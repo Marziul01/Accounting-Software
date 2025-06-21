@@ -289,7 +289,7 @@
                         function ($m) {
                             return '<span class="tiro-font">' . $m[0] . '</span>';
                         },
-                        e($setting->site_website ?? 'www.example.com'),
+                        e($setting->site_link ?? 'www.example.com'),
                     ) !!}
                 </p>
 

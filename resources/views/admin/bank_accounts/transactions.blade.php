@@ -108,7 +108,7 @@
                                 <select class="form-select category-select" id="add_income_category_id" name="bank_account_id" required>
                                     <option value="">Select Bank Account</option>
                                     @foreach ($bankaccounts as $bankaccount)
-                                        <option value="{{ $bankaccount->id }}" >{{ $bankaccount->bank_name }}</option>
+                                        <option value="{{ $bankaccount->id }}" >{{ $bankaccount->bank_name }} ({{ $bankaccount->account_type }}) </option>
                                     @endforeach
                                 </select>
                             </div>
@@ -181,7 +181,7 @@
                                 <select class="form-select category-select" id="add_income_category_id" name="bank_account_id" required>
                                     <option value="">Select Bank Account</option>
                                     @foreach ($bankaccounts as $bankaccount)
-                                        <option value="{{ $bankaccount->id }}" {{ $banktransaction->bank_account_id == $bankaccount->id ? 'selected' : '' }}>{{ $bankaccount->bank_name }}</option>
+                                        <option value="{{ $bankaccount->id }}" {{ $banktransaction->bank_account_id == $bankaccount->id ? 'selected' : '' }}>{{ $bankaccount->bank_name }} ({{ $bankaccount->account_type }})</option>
                                     @endforeach
                                 </select>
                             </div>

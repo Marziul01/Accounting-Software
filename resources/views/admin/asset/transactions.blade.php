@@ -72,7 +72,7 @@
                                         </td>
                                     @else
                                         <td colspan="5">
-                                            <div class="text-danger text-center">No Deposits Found!</div>
+                                            <div class="text-danger text-center">-</div>
                                         </td>
                                     @endif
 
@@ -103,7 +103,7 @@
                                         </td>
                                     @else
                                         <td colspan="5">
-                                            <div class="text-danger text-center">No witdraw Found!</div>
+                                            <div class="text-danger text-center">-</div>
                                         </td>
                                     @endif
                                 </tr>

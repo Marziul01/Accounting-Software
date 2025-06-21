@@ -42,4 +42,8 @@ class Asset extends Model
         return $this->hasMany(AssetTransaction::class, 'asset_id')
             ->orderBy('transaction_date', 'asc');
     }
+
+    public function contact(){
+        return $this->belongsTo(Contact::class, 'contact_id', 'id');
+    }
 }

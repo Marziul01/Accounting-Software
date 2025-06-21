@@ -16,5 +16,15 @@ class Contact extends Model
         'marriage_date',
         'sms_option',
         'image',
+        'national_id',
+        'father_name',
+        'father_mobile',
+        'mother_name',
+        'mother_mobile',
+        'spouse_name',
+        'spouse_mobile',
+        'present_address',
+        'permanent_address',
+        'send_email',
     ];
 }

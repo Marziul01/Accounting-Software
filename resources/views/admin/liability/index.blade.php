@@ -146,6 +146,8 @@
                                             data-spouse_mobile="{{ $user->spouse_mobile ?? '' }}"
                                             data-present_address="{{ $user->present_address ?? '' }}"
                                             data-permanent_address="{{ $user->permanent_address ?? '' }}"
+                                            data-sms_option="{{ $user->sms_option ?? 0 }}"
+                                            data-send_email="{{ $user->send_email ?? 0 }}"
                                             >
                                             {{ $user->name }}
                                         </option>
@@ -300,6 +302,8 @@
                                                         data-spouse_mobile="{{ $user->spouse_mobile ?? '' }}"
                                                         data-present_address="{{ $user->present_address ?? '' }}"
                                                         data-permanent_address="{{ $user->permanent_address ?? '' }}"
+                                                        data-sms_option="{{ $user->sms_option ?? 0 }}"
+                                                        data-send_email="{{ $user->send_email ?? 0 }}"
                                                         {{ $liability->contact_id == $user->id ? 'selected' : '' }} >
                                                         {{ $user->name }}
                                                     </option>
@@ -1091,6 +1095,11 @@
             const spouseMobileInput = form.querySelector('input[name="spouse_mobile"]');
             const presentAddressInput = form.querySelector('input[name="present_address"]');
             const permanentAddressInput = form.querySelector('input[name="permanent_address"]');
+
+            const sendSmsCheckbox = form.querySelector('input[name="send_sms"]');
+            const sendEmailCheckbox = form.querySelector('input[name="send_email"]');
+            const smsOption = selectedOption.dataset.sms_option;
+            const sendEmail = selectedOption.dataset.send_email;
     
             if (this.value && name) {
                 userNameInput.value = name;
@@ -1156,6 +1165,16 @@
                 permanentAddressInput.value = permanentAddress;
                 permanentAddressInput.readOnly = true;
                 }
+
+                if (sendSmsCheckbox && typeof smsOption !== 'undefined') {
+                    sendSmsCheckbox.checked = smsOption === '1';
+                    sendSmsCheckbox.disabled = smsOption === '1';
+                }
+
+                if (sendEmailCheckbox && typeof sendEmail !== 'undefined') {
+                    sendEmailCheckbox.checked = sendEmail === '1';
+                    sendEmailCheckbox.disabled = sendEmail === '1';
+                }
             } else {
                 userNameInput.value = '';
                 userNameInput.readOnly = false;
@@ -1196,6 +1215,16 @@
 
                 permanentAddressInput.value = '';
                 permanentAddressInput.readOnly = false;
+
+                if (sendSmsCheckbox) {
+                    sendSmsCheckbox.checked = false;
+                    sendSmsCheckbox.disabled = false;
+                }
+
+                if (sendEmailCheckbox) {
+                    sendEmailCheckbox.checked = false;
+                    sendEmailCheckbox.disabled = false;
+                }
             }
         });
     });

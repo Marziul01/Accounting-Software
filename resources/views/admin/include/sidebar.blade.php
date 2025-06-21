@@ -61,6 +61,12 @@
                         
                     </a>
                 </li>
+                <li class="menu-item {{ Route::currentRouteName() == 'Export-Data' ? 'active' : '' }}">
+                    <a href="{{ route('Export-Data') }}"
+                        class="menu-link">
+                        <div class="text-truncate" data-i18n="eCommerce">Export Data</div>
+                    </a>
+                </li>
             </ul>
         </li>
         @endif
@@ -360,12 +366,7 @@
                         <div class="text-truncate" data-i18n="eCommerce">Detailed Financial Statement</div>
                     </a>
                 </li>
-                <li class="menu-item {{ Route::currentRouteName() == 'Export-Data' ? 'active' : '' }}">
-                    <a href="{{ route('Export-Data') }}"
-                        class="menu-link">
-                        <div class="text-truncate" data-i18n="eCommerce">Export Data</div>
-                    </a>
-                </li>
+                
             </ul>
         </li>
         @endif

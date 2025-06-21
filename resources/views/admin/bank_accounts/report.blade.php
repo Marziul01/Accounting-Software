@@ -23,7 +23,7 @@
                     <select class="form-select category-select" name="bank_account_id" id="bank_account_id">
                         @foreach($bankAccounts as $account)
                             <option value="{{ $account->id }}" {{ $account->id == $selectedBankAccount ? 'selected' : '' }}>
-                                {{ $account->bank_name }}
+                                {{ $account->bank_name }} ({{ $account->account_type }})
                             </option>
                         @endforeach
                     </select>
