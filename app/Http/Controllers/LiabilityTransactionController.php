@@ -2,9 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\LiabilityDepositInvoiceMail;
+use App\Mail\LiabilityWithdrawInvoiceMail;
 use App\Models\Liability;
 use App\Models\LiabilityTransaction;
+use App\Models\SiteSetting;
+use App\Models\SMSTemplate;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
@@ -86,11 +91,77 @@ class LiabilityTransactionController extends Controller
 
         $asset->save();
 
+        if($asset->category_id == 3 ){
+            if( $asset->send_sms == 1){
+                if($request->transaction_type === 'Deposit'){
+                    $body = SMSTemplate::find(5);
+                    $templateText = $body?->body ?? '';
+                    $site_name = SiteSetting::find(1);
+                    $accountName = $asset->name;
+                    $accountNumber = '#'.$asset->slug.$asset->id; // or $assetsfdf->id if you prefer
+                    $amount = $this->engToBnNumber($request->amount);
+                    $totalamount = $asset->transactions()->where('transaction_type', 'Deposit')->sum('amount') - $asset->transactions()->where('transaction_type', 'Withdraw')->sum('amount');
+                    $totalamountBn = $this->engToBnNumber($totalamount);
+
+$message="আসসালামু আলাইকুম,
+প্রিয় {$accountName}, 
+আপনার নিকট থেকে $amount টাকা  গ্রহন  করা হয়েছে । $templateText রাসেল এর নিকট আপনার প্রদত্ত মোট অবশিষ্ট পাওনা ঋণের পরিমাণ $totalamountBn টাকা।";
+                }else{
+                    $body = SMSTemplate::find(6);
+                    $templateText = $body?->body ?? '';
+                    $site_name = SiteSetting::find(1);
+                    $accountName = $asset->name;
+                    $accountNumber = '#'.$asset->slug.$asset->id; // or $assetsfdf->id if you prefer
+                    $amount = $this->engToBnNumber($request->amount);
+                    $totalamount = $asset->transactions()->where('transaction_type', 'Deposit')->sum('amount') - $asset->transactions()->where('transaction_type', 'Withdraw')->sum('amount');
+                    $totalamountBn = $this->engToBnNumber($totalamount);
+
+$message="আসসালামু আলাইকুম,
+প্রিয় {$accountName}, 
+আপনার নিকট $amount টাকা পরিশোধ করা হয়েছে । $templateText রাসেল এর নিকট আপনার প্রদত্ত মোট অবশিষ্ট পাওনা ঋণের পরিমাণ  $totalamountBn টাকা।";
+                }
+                $number = '88'.$asset->mobile;
+
+                $response = sendSMS($number, $message);
+
+                // Optional: Map response code to readable message
+                $errorMessages = [
+                    '1001' => '❌ ভুল API কী প্রদান করা হয়েছে।',
+                    '1002' => '❌ ভুল Sender ID ব্যবহার করা হয়েছে।',
+                    '1003' => '❌ টাইপ অবশ্যই text অথবা unicode হতে হবে।',
+                    '1004' => '❌ শুধুমাত্র GET বা POST মেথড অনুমোদিত।',
+                    '1005' => '❌ এই prefix এ SMS পাঠানো সম্ভব নয় কারণ এটি নিষ্ক্রিয়।',
+                    '1006' => '❌ অ্যাকাউন্টে পর্যাপ্ত ব্যালেন্স নেই।',
+                    '1007' => '❌ মোবাইল নম্বর অবশ্যই country code (88) দিয়ে শুরু হতে হবে।',
+                ];
+
+                if (isset($errorMessages[$response])) {
+                    session()->flash('error', $errorMessages[$response]);
+                }
+            }
+
+            if ($asset->send_email == 1) {
+                if($request->transaction_type === 'Deposit'){
+                    Mail::to($asset->email)->send(new LiabilityDepositInvoiceMail($asset, $request));
+                }else{
+                    Mail::to($asset->email)->send(new LiabilityWithdrawInvoiceMail($asset, $request));
+                }
+                
+            }
+
+        }
+
         // Redirect back to the index with a success message
         return response()->json([
             'message' => 'Liability Transaction created successfully!',
             'id' => $assetTransaction->id,
         ]);
+    }
+
+    public function engToBnNumber($number) {
+        $eng = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+        $bn  = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
+        return str_replace($eng, $bn, $number);
     }
 
     /**

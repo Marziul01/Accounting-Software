@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\LiabilityInvoiceMail;
 use App\Models\Liability;
 use App\Models\LiabilitySubCategory;
 use App\Models\LiabilityTransaction;
@@ -9,9 +10,12 @@ use Illuminate\Http\Request;
 use App\Models\Contact;
 use App\Models\LiabilityCategory;
 use App\Models\LiabilitySubSubCategory;
+use App\Models\SiteSetting;
+use App\Models\SMSTemplate;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Mail;
 
 class LiabilityController extends Controller
 {
@@ -83,6 +87,20 @@ class LiabilityController extends Controller
                 $contact = Contact::find($request->contact_id);
                 if ($contact) {
                     $data['photo'] = $contact->image;
+                    $contact->email = $request->email;
+                    $contact->national_id = $request->national_id;
+                    $contact->father_name = $request->father_name;
+                    $contact->father_mobile = $request->father_mobile;
+                    $contact->mother_name = $request->mother_name;
+                    $contact->mother_mobile = $request->mother_mobile;
+                    $contact->spouse_name = $request->spouse_name;
+                    $contact->spouse_mobile = $request->spouse_mobile;
+                    $contact->present_address = $request->present_address;
+                    $contact->permanent_address = $request->permanent_address;
+                    $contact->sms_option = $request->send_sms;
+                    $contact->send_email = $request->send_email;
+                    
+                    $contact->save();
                 }
             } else {
                 // Handle photo upload
@@ -98,12 +116,24 @@ class LiabilityController extends Controller
                 // Find or create contact
                 $existingContact = Contact::where('name', $request->user_name)
                     ->where('mobile_number', $request->mobile)
-                    ->where('email', $request->email)
                     ->first();
 
                 if ($existingContact) {
                     $data['contact_id'] = $existingContact->id;
                     $data['photo'] = $existingContact->image;
+                    $existingContact->email = $request->email;
+                    $existingContact->national_id = $request->national_id;
+                    $existingContact->father_name = $request->father_name;
+                    $existingContact->father_mobile = $request->father_mobile;
+                    $existingContact->mother_name = $request->mother_name;
+                    $existingContact->mother_mobile = $request->mother_mobile;
+                    $existingContact->spouse_name = $request->spouse_name;
+                    $existingContact->spouse_mobile = $request->spouse_mobile;
+                    $existingContact->present_address = $request->present_address;
+                    $existingContact->permanent_address = $request->permanent_address;
+                    $existingContact->sms_option = $request->send_sms;
+                    $existingContact->send_email = $request->send_email;
+                    $existingContact->save();
                 } else {
                     $baseSlug = Str::slug($this->convertToEnglish($request->user_name));
                     $slug = $baseSlug;
@@ -163,6 +193,48 @@ class LiabilityController extends Controller
         $firsttransaction->transaction_date = $request->entry_date;
         $firsttransaction->save();
 
+        if($request->category_id == 3){
+
+            if ($request->send_sms == 1 && $request->mobile) {
+                $number = '88'.$request->mobile;
+                $body = SMSTemplate::find(4);
+                $templateText = $body?->body ?? '';
+                $site_name = SiteSetting::find(1);
+                $accountName = $assetsfdf->name;
+                $accountNumber = '#'.$assetsfdf->slug.$assetsfdf->id; // or $assetsfdf->id if you prefer
+                $amount = $this->engToBnNumber($request->amount);
+
+                $message = "প্রিয় {$accountName}, $templateText {$accountNumber} ।  রাসেল এর নিকট আপনার প্রদত্ত মোট অবশিষ্ট পাওনা ঋণের পরিমাণ $amount টাকা।
+
+ধন্যবাদান্তে,
+
+$site_name->site_owner";
+
+                $response = sendSMS($number, $message);
+
+                // Optional: Map response code to readable message
+                $errorMessages = [
+                    '1001' => '❌ ভুল API কী প্রদান করা হয়েছে।',
+                    '1002' => '❌ ভুল Sender ID ব্যবহার করা হয়েছে।',
+                    '1003' => '❌ টাইপ অবশ্যই text অথবা unicode হতে হবে।',
+                    '1004' => '❌ শুধুমাত্র GET বা POST মেথড অনুমোদিত।',
+                    '1005' => '❌ এই prefix এ SMS পাঠানো সম্ভব নয় কারণ এটি নিষ্ক্রিয়।',
+                    '1006' => '❌ অ্যাকাউন্টে পর্যাপ্ত ব্যালেন্স নেই।',
+                    '1007' => '❌ মোবাইল নম্বর অবশ্যই country code (88) দিয়ে শুরু হতে হবে।',
+                ];
+
+                if (isset($errorMessages[$response])) {
+                    session()->flash('error', $errorMessages[$response]);
+                }
+            }
+
+
+            if ($request->send_email == 1) {
+                Mail::to($request->email)->send(new LiabilityInvoiceMail($assetsfdf, $request));
+            }
+
+        }
+
         return response()->json([
             'status' => 'success',
             'message' => 'Liability created successfully.',
@@ -170,8 +242,14 @@ class LiabilityController extends Controller
         ]);
     }
 
+    public function engToBnNumber($number) {
+        $eng = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+        $bn  = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
+        return str_replace($eng, $bn, $number);
+    }
+
     /**
-     * Display the specified resource.
+     * Display the specified resource
      */
     public function show(string $id)
     {
@@ -213,19 +291,67 @@ class LiabilityController extends Controller
             if (!empty($request->contact_id)) {
                 $contact = Contact::find($request->contact_id);
                 if ($contact) {
-                    $data['photo'] = $contact->image;
+                    // ✅ Update contact details from the request
+                    $contact->name = $request->user_name;
+                    $contact->mobile_number = $request->mobile;
+                    $contact->email = $request->email;
+                    $contact->national_id = $request->national_id;
+                    $contact->father_name = $request->father_name;
+                    $contact->father_mobile = $request->father_mobile;
+                    $contact->mother_name = $request->mother_name;
+                    $contact->mother_mobile = $request->mother_mobile;
+                    $contact->spouse_name = $request->spouse_name;
+                    $contact->spouse_mobile = $request->spouse_mobile;
+                    $contact->present_address = $request->present_address;
+                    $contact->permanent_address = $request->permanent_address;
+                    $contact->sms_option = $request->send_sms;
+                    $contact->send_email = $request->send_email;
+
+                    // ✅ If new photo is uploaded, replace the old one
+                    if ($request->hasFile('photo')) {
+                        if ($asset->photo && file_exists(public_path($asset->photo))) {
+                            unlink(public_path($asset->photo));
+                        }
+
+                        $imageFile = $request->file('photo');
+                        $imageName = time() . '_' . uniqid() . '.' . $imageFile->getClientOriginalExtension();
+                        $destinationPath = public_path('admin-assets/img/assets');
+                        $imageFile->move($destinationPath, $imageName);
+                        $photoPath = 'admin-assets/img/assets/' . $imageName;
+                        $contact->image = $photoPath;
+                        $data['photo'] = $photoPath;
+                    } else {
+                        // Use contact's existing image if no new photo
+                        $data['photo'] = $contact->image;
+                    }
+
+                    $contact->save();
+
+                    // ✅ Assign updated contact ID
                     $data['contact_id'] = $contact->id;
                 }
             } else {
                 // If no contact_id, try to find or create contact
                 $existingContact = Contact::where('name', $request->user_name)
                     ->where('mobile_number', $request->mobile)
-                    ->where('email', $request->email)
                     ->first();
 
                 if ($existingContact) {
                     $data['contact_id'] = $existingContact->id;
                     $data['photo'] = $existingContact->image;
+                    $existingContact->email = $request->email;
+                    $existingContact->national_id = $request->national_id;
+                    $existingContact->father_name = $request->father_name;
+                    $existingContact->father_mobile = $request->father_mobile;
+                    $existingContact->mother_name = $request->mother_name;
+                    $existingContact->mother_mobile = $request->mother_mobile;
+                    $existingContact->spouse_name = $request->spouse_name;
+                    $existingContact->spouse_mobile = $request->spouse_mobile;
+                    $existingContact->present_address = $request->present_address;
+                    $existingContact->permanent_address = $request->permanent_address;
+                    $existingContact->sms_option = $request->send_sms;
+                    $existingContact->send_email = $request->send_email;
+                    $existingContact->save();
                 } else {
                     // Upload new image if available
                     if ($request->hasFile('photo')) {
@@ -273,26 +399,6 @@ class LiabilityController extends Controller
                     $contact->save();
 
                     $data['contact_id'] = $contact->id;
-                }
-            }
-
-            // If contact_id exists but no photo uploaded, do not override photo
-            if ($request->hasFile('photo') && empty($data['photo'])) {
-                if ($asset->photo && file_exists(public_path($asset->photo))) {
-                    unlink(public_path($asset->photo));
-                }
-
-                $imageFile = $request->file('photo');
-                $imageName = time() . '_' . uniqid() . '.' . $imageFile->getClientOriginalExtension();
-                $destinationPath = public_path('admin-assets/img/Liability');
-                $imageFile->move($destinationPath, $imageName);
-                $photoPath = 'admin-assets/img/Liability/' . $imageName;
-                $data['photo'] = $photoPath;
-
-                // If contact exists, update its image too
-                if (isset($contact) && $contact instanceof Contact) {
-                    $contact->image = $photoPath;
-                    $contact->save();
                 }
             }
         }

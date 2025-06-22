@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Asset;
 use App\Models\Contact;
+use App\Models\Liability;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -152,6 +154,42 @@ class ContactController extends Controller
 
         $contact->update($data);
 
+        // 2. Update related Assets
+        Asset::where('contact_id', $contact->id)->update([
+            'user_name'           => $contact->name,
+            'mobile'              => $contact->mobile_number,
+            'photo'               => $contact->image,
+            'national_id'         => $contact->national_id,
+            'father_name'         => $contact->father_name,
+            'father_mobile'       => $contact->father_mobile,
+            'mother_name'         => $contact->mother_name,
+            'mother_mobile'       => $contact->mother_mobile,
+            'spouse_name'         => $contact->spouse_name,
+            'spouse_mobile'       => $contact->spouse_mobile,
+            'present_address'     => $contact->present_address,
+            'permanent_address'   => $contact->permanent_address,
+            'send_sms'          => $contact->sms_option,
+            'send_email'          => $contact->send_email,
+        ]);
+
+        // Sync related Liabilities
+        Liability::where('contact_id', $contact->id)->update([
+            'user_name'           => $contact->name,
+            'mobile'              => $contact->mobile_number,
+            'photo'               => $contact->image,
+            'national_id'         => $contact->national_id,
+            'father_name'         => $contact->father_name,
+            'father_mobile'       => $contact->father_mobile,
+            'mother_name'         => $contact->mother_name,
+            'mother_mobile'       => $contact->mother_mobile,
+            'spouse_name'         => $contact->spouse_name,
+            'spouse_mobile'       => $contact->spouse_mobile,
+            'present_address'     => $contact->present_address,
+            'permanent_address'   => $contact->permanent_address,
+            'send_sms'          => $contact->sms_option,
+            'send_email'          => $contact->send_email,
+        ]);
+
         return response()->json([
             'success' => true,
             'message' => 'Contact updated successfully.',
@@ -164,18 +202,29 @@ class ContactController extends Controller
      */
     public function destroy(string $id)
     {
-        if(Auth::user()->access->contact != 2){
-            return redirect()->route('admin.dashboard')->with('error', 'You do not have permission to delete .');
+        if (Auth::user()->access->contact != 2) {
+            return redirect()->route('admin.dashboard')->with('error', 'You do not have permission to delete.');
         }
 
         $contact = Contact::findOrFail($id);
 
+        // ✅ Check if this contact is used in any Asset or Liability
+        $isUsedInAssets = Asset::where('contact_id', $id)->exists();
+        $isUsedInLiabilities = Liability::where('contact_id', $id)->exists();
+
+        if ($isUsedInAssets || $isUsedInLiabilities) {
+            return back()->with('error', 'Cannot delete this contact. It is associated with existing assets or liabilities.');
+        }
+
+        // ✅ Delete the image if exists
         if ($contact->image && file_exists(public_path($contact->image))) {
             unlink(public_path($contact->image));
         }
 
+        // ✅ Delete the contact
         $contact->delete();
 
-        return back()->with('Contact deleted successfully.');
+        return back()->with('success', 'Contact deleted successfully.');
     }
+
 }

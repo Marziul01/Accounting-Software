@@ -12,6 +12,12 @@
         .report-header{
             text-align: center;
         }
+        .signature_img {
+            width: 15%;
+            height: auto;
+            padding-bottom: 3px;
+            border-bottom: #000 solid 1px;
+        }
     </style>
 </head>
 <body>
@@ -25,7 +31,7 @@
 @endphp
     <div class="report-header">
         <img src="{{ asset($setting->site_logo) }}" height="auto" width="15%" class="img" alt="">
-        <p><strong>রেফারেন্স আইডি:</strong> #{{ $asset->slug }}{{ $asset->id }}</p>
+        <p><strong>হিসাব নাম্বার:</strong> #{{ $asset->slug }}{{ $asset->id }}</p>
         <p><strong>প্রকাশের তারিখ:</strong> {!! bn_number(now()->format('d-m-Y')) !!}</p>
     </div>
 
@@ -39,7 +45,7 @@
             <td>
                 <strong>প্রাপকঃ</strong><br>
                 নামঃ {{ $asset->name }}<br>
-                ঠিকানাঃ {{ $asset->address }}
+                ঠিকানাঃ {{ $asset->present_address }}
             </td>
         </tr>
     </table>
@@ -68,6 +74,9 @@
 
     <br><br>
     <p>
+        <div class="w-100">
+            <img src="{{ asset($setting->signature) }}" height="100%" class="signature_img" alt="">
+        </div>
         {{ $setting->site_owner }}<br>
         ঠিকানা: {{ $setting->site_address }}<br>
         ইমেইল: {{ $setting->site_email }}<br>

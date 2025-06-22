@@ -233,6 +233,14 @@
         </div>
     </div>
 
+    <div id="fullscreenLoader" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999;">
+        <div style="display:flex; justify-content:center; align-items:center; width:100%; height:100%;">
+             <div class="spinner-border text-light" role="status" style="width: 4rem; height: 4rem;">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    </div>
+
 @endsection
 
 
@@ -388,6 +396,8 @@
                     console.log(`${key}: ${value}`);
                 }
 
+                $('#fullscreenLoader').fadeIn();
+
                 $.ajax({
                     url: "{{ route('liabilitytransaction.store') }}",
                     method: "POST",
@@ -398,7 +408,7 @@
                     processData: false,
                     contentType: false,
                     success: function(response) {
-
+                        $('#fullscreenLoader').fadeOut();
                         $('#successMessage').text(response
                         .message); // Set dynamic success message
                         $('#successModal').modal('show');
@@ -411,6 +421,7 @@
                         }, 2000);
                     },
                     error: function(xhr) {
+                        $('#fullscreenLoader').fadeOut();
                         console.log('Error:', xhr);
                         if (xhr.status === 422) {
                             let errors = xhr.responseJSON.errors;

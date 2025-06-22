@@ -87,7 +87,20 @@ class AssetController extends Controller
             if (!empty($request->contact_id)) {
                 $contact = Contact::find($request->contact_id);
                 if ($contact) {
+                    $contact->email = $request->email;
+                    $contact->national_id = $request->national_id;
+                    $contact->father_name = $request->father_name;
+                    $contact->father_mobile = $request->father_mobile;
+                    $contact->mother_name = $request->mother_name;
+                    $contact->mother_mobile = $request->mother_mobile;
+                    $contact->spouse_name = $request->spouse_name;
+                    $contact->spouse_mobile = $request->spouse_mobile;
+                    $contact->present_address = $request->present_address;
+                    $contact->permanent_address = $request->permanent_address;
+                    $contact->sms_option = $request->send_sms;
+                    $contact->send_email = $request->send_email;
                     $data['photo'] = $contact->image;
+                    $contact->save();
                 }
             } else {
                 // Handle photo upload
@@ -108,6 +121,19 @@ class AssetController extends Controller
                 if ($existingContact) {
                     $data['contact_id'] = $existingContact->id;
                     $data['photo'] = $existingContact->image;
+                    $existingContact->email = $request->email;
+                    $existingContact->national_id = $request->national_id;
+                    $existingContact->father_name = $request->father_name;
+                    $existingContact->father_mobile = $request->father_mobile;
+                    $existingContact->mother_name = $request->mother_name;
+                    $existingContact->mother_mobile = $request->mother_mobile;
+                    $existingContact->spouse_name = $request->spouse_name;
+                    $existingContact->spouse_mobile = $request->spouse_mobile;
+                    $existingContact->present_address = $request->present_address;
+                    $existingContact->permanent_address = $request->permanent_address;
+                    $existingContact->sms_option = $request->send_sms;
+                    $existingContact->send_email = $request->send_email;
+                    $existingContact->save();
                 } else {
                     $baseSlug = Str::slug($this->convertToEnglish($request->user_name));
                     $slug = $baseSlug;
@@ -175,6 +201,7 @@ class AssetController extends Controller
         if($request->category_id == 4){
 
             if ($request->send_sms == 1 && $request->mobile) {
+                $number = '88'.$request->mobile;
                 $body = SMSTemplate::find(1);
                 $templateText = $body?->body ?? '';
                 $site_name = SiteSetting::find(1);
@@ -188,7 +215,7 @@ class AssetController extends Controller
 
 $site_name->site_owner";
 
-                $response = sendSMS($request->mobile, $message);
+                $response = sendSMS($number, $message);
 
                 // Optional: Map response code to readable message
                 $errorMessages = [
@@ -271,7 +298,43 @@ $site_name->site_owner";
             if (!empty($request->contact_id)) {
                 $contact = Contact::find($request->contact_id);
                 if ($contact) {
-                    $data['photo'] = $contact->image;
+                    // ✅ Update contact details from the request
+                    $contact->name = $request->user_name;
+                    $contact->mobile_number = $request->mobile;
+                    $contact->email = $request->email;
+                    $contact->national_id = $request->national_id;
+                    $contact->father_name = $request->father_name;
+                    $contact->father_mobile = $request->father_mobile;
+                    $contact->mother_name = $request->mother_name;
+                    $contact->mother_mobile = $request->mother_mobile;
+                    $contact->spouse_name = $request->spouse_name;
+                    $contact->spouse_mobile = $request->spouse_mobile;
+                    $contact->present_address = $request->present_address;
+                    $contact->permanent_address = $request->permanent_address;
+                    $contact->sms_option = $request->send_sms;
+                    $contact->send_email = $request->send_email;
+
+                    // ✅ If new photo is uploaded, replace the old one
+                    if ($request->hasFile('photo')) {
+                        if ($asset->photo && file_exists(public_path($asset->photo))) {
+                            unlink(public_path($asset->photo));
+                        }
+
+                        $imageFile = $request->file('photo');
+                        $imageName = time() . '_' . uniqid() . '.' . $imageFile->getClientOriginalExtension();
+                        $destinationPath = public_path('admin-assets/img/assets');
+                        $imageFile->move($destinationPath, $imageName);
+                        $photoPath = 'admin-assets/img/assets/' . $imageName;
+                        $contact->image = $photoPath;
+                        $data['photo'] = $photoPath;
+                    } else {
+                        // Use contact's existing image if no new photo
+                        $data['photo'] = $contact->image;
+                    }
+
+                    $contact->save();
+
+                    // ✅ Assign updated contact ID
                     $data['contact_id'] = $contact->id;
                 }
             } else {
@@ -284,6 +347,19 @@ $site_name->site_owner";
                 if ($existingContact) {
                     $data['contact_id'] = $existingContact->id;
                     $data['photo'] = $existingContact->image;
+                    $existingContact->email = $request->email;
+                    $existingContact->national_id = $request->national_id;
+                    $existingContact->father_name = $request->father_name;
+                    $existingContact->father_mobile = $request->father_mobile;
+                    $existingContact->mother_name = $request->mother_name;
+                    $existingContact->mother_mobile = $request->mother_mobile;
+                    $existingContact->spouse_name = $request->spouse_name;
+                    $existingContact->spouse_mobile = $request->spouse_mobile;
+                    $existingContact->present_address = $request->present_address;
+                    $existingContact->permanent_address = $request->permanent_address;
+                    $existingContact->sms_option = $request->send_sms;
+                    $existingContact->send_email = $request->send_email;
+                    $existingContact->save();
                 } else {
                     // Upload new image if available
                     if ($request->hasFile('photo')) {
@@ -333,26 +409,6 @@ $site_name->site_owner";
                     $contact->save();
 
                     $data['contact_id'] = $contact->id;
-                }
-            }
-
-            // If contact_id exists but no photo uploaded, do not override photo
-            if ($request->hasFile('photo') && empty($data['photo'])) {
-                if ($asset->photo && file_exists(public_path($asset->photo))) {
-                    unlink(public_path($asset->photo));
-                }
-
-                $imageFile = $request->file('photo');
-                $imageName = time() . '_' . uniqid() . '.' . $imageFile->getClientOriginalExtension();
-                $destinationPath = public_path('admin-assets/img/assets');
-                $imageFile->move($destinationPath, $imageName);
-                $photoPath = 'admin-assets/img/assets/' . $imageName;
-                $data['photo'] = $photoPath;
-
-                // If contact exists, update its image too
-                if (isset($contact) && $contact instanceof Contact) {
-                    $contact->image = $photoPath;
-                    $contact->save();
                 }
             }
         }

@@ -31,7 +31,7 @@
 @endphp
     <div class="report-header">
         <img src="{{ asset($setting->site_logo) }}" height="auto" width="15%" class="img" alt="">
-        <p><strong>হিসাব নাম্বার:</strong> #{{ $asset->slug }}{{ $asset->id }}</p>
+        <p><strong> হিসাব নাম্বার:</strong> #{{ $liability->slug }}{{ $liability->id }}</p>
         <p><strong>প্রকাশের তারিখ:</strong> {!! bn_number(now()->format('d-m-Y')) !!}</p>
     </div>
 
@@ -44,8 +44,8 @@
             </td>
             <td>
                 <strong>প্রাপকঃ</strong><br>
-                নামঃ {{ $asset->name }}<br>
-                ঠিকানাঃ {{ $asset->present_address }}
+                নামঃ {{ $liability->name }}<br>
+                ঠিকানাঃ {{ $liability->present_address }}
             </td>
         </tr>
     </table>
@@ -57,15 +57,15 @@
             <td>{!! bn_number(\Carbon\Carbon::parse($request->transaction_date)->format('d-m-Y')) !!} ইং</td>
         </tr>
         <tr>
-            <td>আদায়কৃত ঋণের পরিমাণ:</td>
+            <td>পরিশোধিত  ঋণের পরিমাণ:</td>
             <td>{{ $requestASmount}} টাকা</td>
         </tr>
         <tr>
-            <td>পূর্বের প্রদানকৃত ঋণের পরিমাণ :</td>
+            <td>পূর্বের গৃহীত  ঋণের পরিমাণ:</td>
             <td>{{ $previousAmount }} টাকা</td>
         </tr>
         <tr>
-            <td>মোট অবশিষ্ট অপরিশোধিত ঋণের স্থিতির পরিমাণ:</td>
+            <td>মোট অপরিশোধিত ঋণের স্থিতির পরিমাণ:</td>
             <td>{{ $totalAmount }} টাকা</td>
         </tr>
     </table>

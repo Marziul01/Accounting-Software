@@ -122,8 +122,8 @@ $message="আসসালামু আলাইকুম,
 আপনার নিকট থেকে $amount টাকা আদায় হয়েছে । $templateText রাসেল এর নিকট থেকে আপনার গৃহীত মোট অবশিষ্ট অপরিশোধিত ঋণের পরিমাণ  $totalamountBn টাকা।";
                 }
                 
-
-                $response = sendSMS($asset->mobile, $message);
+                $number = '88'.$asset->mobile;
+                $response = sendSMS($number, $message);
 
                 // Optional: Map response code to readable message
                 $errorMessages = [
