@@ -2,6 +2,7 @@
 
 namespace App\Mail;
 
+use App\Models\Asset;
 use App\Models\EmailTemplate;
 use App\Models\Liability;
 use App\Models\SiteSetting;
@@ -14,22 +15,19 @@ use Illuminate\Queue\SerializesModels;
 use Mpdf\Mpdf;
 use Mpdf\Config\ConfigVariables;
 use Mpdf\Config\FontVariables;
-use Illuminate\Http\Request;
 
-class LiabilityInvoiceMail extends Mailable
+class LiabilityMonthlyInvoiceMail extends Mailable
 {
     use Queueable, SerializesModels;
 
     public $messageText;
     public $contact;
-    public $request;
     public $liability;
     public $totalAmount;
 
-    public function __construct(Liability $liability, Request $request)
+    public function __construct(Liability $liability)
     {
         $this->liability = $liability;
-        $this->request = $request;
 
         $this->totalAmount = $liability->transactions()->where('transaction_type', 'Deposit')->sum('amount') -
                              $liability->transactions()->where('transaction_type', 'Withdraw')->sum('amount');
@@ -38,19 +36,15 @@ class LiabilityInvoiceMail extends Mailable
 
     public function build()
     {
-        $body = EmailTemplate::find(4);
+        $body = EmailTemplate::find(8);
         // Convert to Bangla inside build (safe for queued mails)
-        $requestASmount = $this->engToBnNumber(number_format($this->request->amount, 2));
         $totalAmountBn = $this->engToBnNumber(number_format($this->totalAmount, 2));
         
-        $transDate = $this->engToBnNumber(\Carbon\Carbon::parse($this->request->transaction_date)->format('d-m-Y'));
         $templateText = $body->body ?? '';
 
-        $html = view('pdf.liability_invoice', [
+        $html = view('pdf.liability_monthly_invoice', [
             'liability' => $this->liability,
-            'request' => $this->request,
             'totalAmount' => $totalAmountBn,
-            'requestASmount' => $requestASmount,
         ])->render();
 
         $defaultConfig = (new ConfigVariables())->getDefaults();
@@ -77,14 +71,11 @@ class LiabilityInvoiceMail extends Mailable
         $mpdf->WriteHTML($html);
         $pdf = $mpdf->Output('', 'S');
 
-        return $this->subject('New Liabiliy Created')
-                    ->view('emails.liability.invoice')
+        return $this->subject('Monthly Liability Report')
+                    ->view('emails.liability.monthlyInvoice')
                     ->with([
                         'liability' => $this->liability,
-                        'request' => $this->request,
                         'totalAmountBn' => $totalAmountBn,
-                        'requestASmount' => $requestASmount,
-                        'transDate' => $transDate,
                         'templateText' => $templateText,
                     ])
                     ->attachData($pdf, 'invoice.pdf', [

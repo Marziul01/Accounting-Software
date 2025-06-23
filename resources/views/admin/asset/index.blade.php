@@ -1069,6 +1069,8 @@
                 console.log(`${key}: ${value}`);
             }
 
+            $('#fullscreenLoader').fadeIn();
+
             $.ajax({
                 url: "{{ route('assettransaction.store') }}",
                 method: "POST",
@@ -1079,7 +1081,7 @@
                 processData: false,
                 contentType: false,
                 success: function (response) {
-                    
+                    $('#fullscreenLoader').fadeOut();
                     $('#successMessage').text(response.message); // Set dynamic success message
                     $('#successModal').modal('show');
 
@@ -1091,6 +1093,7 @@
                     }, 2000);
                 },
                 error: function (xhr) {
+                    $('#fullscreenLoader').fadeOut();
                     console.log('Error:', xhr);
                     if (xhr.status === 422) {
                         let errors = xhr.responseJSON.errors;

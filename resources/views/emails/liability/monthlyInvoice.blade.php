@@ -2,7 +2,7 @@
 <html lang="bn">
 <head>
     <meta charset="UTF-8">
-    <title>দায় </title>
+    <title>সম্পদ </title>
     <style>
         body { font-family: 'SolaimanLipi', sans-serif; }
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
@@ -14,26 +14,10 @@
 </head>
 <body>
  
-প্রিয় {{ $liability->name }},
+প্রিয় {{ $liability->name }}, আপনার প্রদান করা রাসেল এর নিকট আজ পর্যন্ত মোট ঋণের অবশিষ্ট পাওনা {{ $totalAmountBn }} টাকা ৷
     <br><br>
-    {{ $templateText }}  #{{ $liability->slug }}{{ $liability->id }}
-    
-    <br><br>
+    {{ $templateText }}   
 
-    <table>
-        <tr>
-            <td>লেনদেনের তারিখ:</td>
-            <td>{{ $transDate }} ইং</td>
-        </tr>
-        <tr>
-            <td>গৃহীত ঋণের পরিমাণ:</td>
-            <td>{{ $requestASmount }} টাকা</td>
-        </tr>
-        <tr>
-            <td>মোট অপরিশোধিত ঋণের স্থিতির পরিমাণ:</td>
-            <td>{{ $totalAmountBn }} টাকা</td>
-        </tr>
-    </table>
 
     <br><br>
     উক্ত মেইলটি আপনার নিকট লেনদেনের তথ্য বিবরণী হিসাবে সয়ংক্রিয় ভাবে সিস্টেম থেকে পাঠানো হয়েছে। তাই উক্ত মেইলের বিপরীতে কোন প্রতিউত্তর না দেয়ার জন্য অনুরোধ রইলো।

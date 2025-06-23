@@ -2,11 +2,20 @@
 
 namespace App\Mail;
 
+use App\Models\Asset;
+use App\Models\EmailTemplate;
+use App\Models\Liability;
+use App\Models\SiteSetting;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Mail\Mailables\Content;
+use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
-use App\Models\EmailTemplate;
-use App\Models\SiteSetting;
+use Mpdf\Mpdf;
+use Mpdf\Config\ConfigVariables;
+use Mpdf\Config\FontVariables;
+use Illuminate\Http\Request;
 
 class AssetInvoiceMail extends Mailable
 {
@@ -14,39 +23,79 @@ class AssetInvoiceMail extends Mailable
 
     public $messageText;
     public $contact;
+    public $request;
+    public $asset;
+    public $totalAmount;
 
-    public function __construct($asset, $request)
+    public function __construct(Asset $asset, Request $request)
     {
-        $emailTemplate = EmailTemplate::find(1);
-        $siteSettings = SiteSetting::find(1);
-        $amount = $request->amount;
+        $this->asset = $asset;
+        $this->request = $request;
 
-        $contactName = $asset->name;
-        $accountNumber = '#' . $asset->slug . $asset->id;
-
-        // Default fallback template if not found
-$templateBody="প্রিয় $contactName, $emailTemplate->body $accountNumber । গৃহীত ঋণের পরিমাণ $amount টাকা ।";
-
-        $footer = "
-ধন্যবাদান্তে,
-
-{$siteSettings->site_owner}
-
-ঠিকানা: {$siteSettings->site_address}
-ইমেইল: {$siteSettings->site_email}
-ওয়েবসাইট : {$siteSettings->site_link}
-        ";
-
-        $this->messageText = $templateBody . "\n\n" . $footer;
-        $this->contact = $request->email; // Not necessary but good if you want to use in view
+        $this->totalAmount = $asset->transactions()->where('transaction_type', 'Deposit')->sum('amount') -
+                             $asset->transactions()->where('transaction_type', 'Withdraw')->sum('amount');
+        
     }
 
     public function build()
     {
-        return $this->view('emails.asset.invoice')
-            ->subject('Asset Created Invoice')
-            ->with([
-                'messageText' => $this->messageText,
-            ]);
+        $body = EmailTemplate::find(1);
+        // Convert to Bangla inside build (safe for queued mails)
+        $requestASmount = $this->engToBnNumber(number_format($this->request->amount, 2));
+        $totalAmountBn = $this->engToBnNumber(number_format($this->totalAmount, 2));
+        
+        $transDate = $this->engToBnNumber(\Carbon\Carbon::parse($this->request->transaction_date)->format('d-m-Y'));
+        $templateText = $body->body ?? '';
+
+        $html = view('pdf.asset_invoice', [
+            'asset' => $this->asset,
+            'request' => $this->request,
+            'totalAmount' => $totalAmountBn,
+            'requestASmount' => $requestASmount,
+        ])->render();
+
+        $defaultConfig = (new ConfigVariables())->getDefaults();
+        $fontDirs = $defaultConfig['fontDir'];
+        $defaultFontConfig = (new FontVariables())->getDefaults();
+        $fontData = $defaultFontConfig['fontdata'];
+        $customFontDir = storage_path('fonts');
+
+        $mpdf = new Mpdf([
+            'mode' => 'utf-8',
+            'format' => 'A4',
+            'fontDir' => array_merge($fontDirs, [$customFontDir]),
+            'fontdata' => $fontData + [
+                'solaimanlipi' => [
+                    'R' => 'SolaimanLipi.ttf',
+                    'useOTL' => 0xFF,
+                    'useKashida' => 75,
+                ],
+            ],
+            'default_font' => 'solaimanlipi',
+            'tempDir' => storage_path('app/tmp'),
+        ]);
+
+        $mpdf->WriteHTML($html);
+        $pdf = $mpdf->Output('', 'S');
+
+        return $this->subject('New Asset Created')
+                    ->view('emails.asset.invoice')
+                    ->with([
+                        'asset' => $this->asset,
+                        'request' => $this->request,
+                        'totalAmountBn' => $totalAmountBn,
+                        'requestASmount' => $requestASmount,
+                        'transDate' => $transDate,
+                        'templateText' => $templateText,
+                    ])
+                    ->attachData($pdf, 'invoice.pdf', [
+                        'mime' => 'application/pdf',
+                    ]);
+    }
+    private function engToBnNumber($number)
+    {
+        $eng = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+        $bn  = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
+        return str_replace($eng, $bn, $number);
     }
 }

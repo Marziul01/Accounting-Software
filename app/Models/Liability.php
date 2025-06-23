@@ -42,4 +42,8 @@ class Liability extends Model
     {
         return $this->hasMany(LiabilityTransaction::class, 'liability_id')->orderBy('transaction_date', 'asc');;
     }
+
+    public function contact(){
+        return $this->belongsTo(Contact::class, 'contact_id', 'id');
+    }
 }

@@ -142,7 +142,7 @@
                                 <input type="text" class="form-control slug-output" id="slug" name="slug" value="{{ $expensesubcategory->slug }}" readonly>
                             </div>
                             @if($expensesubcategory->expense_category_id == 7)
-                            <input type="hidden" name="income_category_id" value="{{ $expensesubcategory->expense_category_id }}">
+                            <input type="hidden" name="expense_category_id" value="{{ $expensesubcategory->expense_category_id }}">
                             @else
                             <div class="mb-3">
                                 <label for="expense_category_id" class="form-label">Category</label>

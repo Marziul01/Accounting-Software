@@ -10,3 +10,9 @@ Artisan::command('inspire', function () {
 
 Schedule::command('app:auto-monthly-export')
     ->monthlyOn(1, '03:00'); // Runs on the 1st of every month at 3:00 AM
+
+Schedule::command('app:send-monthly-asset-notifications')
+    ->monthlyOn(1, '02:00');
+
+Schedule::command('app:send-monthly-liability-notifications')
+    ->monthlyOn(1, '02:00');
