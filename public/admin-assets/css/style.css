@@ -327,7 +327,12 @@ table tbody tr:nth-child(even) {
 div.dataTables_wrapper{
     position: unset !important;
 }
-
+.select2.select2-container.select2-container--default{
+  width: 100% !important;
+}
+.select2-results__option, .select2-selection__choice__display{
+  color: black;
+}
 @media screen and (max-width: 768px) {
   .dt-buttons, div.dataTables_wrapper div.dataTables_info{
     position: relative !important;

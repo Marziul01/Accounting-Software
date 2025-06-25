@@ -79,7 +79,7 @@
             </a>
             <ul class="menu-sub">
                 <li class="menu-item ">
-                    <a href="" class="menu-link">
+                    <a href="{{ route('occassion') }}" class="menu-link">
                         <div class="text-truncate" data-i18n="Analytics"> Occasional SMS and Email</div>
                     </a>
                 </li>

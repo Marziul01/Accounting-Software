@@ -16,3 +16,5 @@ Schedule::command('app:send-monthly-asset-notifications')
 
 Schedule::command('app:send-monthly-liability-notifications')
     ->monthlyOn(1, '02:00');
+
+Schedule::command('send:occasion-sms')->dailyAt('00:00');

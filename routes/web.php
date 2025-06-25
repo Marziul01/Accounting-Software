@@ -36,6 +36,7 @@ use App\Http\Controllers\InvestmentIncomeController;
 use App\Http\Controllers\InvestmentSubCategoryController;
 use App\Http\Controllers\InvestmentTransactionController;
 use App\Http\Controllers\LiabilityTransactionController;
+use App\Http\Controllers\OccassionController;
 use App\Http\Controllers\UserController;
 use App\Models\AssetSubSubCategory;
 use App\Models\ExpenseCategory;
@@ -174,6 +175,12 @@ Route::prefix('admin')->middleware(['auth:admin', 'admin.only'])->group(function
     Route::get('/liability/export/{format}', [ExportData::class, 'exportliability'])->name('liability.export');
     Route::get('/bank/export/{format}', [ExportData::class, 'exportbank'])->name('bank.export');
     Route::get('/expense/${id}/edit', [ExpenseController::class, 'editMdals'])->name('expenseeditMdals');
+
+
+    Route::get('/occassions', [OccassionController::class, 'occassion'])->name('occassion');
+    Route::post('/occassion/store/', [OccassionController::class, 'store'])->name('occassion.store');
+    Route::post('/occassion/update/{id}', [OccassionController::class, 'update'])->name('occassion.update');
+    Route::post('/occassion/delete/{id}', [OccassionController::class, 'destroy'])->name('occassion.destroy');
 
 });
 
