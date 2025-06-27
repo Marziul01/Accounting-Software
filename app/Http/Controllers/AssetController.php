@@ -209,7 +209,7 @@ class AssetController extends Controller
                 $accountNumber = '#'.$assetsfdf->slug.$assetsfdf->id; // or $assetsfdf->id if you prefer
                 $amount = $this->engToBnNumber($request->amount);
 
-                $message = "প্রিয় {$accountName}, $templateText {$accountNumber} । গৃহীত ঋণের পরিমাণ $amount টাকা ।
+                $message = "প্রিয় {$accountName}, $templateText {$accountNumber} । গৃহীত ঋণের পরিমাণ $amount টাকা । 
 
 ধন্যবাদান্তে,
 
@@ -300,6 +300,7 @@ $site_name->site_owner";
                 if ($contact) {
                     // ✅ Update contact details from the request
                     $contact->name = $request->user_name;
+                    $contact->slug = $request->slug;
                     $contact->mobile_number = $request->mobile;
                     $contact->email = $request->email;
                     $contact->national_id = $request->national_id;
@@ -341,7 +342,6 @@ $site_name->site_owner";
                 // If no contact_id, try to find or create contact
                 $existingContact = Contact::where('name', $request->user_name)
                     ->where('mobile_number', $request->mobile)
-                    ->where('email', $request->email)
                     ->first();
 
                 if ($existingContact) {

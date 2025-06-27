@@ -157,6 +157,8 @@ class ContactController extends Controller
         // 2. Update related Assets
         Asset::where('contact_id', $contact->id)->update([
             'user_name'           => $contact->name,
+            'name'                => $contact->name,
+            'slug'                => $contact->slug,
             'mobile'              => $contact->mobile_number,
             'photo'               => $contact->image,
             'national_id'         => $contact->national_id,
@@ -175,6 +177,8 @@ class ContactController extends Controller
         // Sync related Liabilities
         Liability::where('contact_id', $contact->id)->update([
             'user_name'           => $contact->name,
+            'name'                => $contact->name,
+            'slug'                => $contact->slug,
             'mobile'              => $contact->mobile_number,
             'photo'               => $contact->image,
             'national_id'         => $contact->national_id,

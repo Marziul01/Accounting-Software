@@ -12,7 +12,7 @@
                     <div class="card-body">
                         
                                         <div class="table-responsive">
-                                            <table class="table" id="myTable">
+                                            {{-- <table class="table" id="myTable">
                                                 <thead>
                                                     <tr>
                                                         <th>Sl</th>
@@ -71,7 +71,22 @@
                                                     </tr>
                                                     @endif
                                                 </tbody>
-                                            </table>
+                                            </table> --}}
+                                            <table class="table" id="myTable">
+    <thead>
+        <tr>
+            <th>Sl</th>
+            <th>Bank Name</th>
+            <th>Transaction Name</th>
+            <th>Transaction Id</th>
+            <th>Amount</th>
+            <th>Transaction Date</th>
+            <th>Transaction Type</th>
+            <th>Description</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+</table>
                                         </div>
                                         
                                 
@@ -152,7 +167,7 @@
     <!-- / Modal -->
       
 
-    @if($banktransactions->isNotEmpty())
+    {{-- @if($banktransactions->isNotEmpty())
         @foreach ($banktransactions as $banktransaction )
 
         <div class="modal fade" id="editModal{{ $banktransaction->id }}">
@@ -221,7 +236,78 @@
             </div>
         </div>
         @endforeach
-    @endif
+    @endif --}}
+
+    <!-- Edit Bank Transaction Modal -->
+<div class="modal fade" id="editBankTransactionModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <form id="editBankTransactionForm" method="POST" action="">
+      @csrf
+      @method('PUT')
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Edit Bank Transaction</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" name="transaction_id_hidden" id="editTransactionIdHidden">
+
+          <div class="mb-3">
+            <label class="form-label">Transaction Name</label>
+            <input type="text" class="form-control name-input" name="name" id="editBankName" required>
+          </div>
+
+          <div class="mb-3 d-none">
+                            <label for="slug" class="form-label">Slug</label>
+                            <input type="text" class="form-control slug-output" id="bankslug" name="slug"  readonly>
+                        </div>
+          <div class="mb-3">
+            <label class="form-label">Bank Account</label>
+            <select class="form-select" name="bank_account_id" id="editBankAccount" required>
+              <option value="">Select Bank</option>
+              @foreach ($bankaccounts as $account)
+                <option value="{{ $account->id }}">{{ $account->bank_name }} ({{ $account->account_type }})</option>
+              @endforeach
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Transaction Type</label>
+            <select class="form-select" name="transaction_type" id="editTransactionType" required>
+              <option value="credit">জমা</option>
+              <option value="debit">উত্তোলন</option>
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Transaction ID</label>
+            <input type="text" class="form-control" name="transaction_id" id="editTransactionID">
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Amount</label>
+            <input type="number" class="form-control" name="amount" id="editBankAmount" required>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Transaction Date</label>
+            <input type="date" class="form-control" name="transaction_date" id="editBankDate" required>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Description</label>
+            <textarea class="form-control" name="description" id="editBankDescription" rows="3"></textarea>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Update</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
     <!-- / Modal -->
 
 
@@ -244,8 +330,50 @@
 
 
 @section('scripts')
-
+@if ($banktransactions->isNotEmpty())
 <script>
+$(document).ready(function () {
+    $('#myTable').DataTable({
+        processing: true,
+        serverSide: true,
+        ajax: "{{ route('banktransaction.index') }}",
+        pageLength: 25,
+        lengthMenu: [[25, 50, 100], [25, 50, 100]],
+        dom: 'Blfrtip',
+        buttons: [
+            {
+                extend: 'csv',
+                text: 'Export CSV',
+                className: 'btn btn-sm my-custom-table-btn',
+                exportOptions: {
+                    columns: ':not(:last-child)'
+                }
+            },
+            {
+                extend: 'print',
+                text: 'Print Table',
+                className: 'btn btn-sm my-custom-table-btn',
+                exportOptions: {
+                    columns: ':not(:last-child)'
+                }
+            }
+        ],
+        columns: [
+            { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
+            { data: 'bank_name', name: 'bankAccount.bank_name' },
+            { data: 'name', name: 'name' },
+            { data: 'transaction_id', name: 'transaction_id' },
+            { data: 'amount', name: 'amount' },
+            { data: 'transaction_date', name: 'transaction_date' },
+            { data: 'transaction_type', name: 'transaction_type' },
+            { data: 'description', name: 'description' },
+            { data: 'action', name: 'action', orderable: false, searchable: false }
+        ],
+        order: [[5, 'desc']]
+    });
+});
+</script>
+{{-- <script>
     $(document).ready(function () {
         
                 $('#myTable}').DataTable({
@@ -272,7 +400,8 @@
                 });
             
     });
-</script>
+</script> --}}
+@endif
 
 <script>
     const banglaToEnglishMap = {
@@ -381,7 +510,7 @@
 </script>
 
 
-<script>
+{{-- <script>
     $(document).ready(function () {
         $('form[id^="editIncomeCategoryForms"] button[type="submit"]').on('click', function (e) {
             e.preventDefault();
@@ -430,7 +559,68 @@
         });
     });
 
+</script> --}}
+
+<script>
+$(document).ready(function () {
+    // Show Edit Modal with data
+    $(document).on('click', '.openBankEditModal', function () {
+        const button = $(this);
+        const id = button.data('id');
+
+        const actionUrl = "{{ route('banktransaction.update', ':id') }}".replace(':id', id);
+        $('#editBankTransactionForm').attr('action', actionUrl);
+        $('#editTransactionIdHidden').val(id);
+        $('#editBankName').val(button.data('name'));
+        $('#bankslug').val(button.data('slug'));
+        $('#editTransactionID').val(button.data('transaction-id'));
+        $('#editBankAmount').val(button.data('amount'));
+        $('#editBankDate').val(button.data('date'));
+        $('#editBankDescription').val(button.data('description'));
+        $('#editBankAccount').val(button.data('bank-id'));
+        $('#editTransactionType').val(button.data('type'));
+
+        $('#editBankTransactionModal').modal('show');
+    });
+
+    // Optional: AJAX submission (if you want to avoid reload)
+    $('#editBankTransactionForm').on('submit', function (e) {
+        e.preventDefault();
+        const form = $(this)[0];
+        const formData = new FormData(form);
+
+        $.ajax({
+            url: form.action,
+            method: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
+            success: function (response) {
+                $('#successMessage').text(response.message);
+                $('#successModal').modal('show');
+                $('#editBankTransactionModal').modal('hide');
+                setTimeout(function () {
+                        window.location.reload();
+                    }, 2000);
+            },
+            error: function (xhr) {
+                if (xhr.status === 422) {
+                    let errors = xhr.responseJSON.errors;
+                    for (let key in errors) {
+                        toastr.error(errors[key][0]);
+                    }
+                } else {
+                    toastr.error("Something went wrong.");
+                }
+            }
+        });
+    });
+});
 </script>
+
 
 <script>
     $(document).on('click', '.delete-confirm', function (e) {

@@ -84,7 +84,7 @@
                     </a>
                 </li>
                 <li class="menu-item ">
-                    <a href=""
+                    <a href="{{ route('emailsmsTemplate') }}"
                         class="menu-link">
                         <div class="text-truncate" data-i18n="CRM"> SMS and Email Template </div>
                     </a>

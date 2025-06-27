@@ -8,7 +8,7 @@
     <meta name="viewport"
         content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
 
-    <title>Admin Login</title>
+    <title>Forget Password!</title>
 
     <meta name="description" content="" />
 
@@ -35,12 +35,13 @@
     <!-- Page CSS -->
     <!-- Page -->
     <link rel="stylesheet" href="{{ asset( 'admin-assets' )  }}/assets/vendor/css/pages/page-auth.css" />
+
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Helpers -->
+    <script src="{{ asset( 'admin-assets' )  }}/assets/vendor/js/helpers.js"></script>
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
     <script src="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 
-    <!-- Helpers -->
-    <script src="{{ asset( 'admin-assets' )  }}/assets/vendor/js/helpers.js"></script>
     <!--! Template customizer & Theme config files MUST be included after core stylesheets and helpers.js in the <head> section -->
     <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
     <script src="{{ asset( 'admin-assets' )  }}/assets/js/config.js"></script>
@@ -64,30 +65,56 @@
                             </a>
                         </div>
 
-                        <form id="formAuthentication" class="mb-6" action="index.html">
+                        <form id="forgotForm" class="mb-6">
                             @csrf
-                            <div class="mb-6 position-relative">
-                                <label for="email" class="form-label">Email </label>
-                                <input type="text" class="form-control" id="email" name="email"
-                                    placeholder="Enter your email" autofocus />
+                            <div id="input-email" class="mb-3">
+                                <label for="email" class="form-label">Email</label>
+                                <input type="email" class="form-control" name="email" placeholder="Enter your email" />
                             </div>
-                            <div class="mb-6 form-password-toggle">
-                                <label class="form-label" for="password">Password</label>
-                                <div class="input-group input-group-merge">
-                                    <input type="password" id="password" class="form-control" name="password"
-                                        placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
-                                        aria-describedby="password" />
-                                    <span class="input-group-text cursor-pointer"><i class="bx bx-hide"></i></span>
-                                </div>
+
+                            <div id="input-phone" class="mb-3" style="display: none;">
+                                <label for="phone" class="form-label">Phone Number</label>
+                                <input type="number" class="form-control" name="mobile" placeholder="Enter your phone number" />
                             </div>
-                            
-                            <div class="mb-6">
-                                <button class="btn btn-primary d-grid w-100 mt-3" type="submit">Login</button>
+
+                            <div class="mb-3">
+                                <button type="button" id="toggleInput" class="btn btn-sm btn-outline-primary">Use Phone Number</button>
                             </div>
-                            <div class="w-100 text-center">
-                                <a class="text-center text-danger" href="{{ route('forgotPass') }}">Forgot your password?</a>
+
+                            <div>
+                                <button class="btn btn-primary w-100" type="submit">Send Code</button>
+                            </div>
+
+                            <div class="text-center mt-3">
+                                <a class="text-primary" href="{{ route('login') }}">Back to Login!</a>
                             </div>
                         </form>
+
+                        {{-- Code Verification --}}
+                        <form id="verifyCodeForm" style="display: none;">
+                            @csrf
+                            <div class="mb-3">
+                                <label for="code" class="form-label">Enter Verification Code</label>
+                                <input type="text" class="form-control" name="code" placeholder="6-digit code" />
+                            </div>
+                            <button type="submit" class="btn btn-success w-100">Verify Code</button>
+                        </form>
+
+                        {{-- New Password --}}
+                        <form id="newPasswordForm" style="display: none;">
+                            @csrf
+                            <div class="mb-3">
+                                <label>New Password</label>
+                                <input type="password" name="password" class="form-control" />
+                            </div>
+                            <div class="mb-3">
+                                <label>Confirm Password</label>
+                                <input type="password" name="password_confirmation" class="form-control" />
+                            </div>
+                            <button type="submit" class="btn btn-success w-100">Update Password</button>
+                        </form>
+
+
                     </div>
                 </div>
                 <!-- /Register -->
@@ -110,29 +137,15 @@
             </div>
         </div>
     </div>
-  
-    <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered">
-          <div class="modal-content">
-              <div class="modal-header">
-                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-              </div>
-              <div class="modal-body d-flex justify-content-center flex-column align-items-center auth-error-modal">
-                  <img src="{{ asset('admin-assets/img/fail.gif') }}" width="25%" alt="">
-                  <h5 class="modal-title text-center text-danger" id="errorModalLabel">Access Denied</h5>
-                  <p id="errorMessage" class="text-center text-danger">You are not authorized to access the Admin Panel.</p>
-              </div>
-          </div>
-      </div>
-  </div>
 
-  <div id="fullscreenLoader" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999;">
+    <div id="fullscreenLoader" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999;">
         <div style="display:flex; justify-content:center; align-items:center; width:100%; height:100%;">
              <div class="spinner-border text-light" role="status" style="width: 4rem; height: 4rem;">
                 <span class="visually-hidden">Loading...</span>
             </div>
         </div>
     </div>
+
 
     <!-- Core JS -->
     <!-- build:js assets/vendor/js/core.js -->
@@ -157,66 +170,107 @@
 
 
     <script>
-        $(document).ready(function () {
-            $('#formAuthentication').on('submit', function (e) {
-                e.preventDefault();
-    
-                let form = $(this);
-                let url = "{{ route('admin.authenticate') }}";
-                let data = form.serialize();
-                $('#fullscreenLoader').fadeIn();
-    
-                // Clear previous error messages
-                form.find('.text-danger').remove();
-    
-                // Show loader (optional)
-                let submitButton = form.find('button[type="submit"]');
-                submitButton.prop('disabled', true).text('Logging in...');
-    
-                $.ajax({
-                    url: url,
-                    type: 'POST',
-                    data: data,
-                    success: function (response) {
-                        $('#fullscreenLoader').fadeOut();
-                        // Display success message in the modal
-                        $('#successMessage').text(response.message);
-                        $('#successModal').modal('show');
-    
-                        // Redirect when "Go to Dashboard" button is clicked
-                        setTimeout(function () {
-                            window.location.href = response.redirect;
-                        }, 2000); // Delay of 2000 milliseconds (2 seconds)
-                    },
-                    error: function (xhr) {
-                        $('#fullscreenLoader').fadeOut();
-                      if (xhr.status === 422) {
-                          let errors = xhr.responseJSON.errors;
-  
-                          if (errors.authorization) {
-                              // Show "Not Authorized" error in the modal
-                              $('#errorMessage').text(errors.authorization);
-                              $('#errorModal').modal('show');
-                          } else {
-                              // Display other validation errors under the corresponding inputs
-                              $.each(errors, function (field, message) {
-                                  form.find(`[name="${field}"]`).after(
-                                      `<small class="text-danger pass-error">${message}</small>`
-                                  );
-                              });
-                          }
-                      } else {
-                          alert('An unexpected error occurred.');
-                      }
-                  },
-                    complete: function () {
-                        $('#fullscreenLoader').fadeOut();
-                        submitButton.prop('disabled', false).text('Login');
-                    },
-                });
-            });
+    let usingEmail = true;
+
+    $('#toggleInput').on('click', function () {
+        usingEmail = !usingEmail;
+
+        if (usingEmail) {
+            $('#input-email').show();
+            $('#input-phone').hide();
+            $('input[name=phone]').val('');
+            $(this).text('Use Phone Number');
+        } else {
+            $('#input-email').hide();
+            $('#input-phone').show();
+            $('input[name=email]').val('');
+            $(this).text('Use Email');
+        }
+    });
+
+    // Send Code
+    $('#forgotForm').on('submit', function (e) {
+    e.preventDefault();
+    $('#fullscreenLoader').fadeIn();
+
+    // Manually clear the hidden field
+    if ($('#input-email').is(':hidden')) {
+        $('input[name=email]').val('');
+    } else {
+        $('input[name=mobile]').val('');
+    }
+
+    const formData = new FormData(this);
+
+    $.ajax({
+            url: "{{ route('password.send.code') }}",
+            method: "POST",
+            data: formData,
+            processData: false,
+            contentType: false,
+            success(response) {
+                $('#fullscreenLoader').fadeOut();
+                toastr.success(response.message);
+                $('#forgotForm').hide();
+                $('#verifyCodeForm').show();
+            },
+            error(xhr) {
+                $('#fullscreenLoader').fadeOut();
+                if (xhr.responseJSON?.errors) {
+                    const errors = xhr.responseJSON.errors;
+                    for (let field in errors) {
+                        toastr.error(errors[field][0]);
+                    }
+                } else {
+                    toastr.error(xhr.responseJSON?.message || 'Something went wrong.');
+                }
+            }
         });
-    </script>
+    });
+
+
+    // Verify Code
+    $('#verifyCodeForm').on('submit', function (e) {
+        e.preventDefault();
+
+        $.ajax({
+            url: "{{ route('password.verify.code') }}",
+            method: "POST",
+            data: $(this).serialize(),
+            success(response) {
+                toastr.success(response.message);
+                $('#verifyCodeForm').hide();
+                $('#newPasswordForm').show();
+            },
+            error(xhr) {
+                toastr.error(xhr.responseJSON.message || "Invalid code.");
+            }
+        });
+    });
+
+    // Update Password
+    $('#newPasswordForm').on('submit', function (e) {
+        e.preventDefault();
+
+        $.ajax({
+            url: "{{ route('password.reset.update') }}",
+            method: "POST",
+            data: $(this).serialize(),
+            success(response) {
+                toastr.success(response.message);
+                window.location.href = "{{ route('login') }}";
+            },
+            error(xhr) {
+                const errors = xhr.responseJSON.errors;
+                for (let field in errors) {
+                    toastr.error(errors[field][0]);
+                }
+            }
+        });
+    });
+</script>
+
+
     <script>
         const toggleBtn = document.getElementById('themeToggle');
         const root = document.documentElement;
@@ -238,9 +292,8 @@
             toggleBtn.textContent = '☀️ Light Mode';
           }
         });
-      </script>
-
-      <script>
+    </script>
+    <script>
         @if(session('success'))
             toastr.success("{{ session('success') }}");
         @endif
@@ -257,7 +310,6 @@
             toastr.info("{{ session('info') }}");
         @endif
       </script>
-    
 </body>
 
 </html>

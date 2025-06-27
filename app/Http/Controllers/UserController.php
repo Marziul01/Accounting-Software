@@ -43,7 +43,7 @@ class UserController extends Controller
             'email' => $request->email,
             'password' => bcrypt($request->password),
             'mobile' => $request->mobile,
-            'role' => 0,
+            'role' => 1,
         ]);
 
         // Create user access
@@ -86,7 +86,7 @@ class UserController extends Controller
             'email' => $request->email,
             'password' => $request->password ? bcrypt($request->password) : $user->password,
             'mobile' => $request->mobile,
-            'role' => 0,
+            'role' => 1,
         ]);
 
         // Update user access

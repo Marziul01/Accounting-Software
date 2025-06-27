@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\BankAccount;
 use Illuminate\Http\Request;
+use Yajra\DataTables\Facades\DataTables;
 use App\Models\BankTransaction;
 
 class BankTransactionController extends Controller
@@ -11,7 +12,7 @@ class BankTransactionController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         // Check if the user has permission to access this page
         if (auth()->user()->access->bankbook == 3) {
@@ -20,6 +21,28 @@ class BankTransactionController extends Controller
         // Fetch all bank transactions from the database
         $bankTransactions = BankTransaction::all();
 
+        if ($request->ajax()) {
+            $transactions = BankTransaction::with('bankAccount')->orderByDesc('transaction_date');
+
+            return DataTables::of($transactions)
+                ->addIndexColumn()
+                ->addColumn('bank_name', function ($row) {
+                    return $row->bankAccount->bank_name ?? 'Bank Deleted';
+                })
+                ->addColumn('transaction_type', function ($row) {
+                    if ($row->transaction_type == 'credit') {
+                        return '<span class="badge bg-label-success">জমা</span>';
+                    } elseif ($row->transaction_type == 'debit') {
+                        return '<span class="badge bg-label-danger">উত্তোলন</span>';
+                    }
+                    return '<span class="badge bg-label-secondary">N/A</span>';
+                })
+                ->addColumn('action', function ($row) {
+                        return view('admin.bank_accounts._actions', compact('row'))->render();
+                    })
+                ->rawColumns(['transaction_type', 'action'])
+                ->make(true);
+        }
         // Return the view with the bank transactions data
         return view('admin.bank_accounts.transactions', [
             'banktransactions' => $bankTransactions,

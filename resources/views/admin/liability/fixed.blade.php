@@ -77,10 +77,10 @@
                                                     <a class=" btn btn-sm btn-outline-secondary {{ Auth::user()->access->liability == 1 ? 'disabled' : '' }}" href="" data-bs-toggle="modal"
                                                     data-bs-target="#editModal{{ $liability->id }}"><i
                                                             class="bx bx-edit-alt me-1"></i> Edit</a>
-                                                <form action="{{ route('liability.destroy', $liability->id) }}" method="POST" class="d-inline">
+                                                <form action="{{ route('liability.destroy', $liability->id) }}" method="POST" class="d-inline w-100">
                                                     @csrf
                                                     @method('DELETE')
-                                                    <button type="submit" class="btn btn-sm btn-outline-danger delete-confirm {{ Auth::user()->access->liability == 1 ? 'disabled' : '' }}" ><i
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger w-100 delete-confirm {{ Auth::user()->access->liability == 1 ? 'disabled' : '' }}" ><i
                                                             class="bx bx-trash me-1"></i> Delete</button>
                                         </form>
                                             </div>

@@ -643,6 +643,37 @@
                         e($setting->site_website ?? 'www.example.com'),
                     ) !!}
                 </p>
+                @php
+                use Illuminate\Support\Carbon;
+
+                $banglaMonths = [
+                    'January' => 'জানুয়ারি',
+                    'February' => 'ফেব্রুয়ারি',
+                    'March' => 'মার্চ',
+                    'April' => 'এপ্রিল',
+                    'May' => 'মে',
+                    'June' => 'জুন',
+                    'July' => 'জুলাই',
+                    'August' => 'আগস্ট',
+                    'September' => 'সেপ্টেম্বর',
+                    'October' => 'অক্টোবর',
+                    'November' => 'নভেম্বর',
+                    'December' => 'ডিসেম্বর',
+                ];
+
+                $banglaMeridiem = ['AM' => 'পূর্বাহ্ণ', 'PM' => 'অপরাহ্ণ'];
+
+                $now = Carbon::now();
+                $formatted = $now->format('d F, Y h:i A'); // Example: 31 May, 2025 09:45 PM
+
+                // Translate English month and AM/PM to Bangla
+                $formatted = str_replace(array_keys($banglaMonths), array_values($banglaMonths), $formatted);
+                $formatted = str_replace(array_keys($banglaMeridiem), array_values($banglaMeridiem), $formatted);
+
+                $banglaDateTime = bn_number($formatted);
+            @endphp
+
+            <p class="mt-4 text-center">রাসেল বুক দ্বারা প্রস্তুতকৃত - {!! $banglaDateTime !!} </p>
 
             </div>
         </div>

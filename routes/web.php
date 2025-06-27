@@ -37,6 +37,7 @@ use App\Http\Controllers\InvestmentSubCategoryController;
 use App\Http\Controllers\InvestmentTransactionController;
 use App\Http\Controllers\LiabilityTransactionController;
 use App\Http\Controllers\OccassionController;
+use App\Http\Controllers\TemplateController;
 use App\Http\Controllers\UserController;
 use App\Models\AssetSubSubCategory;
 use App\Models\ExpenseCategory;
@@ -48,7 +49,13 @@ use PHPUnit\Util\Exporter;
 Route::get('/', [Homecontroller::class, 'index'])->name('home');
 
 Route::get('/admin/login', [AdminAuthController::class, 'login'])->name('login');
+Route::get('/admin/forget/pass', [AdminAuthController::class, 'forgotPass'])->name('forgotPass');
 Route::post('/admin/login/auth', [AdminAuthController::class, 'authenticate'])->name('admin.authenticate');
+
+Route::post('/password/send-code', [AdminAuthController::class, 'sendResetCode'])->name('password.send.code');
+Route::post('/password/verify-code', [AdminAuthController::class, 'verifyCode'])->name('password.verify.code');
+Route::post('/password/reset', [AdminAuthController::class, 'updatePassword'])->name('password.reset.update');
+
 
 // User-only area
 Route::middleware(['auth', 'user.only'])->group(function () {
@@ -181,6 +188,10 @@ Route::prefix('admin')->middleware(['auth:admin', 'admin.only'])->group(function
     Route::post('/occassion/store/', [OccassionController::class, 'store'])->name('occassion.store');
     Route::post('/occassion/update/{id}', [OccassionController::class, 'update'])->name('occassion.update');
     Route::post('/occassion/delete/{id}', [OccassionController::class, 'destroy'])->name('occassion.destroy');
+
+    Route::get('/emailsmsTemplate', [TemplateController::class, 'index'])->name('emailsmsTemplate');
+    Route::post('/smsTemplate/update/{id}', [TemplateController::class, 'update'])->name('smsTemplate.update');
+    Route::post('/emailTemplate/update/{id}', [TemplateController::class, 'emailTemplate'])->name('emailTemplate.update');
 
 });
 
