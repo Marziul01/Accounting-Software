@@ -84,11 +84,13 @@ class AssetTransactionController extends Controller
         }
         $assetTransaction = AssetTransaction::create($request->all());
 
-        if ($request->transaction_type === 'Deposit') {
-            $asset->amount += $request->amount;
-        } elseif ($request->transaction_type === 'Withdraw') {
-            $asset->amount -= $request->amount;
-        }
+        // Recalculate current balance after creating transaction
+        $totalDeposit = $asset->transactions()->where('transaction_type', 'Deposit')->sum('amount');
+        $totalWithdraw = $asset->transactions()->where('transaction_type', 'Withdraw')->sum('amount');
+        $currentBalance = $totalDeposit - $totalWithdraw;
+
+        // Save updated balance to asset
+        $asset->amount = $currentBalance;
 
         $asset->save();
 
@@ -203,13 +205,6 @@ $message="আসসালামু আলাইকুম,
         $assetTransaction = AssetTransaction::findOrFail($id);
         $asset = Asset::findOrFail($request->asset_id);
 
-        // Reverse previous transaction effect
-        if ($assetTransaction->transaction_type === 'Deposit') {
-            $asset->amount -= $assetTransaction->amount;
-        } elseif ($assetTransaction->transaction_type === 'Withdraw') {
-            $asset->amount += $assetTransaction->amount;
-        }
-
         // 🔒 Check for over-withdrawal BEFORE updating transaction
         if ($request->transaction_type === 'Withdraw') {
             $totalDeposit = $asset->transactions()->where('id', '!=', $assetTransaction->id)->where('transaction_type', 'Deposit')->sum('amount');
@@ -226,12 +221,13 @@ $message="আসসালামু আলাইকুম,
         // Apply new transaction values
         $assetTransaction->update($request->all());
 
-        if ($request->transaction_type === 'Deposit') {
-            $asset->amount += $request->amount;
-        } elseif ($request->transaction_type === 'Withdraw') {
-            $asset->amount -= $request->amount;
-        }
+        // Recalculate current balance after update
+        $totalDeposit = $asset->transactions()->where('transaction_type', 'Deposit')->sum('amount');
+        $totalWithdraw = $asset->transactions()->where('transaction_type', 'Withdraw')->sum('amount');
+        $currentBalance = $totalDeposit - $totalWithdraw;
 
+        // Save recalculated balance to asset
+        $asset->amount = $currentBalance;
         $asset->save();
 
         return response()->json([

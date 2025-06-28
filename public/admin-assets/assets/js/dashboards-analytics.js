@@ -105,243 +105,347 @@
 
   // Total Revenue Report Chart - Bar Chart
   // --------------------------------------------------------------------
-  const totalRevenueChartEl = document.querySelector('#totalRevenueChart'),
-    totalRevenueChartOptions = {
-      series: [
-        {
-          name: new Date().getFullYear() - 1,
+  // const totalRevenueChartEl = document.querySelector('#totalRevenueChart'),
+  //   totalRevenueChartOptions = {
+  //     series: [
+  //       {
+  //         name: new Date().getFullYear() - 1,
 
-          data: [18, 7, 15, 29, 18, 12, 9]
-        },
-        {
-          name: new Date().getFullYear() - 2,
-          data: [-13, -18, -9, -14, -5, -17, -15]
-        }
-      ],
-      chart: {
-        height: 317,
-        stacked: true,
-        type: 'bar',
-        toolbar: { show: false }
-      },
-      plotOptions: {
-        bar: {
-          horizontal: false,
-          columnWidth: '30%',
-          borderRadius: 8,
-          startingShape: 'rounded',
-          endingShape: 'rounded'
-        }
-      },
-      colors: [config.colors.primary, config.colors.info],
-      dataLabels: {
-        enabled: false
-      },
-      stroke: {
-        curve: 'smooth',
-        width: 6,
-        lineCap: 'round',
-        colors: [cardColor]
-      },
-      legend: {
-        show: true,
-        horizontalAlign: 'left',
-        position: 'top',
-        markers: {
-          height: 8,
-          width: 8,
-          radius: 12,
-          offsetX: -5
-        },
-        fontSize: '13px',
-        fontFamily: 'Public Sans',
-        fontWeight: 400,
-        labels: {
-          colors: legendColor,
-          useSeriesColors: false
-        },
-        itemMargin: {
-          horizontal: 10
-        }
-      },
-      grid: {
-        strokeDashArray: 7,
-        borderColor: borderColor,
-        padding: {
-          top: 0,
-          bottom: -8,
-          left: 20,
-          right: 20
-        }
-      },
-      fill: {
-        opacity: [1, 1]
-      },
-      xaxis: {
-        categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
-        labels: {
-          style: {
-            fontSize: '13px',
-            fontFamily: 'Public Sans',
-            colors: labelColor
-          }
-        },
-        axisTicks: {
-          show: false
-        },
-        axisBorder: {
-          show: false
-        }
-      },
-      yaxis: {
-        labels: {
-          style: {
-            fontSize: '13px',
-            fontFamily: 'Public Sans',
-            colors: labelColor
-          }
-        }
-      },
-      responsive: [
-        {
-          breakpoint: 1700,
-          options: {
-            plotOptions: {
-              bar: {
-                borderRadius: 10,
-                columnWidth: '35%'
-              }
-            }
-          }
-        },
-        {
-          breakpoint: 1440,
-          options: {
-            plotOptions: {
-              bar: {
-                borderRadius: 12,
-                columnWidth: '43%'
-              }
-            }
-          }
-        },
-        {
-          breakpoint: 1300,
-          options: {
-            plotOptions: {
-              bar: {
-                borderRadius: 11,
-                columnWidth: '45%'
-              }
-            }
-          }
-        },
-        {
-          breakpoint: 1200,
-          options: {
-            plotOptions: {
-              bar: {
-                borderRadius: 11,
-                columnWidth: '37%'
-              }
-            }
-          }
-        },
-        {
-          breakpoint: 1040,
-          options: {
-            plotOptions: {
-              bar: {
-                borderRadius: 12,
-                columnWidth: '45%'
-              }
-            }
-          }
-        },
-        {
-          breakpoint: 991,
-          options: {
-            plotOptions: {
-              bar: {
-                borderRadius: 12,
-                columnWidth: '33%'
-              }
-            }
-          }
-        },
-        {
-          breakpoint: 768,
-          options: {
-            plotOptions: {
-              bar: {
-                borderRadius: 11,
-                columnWidth: '28%'
-              }
-            }
-          }
-        },
-        {
-          breakpoint: 640,
-          options: {
-            plotOptions: {
-              bar: {
-                borderRadius: 11,
-                columnWidth: '30%'
-              }
-            }
-          }
-        },
-        {
-          breakpoint: 576,
-          options: {
-            plotOptions: {
-              bar: {
-                borderRadius: 10,
-                columnWidth: '38%'
-              }
-            }
-          }
-        },
-        {
-          breakpoint: 440,
-          options: {
-            plotOptions: {
-              bar: {
-                borderRadius: 10,
-                columnWidth: '50%'
-              }
-            }
-          }
-        },
-        {
-          breakpoint: 380,
-          options: {
-            plotOptions: {
-              bar: {
-                borderRadius: 9,
-                columnWidth: '60%'
-              }
-            }
-          }
-        }
-      ],
-      states: {
-        hover: {
-          filter: {
-            type: 'none'
-          }
-        },
-        active: {
-          filter: {
-            type: 'none'
-          }
+  //         data: [18, 7, 15, 29, 18, 12, 9]
+  //       },
+  //       {
+  //         name: new Date().getFullYear() - 2,
+  //         data: [-13, -18, -9, -14, -5, -17, -15]
+  //       }
+  //     ],
+  //     chart: {
+  //       height: 317,
+  //       stacked: true,
+  //       type: 'bar',
+  //       toolbar: { show: false }
+  //     },
+  //     plotOptions: {
+  //       bar: {
+  //         horizontal: false,
+  //         columnWidth: '30%',
+  //         borderRadius: 8,
+  //         startingShape: 'rounded',
+  //         endingShape: 'rounded'
+  //       }
+  //     },
+  //     colors: [config.colors.primary, config.colors.info],
+  //     dataLabels: {
+  //       enabled: false
+  //     },
+  //     stroke: {
+  //       curve: 'smooth',
+  //       width: 6,
+  //       lineCap: 'round',
+  //       colors: [cardColor]
+  //     },
+  //     legend: {
+  //       show: true,
+  //       horizontalAlign: 'left',
+  //       position: 'top',
+  //       markers: {
+  //         height: 8,
+  //         width: 8,
+  //         radius: 12,
+  //         offsetX: -5
+  //       },
+  //       fontSize: '13px',
+  //       fontFamily: 'Public Sans',
+  //       fontWeight: 400,
+  //       labels: {
+  //         colors: legendColor,
+  //         useSeriesColors: false
+  //       },
+  //       itemMargin: {
+  //         horizontal: 10
+  //       }
+  //     },
+  //     grid: {
+  //       strokeDashArray: 7,
+  //       borderColor: borderColor,
+  //       padding: {
+  //         top: 0,
+  //         bottom: -8,
+  //         left: 20,
+  //         right: 20
+  //       }
+  //     },
+  //     fill: {
+  //       opacity: [1, 1]
+  //     },
+  //     xaxis: {
+  //       categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
+  //       labels: {
+  //         style: {
+  //           fontSize: '13px',
+  //           fontFamily: 'Public Sans',
+  //           colors: labelColor
+  //         }
+  //       },
+  //       axisTicks: {
+  //         show: false
+  //       },
+  //       axisBorder: {
+  //         show: false
+  //       }
+  //     },
+  //     yaxis: {
+  //       labels: {
+  //         style: {
+  //           fontSize: '13px',
+  //           fontFamily: 'Public Sans',
+  //           colors: labelColor
+  //         }
+  //       }
+  //     },
+  //     responsive: [
+  //       {
+  //         breakpoint: 1700,
+  //         options: {
+  //           plotOptions: {
+  //             bar: {
+  //               borderRadius: 10,
+  //               columnWidth: '35%'
+  //             }
+  //           }
+  //         }
+  //       },
+  //       {
+  //         breakpoint: 1440,
+  //         options: {
+  //           plotOptions: {
+  //             bar: {
+  //               borderRadius: 12,
+  //               columnWidth: '43%'
+  //             }
+  //           }
+  //         }
+  //       },
+  //       {
+  //         breakpoint: 1300,
+  //         options: {
+  //           plotOptions: {
+  //             bar: {
+  //               borderRadius: 11,
+  //               columnWidth: '45%'
+  //             }
+  //           }
+  //         }
+  //       },
+  //       {
+  //         breakpoint: 1200,
+  //         options: {
+  //           plotOptions: {
+  //             bar: {
+  //               borderRadius: 11,
+  //               columnWidth: '37%'
+  //             }
+  //           }
+  //         }
+  //       },
+  //       {
+  //         breakpoint: 1040,
+  //         options: {
+  //           plotOptions: {
+  //             bar: {
+  //               borderRadius: 12,
+  //               columnWidth: '45%'
+  //             }
+  //           }
+  //         }
+  //       },
+  //       {
+  //         breakpoint: 991,
+  //         options: {
+  //           plotOptions: {
+  //             bar: {
+  //               borderRadius: 12,
+  //               columnWidth: '33%'
+  //             }
+  //           }
+  //         }
+  //       },
+  //       {
+  //         breakpoint: 768,
+  //         options: {
+  //           plotOptions: {
+  //             bar: {
+  //               borderRadius: 11,
+  //               columnWidth: '28%'
+  //             }
+  //           }
+  //         }
+  //       },
+  //       {
+  //         breakpoint: 640,
+  //         options: {
+  //           plotOptions: {
+  //             bar: {
+  //               borderRadius: 11,
+  //               columnWidth: '30%'
+  //             }
+  //           }
+  //         }
+  //       },
+  //       {
+  //         breakpoint: 576,
+  //         options: {
+  //           plotOptions: {
+  //             bar: {
+  //               borderRadius: 10,
+  //               columnWidth: '38%'
+  //             }
+  //           }
+  //         }
+  //       },
+  //       {
+  //         breakpoint: 440,
+  //         options: {
+  //           plotOptions: {
+  //             bar: {
+  //               borderRadius: 10,
+  //               columnWidth: '50%'
+  //             }
+  //           }
+  //         }
+  //       },
+  //       {
+  //         breakpoint: 380,
+  //         options: {
+  //           plotOptions: {
+  //             bar: {
+  //               borderRadius: 9,
+  //               columnWidth: '60%'
+  //             }
+  //           }
+  //         }
+  //       }
+  //     ],
+  //     states: {
+  //       hover: {
+  //         filter: {
+  //           type: 'none'
+  //         }
+  //       },
+  //       active: {
+  //         filter: {
+  //           type: 'none'
+  //         }
+  //       }
+  //     }
+  //   };
+  // if (typeof totalRevenueChartEl !== undefined && totalRevenueChartEl !== null) {
+  //   const totalRevenueChart = new ApexCharts(totalRevenueChartEl, totalRevenueChartOptions);
+  //   totalRevenueChart.render();
+  // }
+
+  
+
+const currentYear = new Date().getFullYear();
+let revenueChartInstance = null;
+
+function renderRevenueChart(dataSet, color1, color2) {
+  const chartEl = document.querySelector('#totalRevenueChart');
+  if (!chartEl) return;
+
+  if (revenueChartInstance) {
+    revenueChartInstance.destroy();
+  }
+
+  revenueChartInstance = new ApexCharts(chartEl, {
+    series: [
+      { name: currentYear, data: dataSet.current },
+      { name: currentYear - 1, data: dataSet.previous }
+    ],
+    chart: {
+      height: 317,
+      stacked: false, // show side-by-side
+      type: 'bar',
+      toolbar: { show: false }
+    },
+    plotOptions: {
+      bar: {
+        horizontal: false,
+        columnWidth: '35%',
+        borderRadius: 6,
+      }
+    },
+    colors: [color1, color2], // ✅ Apply the colors
+    dataLabels: {
+      enabled: false
+    },
+    stroke: {
+      show: true,
+      width: 2,
+      colors: ['transparent'] // ✅ Allow bar color to show without white overlay
+    },
+    fill: {
+      type: 'solid', // ✅ Solid fill for strong color
+      opacity: 1
+    },
+    legend: {
+      show: true,
+      position: 'top',
+      labels: {
+        colors: '#333'
+      }
+    },
+    grid: {
+      borderColor: '#e0e0e0',
+      strokeDashArray: 5,
+      padding: { left: 20, right: 20 }
+    },
+    xaxis: {
+      categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+      labels: {
+        style: {
+          fontSize: '13px',
+          color: '#333'
         }
       }
-    };
-  if (typeof totalRevenueChartEl !== undefined && totalRevenueChartEl !== null) {
-    const totalRevenueChart = new ApexCharts(totalRevenueChartEl, totalRevenueChartOptions);
-    totalRevenueChart.render();
-  }
+    },
+    yaxis: {
+      labels: {
+        style: {
+          fontSize: '13px',
+          color: '#333'
+        }
+      }
+    }
+  });
+
+  revenueChartInstance.render();
+}
+
+// Initial chart
+renderRevenueChart(revenueData.income, '#28a745', '#17a2b8');
+
+// Handle tab switches
+document.querySelectorAll('[data-bs-toggle="tab"]').forEach(tab => {
+  tab.addEventListener('shown.bs.tab', function (e) {
+    const targetId = e.target.getAttribute('data-bs-target');
+    switch (targetId) {
+      case '#revenue-income':
+        renderRevenueChart(revenueData.income, '#28a745', '#17a2b8');
+        break;
+      case '#revenue-expense':
+        renderRevenueChart(revenueData.expenses, '#dc3545', '#ffc107');
+        break;
+      case '#revenue-asset':
+        renderRevenueChart(revenueData.assets, '#6610f2', '#6f42c1');
+        break;
+      case '#revenue-liability':
+        renderRevenueChart(revenueData.liabilities, '#20c997', '#0dcaf0');
+        break;
+    }
+  });
+});
+
+
 
   // Growth Chart - Radial Bar Chart
   // --------------------------------------------------------------------
@@ -644,102 +748,165 @@
 
   // Income Chart - Area chart
   // --------------------------------------------------------------------
-  const incomeChartEl = document.querySelector('#incomeChart'),
-    incomeChartConfig = {
-      series: [
-        {
-          data: [21, 30, 22, 42, 26, 35, 29]
-        }
-      ],
-      chart: {
-        height: 232,
-        parentHeightOffset: 0,
-        parentWidthOffset: 0,
-        toolbar: {
-          show: false
-        },
-        type: 'area'
-      },
-      dataLabels: {
-        enabled: false
-      },
-      stroke: {
-        width: 3,
-        curve: 'smooth'
-      },
-      legend: {
-        show: false
-      },
-      markers: {
-        size: 6,
-        colors: 'transparent',
-        strokeColors: 'transparent',
-        strokeWidth: 4,
-        discrete: [
-          {
-            fillColor: config.colors.white,
-            seriesIndex: 0,
-            dataPointIndex: 6,
-            strokeColor: config.colors.primary,
-            strokeWidth: 2,
-            size: 6,
-            radius: 8
-          }
-        ],
-        hover: {
-          size: 7
-        }
-      },
-      colors: [config.colors.primary],
-      fill: {
-        type: 'gradient',
-        gradient: {
-          shade: shadeColor,
-          shadeIntensity: 0.6,
-          opacityFrom: 0.5,
-          opacityTo: 0.25,
-          stops: [0, 95, 100]
-        }
-      },
-      grid: {
-        borderColor: borderColor,
-        strokeDashArray: 8,
-        padding: {
-          top: -20,
-          bottom: -8,
-          left: 0,
-          right: 8
-        }
-      },
-      xaxis: {
-        categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
-        axisBorder: {
-          show: false
-        },
-        axisTicks: {
-          show: false
-        },
-        labels: {
-          show: true,
-          style: {
-            fontSize: '13px',
-            colors: labelColor
-          }
-        }
-      },
-      yaxis: {
-        labels: {
-          show: false
-        },
-        min: 10,
-        max: 50,
-        tickAmount: 4
+  // const incomeChartEl = document.querySelector('#incomeChart'),
+  //   incomeChartConfig = {
+  //     series: [
+  //       {
+  //         data: [21, 30, 22, 42, 26, 35, 29]
+  //       }
+  //     ],
+  //     chart: {
+  //       height: 232,
+  //       parentHeightOffset: 0,
+  //       parentWidthOffset: 0,
+  //       toolbar: {
+  //         show: false
+  //       },
+  //       type: 'area'
+  //     },
+  //     dataLabels: {
+  //       enabled: false
+  //     },
+  //     stroke: {
+  //       width: 3,
+  //       curve: 'smooth'
+  //     },
+  //     legend: {
+  //       show: false
+  //     },
+  //     markers: {
+  //       size: 6,
+  //       colors: 'transparent',
+  //       strokeColors: 'transparent',
+  //       strokeWidth: 4,
+  //       discrete: [
+  //         {
+  //           fillColor: config.colors.white,
+  //           seriesIndex: 0,
+  //           dataPointIndex: 6,
+  //           strokeColor: config.colors.primary,
+  //           strokeWidth: 2,
+  //           size: 6,
+  //           radius: 8
+  //         }
+  //       ],
+  //       hover: {
+  //         size: 7
+  //       }
+  //     },
+  //     colors: [config.colors.primary],
+  //     fill: {
+  //       type: 'gradient',
+  //       gradient: {
+  //         shade: shadeColor,
+  //         shadeIntensity: 0.6,
+  //         opacityFrom: 0.5,
+  //         opacityTo: 0.25,
+  //         stops: [0, 95, 100]
+  //       }
+  //     },
+  //     grid: {
+  //       borderColor: borderColor,
+  //       strokeDashArray: 8,
+  //       padding: {
+  //         top: -20,
+  //         bottom: -8,
+  //         left: 0,
+  //         right: 8
+  //       }
+  //     },
+  //     xaxis: {
+  //       categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
+  //       axisBorder: {
+  //         show: false
+  //       },
+  //       axisTicks: {
+  //         show: false
+  //       },
+  //       labels: {
+  //         show: true,
+  //         style: {
+  //           fontSize: '13px',
+  //           colors: labelColor
+  //         }
+  //       }
+  //     },
+  //     yaxis: {
+  //       labels: {
+  //         show: false
+  //       },
+  //       min: 10,
+  //       max: 50,
+  //       tickAmount: 4
+  //     }
+  //   };
+  // if (typeof incomeChartEl !== undefined && incomeChartEl !== null) {
+  //   const incomeChart = new ApexCharts(incomeChartEl, incomeChartConfig);
+  //   incomeChart.render();
+  // }
+
+  const chartsRendered = {};
+
+function renderChart(id, data, color) {
+  const el = document.querySelector(id);
+  if (!el || chartsRendered[id]) return;
+
+  chartsRendered[id] = true;
+
+  new ApexCharts(el, {
+    series: [{ name: 'Amount', data }],
+    chart: {
+      type: 'area',
+      height: 232,
+      toolbar: { show: false }
+    },
+    dataLabels: { enabled: false },
+    stroke: { width: 3, curve: 'smooth' },
+    colors: [color],
+    fill: {
+      type: 'gradient',
+      gradient: {
+        shadeIntensity: 0.6,
+        opacityFrom: 0.5,
+        opacityTo: 0.25,
+        stops: [0, 95, 100]
       }
-    };
-  if (typeof incomeChartEl !== undefined && incomeChartEl !== null) {
-    const incomeChart = new ApexCharts(incomeChartEl, incomeChartConfig);
-    incomeChart.render();
-  }
+    },
+    xaxis: {
+      categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+    },
+    yaxis: {
+      labels: { show: true },
+      min: 0
+    },
+    grid: {
+      borderColor: '#e0e0e0',
+      strokeDashArray: 5
+    }
+  }).render();
+}
+
+// Render income chart immediately (first tab visible)
+renderChart('#incomeChart', monthlyData.income, '#28a745');
+
+// On tab switch, render charts as they become visible
+document.querySelectorAll('[data-bs-toggle="tab"]').forEach(tab => {
+  tab.addEventListener('shown.bs.tab', function (e) {
+    const targetId = e.target.getAttribute('data-bs-target');
+
+    switch (targetId) {
+      case '#expenses-tab':
+        renderChart('#expensesChart', monthlyData.expenses, '#dc3545');
+        break;
+      case '#assets-tab':
+        renderChart('#assetsChart', monthlyData.assets, '#17a2b8');
+        break;
+      case '#liabilities-tab':
+        renderChart('#liabilitiesChart', monthlyData.liabilities, '#ffc107');
+        break;
+    }
+  });
+});
 
   // Expenses Mini Chart - Radial Chart
   // --------------------------------------------------------------------

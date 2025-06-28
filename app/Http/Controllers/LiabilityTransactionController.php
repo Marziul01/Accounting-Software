@@ -83,11 +83,13 @@ class LiabilityTransactionController extends Controller
         // Update the asset amount based on the transaction type
         
 
-        if ($request->transaction_type === 'Deposit') {
-            $asset->amount += $request->amount;
-        } elseif ($request->transaction_type === 'Withdraw') {
-            $asset->amount -= $request->amount;
-        }
+        // Recalculate current balance after creating transaction
+        $totalDeposit = $asset->transactions()->where('transaction_type', 'Deposit')->sum('amount');
+        $totalWithdraw = $asset->transactions()->where('transaction_type', 'Withdraw')->sum('amount');
+        $currentBalance = $totalDeposit - $totalWithdraw;
+
+        // Save updated balance to asset
+        $asset->amount = $currentBalance;
 
         $asset->save();
 
@@ -211,35 +213,17 @@ $message="আসসালামু আলাইকুম,
                 ]);
             }
         }
-        
-        // Save previous values before update
-        $previousAmount = $assetTransaction->amount;
-        $previousType = $assetTransaction->transaction_type;
 
         // Update the transaction record
-        $assetTransaction->update($request->all());
+        $assetTransaction->update($request->all());    
 
-        // Fetch the associated asset
-        
+        // Recalculate current balance after update
+        $totalDeposit = $asset->transactions()->where('transaction_type', 'Deposit')->sum('amount');
+        $totalWithdraw = $asset->transactions()->where('transaction_type', 'Withdraw')->sum('amount');
+        $currentBalance = $totalDeposit - $totalWithdraw;
 
-        // Reverse the previous transaction
-        if ($previousType === 'Deposit') {
-            $asset->amount -= $previousAmount;
-        } elseif ($previousType === 'Withdraw') {
-            $asset->amount += $previousAmount;
-        }
-
-        // Apply the new transaction
-        $newAmount = $request->amount;
-        $newType = $request->transaction_type;
-
-        if ($newType === 'Deposit') {
-            $asset->amount += $newAmount;
-        } elseif ($newType === 'Withdraw') {
-            $asset->amount -= $newAmount;
-        }
-
-        // Save the updated asset amount
+        // Save recalculated balance to asset
+        $asset->amount = $currentBalance;
         $asset->save();
 
         return response()->json([
