@@ -43,7 +43,7 @@ class LiabilityInvoiceMail extends Mailable
         $requestASmount = $this->engToBnNumber(number_format($this->request->amount, 2));
         $totalAmountBn = $this->engToBnNumber(number_format($this->totalAmount, 2));
         
-        $transDate = $this->engToBnNumber(\Carbon\Carbon::parse($this->request->transaction_date)->format('d-m-Y'));
+        $transDate = $this->engToBnNumber(\Carbon\Carbon::parse($this->request->entry_date)->format('d-m-Y'));
         $templateText = $body->body ?? '';
 
         $html = view('pdf.liability_invoice', [

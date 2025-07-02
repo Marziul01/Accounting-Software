@@ -196,6 +196,7 @@ class AssetController extends Controller
         $firsttransaction->amount = $request->amount;
         $firsttransaction->transaction_type = 'Deposit';
         $firsttransaction->transaction_date = $request->entry_date;
+        $firsttransaction->description = $request->description;
         $firsttransaction->save();
 
         if($request->category_id == 4){

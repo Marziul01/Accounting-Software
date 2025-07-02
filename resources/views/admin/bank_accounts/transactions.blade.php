@@ -109,7 +109,7 @@
                     @csrf
                     
                     <div class="modal-body">
-                        <div class="mb-3">
+                        <div class="mb-3 d-none">
                             <label for="name" class="form-label">Transaction Name</label>
                             <input type="text" class="form-control name-input" id="name" name="name"  required>
                            
@@ -150,7 +150,7 @@
                         </div>
                         <div class="mb-3">
                             <label for="Description" class="form-label">Description</label>
-                            <textarea class="form-control" id="Description" name="description" rows="3"></textarea>
+                            <textarea class="form-control description-input" id="Description" name="description" rows="3"></textarea>
                         </div>
                         
                     </div>
@@ -252,7 +252,7 @@
         <div class="modal-body">
           <input type="hidden" name="transaction_id_hidden" id="editTransactionIdHidden">
 
-          <div class="mb-3">
+          <div class="mb-3 d-none">
             <label class="form-label">Transaction Name</label>
             <input type="text" class="form-control name-input" name="name" id="editBankName" required>
           </div>
@@ -273,7 +273,7 @@
 
           <div class="mb-3">
             <label class="form-label">Transaction Type</label>
-            <select class="form-select" name="transaction_type" id="editTransactionType" required>
+            <select class="form-select contact-select" name="transaction_type" id="editTransactionType" required>
               <option value="credit">জমা</option>
               <option value="debit">উত্তোলন</option>
             </select>
@@ -296,7 +296,7 @@
 
           <div class="mb-3">
             <label class="form-label">Description</label>
-            <textarea class="form-control" name="description" id="editBankDescription" rows="3"></textarea>
+            <textarea class="form-control description-input" name="description" id="editBankDescription" rows="3"></textarea>
           </div>
         </div>
 
@@ -430,31 +430,29 @@ $(document).ready(function () {
             .replace(/\s+/g, '_');    // replace spaces with "_"
     }
 
-    function attachSlugListener(modalId) {
-        const modal = document.getElementById(modalId);
-        if (!modal) return;
+    // Attach to all modals with description-input class
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.description-input').forEach(function (descInput) {
+            descInput.addEventListener('input', function () {
+                const $form = this.closest('form');
+                const nameInput = $form.querySelector('.name-input');
+                const slugInput = $form.querySelector('.slug-output');
 
-        modal.addEventListener('shown.bs.modal', () => {
-            const input = modal.querySelector('.name-input');
-            const slugInput = modal.querySelector('.slug-output');
-            if (input && slugInput) {
-                input.addEventListener('input', function () {
-                    slugInput.value = generateSlug(this.value);
-                });
-            }
+                const value = this.value.trim();
+
+                if (nameInput) {
+                    nameInput.value = value;
+                }
+
+                if (slugInput) {
+                    slugInput.value = generateSlug(value);
+                }
+            });
         });
-    }
-
-    // Attach for Add Modal
-    
-        attachSlugListener('addmodals');
-    
-
-    // Attach for all Edit Modals
-    @foreach ($banktransactions as $incomecategory)
-        attachSlugListener('editModal{{ $incomecategory->id }}');
-    @endforeach
+    });
 </script>
+
+
 
 <script>
     $(document).ready(function () {
@@ -697,7 +695,25 @@ $(document).ready(function () {
 
 </script> --}}
 
-    
+
+<script>
+    $(document).on('change', '.contact-select', function () {
+        // Get selected subcategory name
+        let subcategoryName = $(this).find('option:selected').text();
+
+        // Get closest form
+        let $form = $(this).closest('form');
+
+        // Fill in name field
+        $form.find('.name-input').val(subcategoryName);
+
+        // If generateSlug function is defined globally, use it
+        if (typeof generateSlug === 'function') {
+            const slug = generateSlug(subcategoryName);
+            $form.find('.slug-output').val(slug);
+        }
+    });
+</script>
     
     
 

@@ -54,7 +54,7 @@
     <table>
         <tr>
             <td>লেনদেনের তারিখ:</td>
-            <td>{!! bn_number(\Carbon\Carbon::parse($request->transaction_date)->format('d-m-Y')) !!} ইং</td>
+            <td>{!! bn_number(\Carbon\Carbon::parse($request->entry_date)->format('d-m-Y')) !!} ইং</td>
         </tr>
         <tr>
             <td>গৃহীত ঋণের পরিমাণ:</td>

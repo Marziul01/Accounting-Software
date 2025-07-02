@@ -439,4 +439,26 @@
             });
         });
     </script>
+
+    <script>
+    $(document).on('click', '.delete-confirm', function (e) {
+        e.preventDefault();
+
+        const form = $(this).closest('form');
+
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "This action cannot be undone.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                form.submit();
+            }
+        });
+    });
+</script>
 @endsection
