@@ -23,7 +23,7 @@
                 <div id="google_translate_element"></div>
             </li>
             <li class="nav-item lh-1 me-4">
-                <button id="themeToggle" class="btn btn-sm btn-outline-secondary">🌙 Dark Mode</button>
+                <button id="themeToggle" class="btn btn-sm btn-outline-secondary themecolor">🌙 <span>Dark Mode</span></button>
 
             </li>
 

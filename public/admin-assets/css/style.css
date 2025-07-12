@@ -444,4 +444,7 @@ div.dataTables_wrapper{
   height: 100%;
   padding: 10px;
 }
+.themecolor span{
+  display: none;
+}
 }

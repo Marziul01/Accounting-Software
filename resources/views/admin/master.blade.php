@@ -132,18 +132,18 @@
         // Load theme from localStorage
         if (localStorage.getItem('theme') === 'dark') {
           root.setAttribute('data-theme', 'dark');
-          toggleBtn.textContent = '☀️ Light Mode';
+          toggleBtn.innerHTML = '☀️ <span>Light Mode</span>';
         }
       
         toggleBtn.addEventListener('click', () => {
           if (root.getAttribute('data-theme') === 'dark') {
             root.removeAttribute('data-theme');
             localStorage.setItem('theme', 'light');
-            toggleBtn.textContent = '🌙 Dark Mode';
+            toggleBtn.innerHTML = '🌙 <span>Dark Mode</span>';
           } else {
             root.setAttribute('data-theme', 'dark');
             localStorage.setItem('theme', 'dark');
-            toggleBtn.textContent = '☀️ Light Mode';
+            toggleBtn.innerHTML = '☀️ <span>Light Mode</span> ';
           }
         });
       </script>
