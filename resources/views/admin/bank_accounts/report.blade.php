@@ -38,7 +38,7 @@
                 <button
                     id="bankAccountReportBtn"
                     data-base-url="{{ route('admin.report.bankaccount', ['id' => 'BANKACCOUNT_ID']) }}"
-                    class="btn btn-outline-primary">
+                    class="btn btn-primary">
                     Bank Account Report
                 </button>
             </div>
