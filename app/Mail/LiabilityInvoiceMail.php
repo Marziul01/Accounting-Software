@@ -44,6 +44,8 @@ class LiabilityInvoiceMail extends Mailable
         $totalAmountBn = $this->engToBnNumber(number_format($this->totalAmount, 2));
         
         $transDate = $this->engToBnNumber(\Carbon\Carbon::parse($this->request->entry_date)->format('d-m-Y'));
+        $startDate = $this->liability->transactions->min('transaction_date');
+        $endDate = $this->liability->transactions->max('transaction_date');
         $templateText = $body->body ?? '';
 
         $html = view('pdf.liability_invoice', [
@@ -86,6 +88,8 @@ class LiabilityInvoiceMail extends Mailable
                         'requestASmount' => $requestASmount,
                         'transDate' => $transDate,
                         'templateText' => $templateText,
+                        'startDate' => $startDate,
+                        'endDate' => $endDate
                     ])
                     ->attachData($pdf, 'invoice.pdf', [
                         'mime' => 'application/pdf',

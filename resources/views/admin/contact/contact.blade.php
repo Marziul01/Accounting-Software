@@ -60,6 +60,26 @@
                                             <p>Email : {{ $contact->email ?? 'N/A' }} </p>
                                             <p>Date of Birth : {{ $contact->date_of_birth ?? 'N/A' }} </p>
                                             <p>Marrige Date : {{ $contact->marriage_date ?? 'N/A' }} </p>
+                                            {{-- See More Toggle Button --}}
+<p>
+    <button type="button" class="btn btn-sm btn-outline-primary toggle-details-btn" data-target="details-{{ $loop->index }}">
+        See More
+    </button>
+</p>
+
+{{-- Hidden Details --}}
+<div id="details-{{ $loop->index }}" class="extra-details" style="display: none;">
+    <hr>
+    <p><strong>National ID:</strong> {{ $contact->national_id ?? 'N/A' }}</p>
+    <p><strong>Father's Name:</strong> {{ $contact->father_name ?? 'N/A' }}</p>
+    <p><strong>Father's Mobile:</strong> {{ $contact->father_mobile ?? 'N/A' }}</p>
+    <p><strong>Mother's Name:</strong> {{ $contact->mother_name ?? 'N/A' }}</p>
+    <p><strong>Mother's Mobile:</strong> {{ $contact->mother_mobile ?? 'N/A' }}</p>
+    <p><strong>Spouse's Name:</strong> {{ $contact->spouse_name ?? 'N/A' }}</p>
+    <p><strong>Spouse's Mobile:</strong> {{ $contact->spouse_mobile ?? 'N/A' }}</p>
+    <p><strong>Present Address:</strong> {{ $contact->present_address ?? 'N/A' }}</p>
+    <p><strong>Permanent Address:</strong> {{ $contact->permanent_address ?? 'N/A' }}</p>
+</div>
                                         </div>
                                     </div>
 
@@ -690,5 +710,20 @@
                 card.style.display = isVisible ? 'block' : 'none';
             });
         });
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.toggle-details-btn').forEach(button => {
+        button.addEventListener('click', function () {
+            const targetId = this.dataset.target;
+            const details = document.getElementById(targetId);
+            const isVisible = details.style.display === 'block';
+
+            details.style.display = isVisible ? 'none' : 'block';
+            this.textContent = isVisible ? 'See More' : 'See Less';
+        });
+    });
+});
     </script>
 @endsection

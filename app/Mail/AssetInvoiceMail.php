@@ -45,6 +45,8 @@ class AssetInvoiceMail extends Mailable
         $totalAmountBn = $this->engToBnNumber(number_format($this->totalAmount, 2));
         
         $transDate = $this->engToBnNumber(\Carbon\Carbon::parse($this->request->entry_date)->format('d-m-Y'));
+        $startDate = $this->asset->transactions->min('transaction_date');
+        $endDate = $this->asset->transactions->max('transaction_date');
         $templateText = $body->body ?? '';
 
         $html = view('pdf.asset_invoice', [
@@ -87,6 +89,8 @@ class AssetInvoiceMail extends Mailable
                         'requestASmount' => $requestASmount,
                         'transDate' => $transDate,
                         'templateText' => $templateText,
+                        'startDate' => $startDate,
+                        'endDate' => $endDate
                     ])
                     ->attachData($pdf, 'invoice.pdf', [
                         'mime' => 'application/pdf',

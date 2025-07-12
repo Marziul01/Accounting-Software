@@ -50,6 +50,35 @@ class BankTransactionController extends Controller
         ]);
     }
 
+//     public function index(Request $request)
+// {
+//     if (auth()->user()->access->bankbook == 3) {
+//         return redirect()->route('admin.dashboard')->with('error', 'You do not have permission to access this page.');
+//     }
+
+//     if ($request->ajax()) {
+//         $query = BankTransaction::with('bankAccount')->orderByDesc('transaction_date');
+
+//         // Filter by transaction type (credit/debit)
+//         if ($request->has('type')) {
+//             $query->where('transaction_type', $request->type);
+//         }
+
+//         return DataTables::of($query)
+//             ->addIndexColumn()
+//             ->addColumn('bank_name', fn($row) => $row->bankAccount->bank_name ?? 'Bank Deleted')
+//             ->addColumn('action', fn($row) => view('admin.bank_accounts._actions', compact('row'))->render())
+//             ->rawColumns(['action'])
+//             ->make(true);
+//     }
+
+//     return view('admin.bank_accounts.transactions', [
+//         'banktransactions' => BankTransaction::all(),
+//         'bankaccounts' => BankAccount::all(),
+//     ]);
+// }
+
+
     /**
      * Show the form for creating a new resource.
      */

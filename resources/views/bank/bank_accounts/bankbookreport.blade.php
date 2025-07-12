@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="1024">
-  <title>{{ $bankAccount->bank_name }} ব্যাংক রিপোর্ট</title>
+  <title>{{ $bankAccount->bank_name }} এর রিপোর্ট</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
         @import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&display=swap');
@@ -136,7 +136,7 @@
   <div class="report-header">
     <img src="{{ asset($setting->site_logo) }}" height="100%" class="img" alt="">
             <h3>{{ $setting->site_name_bangla }}</h2>
-    <h5>{{ $bankAccount->bank_name }} ব্যাংক হিসাব রিপোর্ট</h4>
+    <h5>{{ $bankAccount->bank_name }} এর রিপোর্ট</h4>
     <p class=""> {!! bn_number($startDate ?? 'সর্বপ্রথম') !!} থেকে {!! bn_number($endDate ?? now()->format('Y-m-d')) !!} পর্যন্ত </p>
   </div>
 

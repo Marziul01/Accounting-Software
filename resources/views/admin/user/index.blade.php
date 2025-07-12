@@ -27,7 +27,7 @@
                             <div class="card-body">
                                 <div>
                                     <div class="d-flex align-items-center justify-content-between gap-2 mb-3">
-                                        <img src="http://localhost/accounts/public/admin-assets/assets/img/illustrations/man.png" height="75" class="scaleX-n1-rtl" alt="View Badge User">
+                                        <img src="{{ asset('admin-assets/assets/img/illustrations/man.png') }}" height="75" class="scaleX-n1-rtl" alt="View Badge User">
                                     </div>
                                     <h3 class="account_number">{{ $user->name }}</h3>
                                     <p class="holder_name">Email: {{ $user->email }} </p>

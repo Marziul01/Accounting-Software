@@ -18,7 +18,63 @@
       color: rgb(53, 53, 53) !important;
 }
   }
-  
+html.bangla-font body {
+  font-family: 'Tiro Bangla', serif !important;
+}
+[lang="en"] {
+  body{
+    top: 0px !important;
+  }
+}
+[lang="bn"] {
+  font-family: 'Tiro Bangla', serif !important;   
+  font{
+    font-family: 'Tiro Bangla', serif !important;
+  }
+  .VIpgJd-ZVi9od-ORHb-OEVmcd{
+    display: none !important;
+  }
+  #google_translate_element .skiptranslate{
+    display: block !important;
+  }
+  body{
+    top: 0px !important;
+  }
+  .goog-te-gadget-simple {
+    background-color: transparent !important;
+    color: var(--text-color) !important;
+    padding: 5px 0px 5px 5px !important;
+    border-radius: 5px;
+    margin-right: 15px;
+  }
+  .goog-te-gadget-simple img{
+    display: none !important;
+  }
+  .goog-te-gadget-simple span {
+    color: var(--text-color) !important;
+    margin-right: 5px !important;
+  }
+  input , select , input::placeholder, textarea {
+    font-family: 'Tiro Bangla', serif !important;
+  }
+}
+.VIpgJd-ZVi9od-ORHb-OEVmcd {
+    display: none !important;
+  }
+  .goog-te-gadget-simple {
+    background-color: transparent !important;
+    color: var(--text-color) !important;
+    padding: 5px 0px 5px 5px !important;
+    border-radius: 5px;
+    margin-right: 15px;
+  }
+  .goog-te-gadget-simple img{
+    display: none !important;
+  }
+  .goog-te-gadget-simple span {
+    color: var(--text-color) !important;
+    margin-right: 5px !important;
+  }
   body  {
     background-color: var(--bg-color);
     color: var(--text-color);
@@ -333,6 +389,12 @@ div.dataTables_wrapper{
 .select2-results__option, .select2-selection__choice__display{
   color: black;
 }
+.ttoalsamount{
+  font-size: 18px !important;
+}
+.quickdivs{
+  padding: 5px;
+}
 @media screen and (max-width: 768px) {
   .dt-buttons, div.dataTables_wrapper div.dataTables_info{
     position: relative !important;
@@ -368,5 +430,18 @@ div.dataTables_wrapper{
     justify-content: center;
     align-items: center;
     width: 100%;
+}
+.ttoalsamount{
+  font-size: 15px !important;
+}
+.quickdivs{
+      width: 50%;
+    flex-grow: 1;
+    padding: 5px;
+}
+.quickdivs .btn{
+  width: 100%;
+  height: 100%;
+  padding: 10px;
 }
 }

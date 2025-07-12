@@ -1243,7 +1243,7 @@
             }
         });
     });
-    </script>
+</script>
     
 
 <script>

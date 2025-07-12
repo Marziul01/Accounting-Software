@@ -85,10 +85,10 @@
                                                         <a class=" btn btn-sm btn-outline-primary" href="{{ route('seeInvestmentsinex' ,$investment->slug ) }}" ><i
                                                         class="bx bx-wallet me-1"></i> See All Gain/Loss</a>
 
-                                                <form action="{{ route('investment.destroy', $investment->id) }}" method="POST" class="d-inline">
+                                                <form action="{{ route('investment.destroy', $investment->id) }}" method="POST" class="d-inline w-100">
                                                     @csrf
                                                     @method('DELETE')
-                                                    <button type="submit" class="btn btn-sm btn-outline-danger delete-confirm {{ Auth::user()->access->investment == 1 ? 'disabled' : '' }}">
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger w-100 delete-confirm {{ Auth::user()->access->investment == 1 ? 'disabled' : '' }}">
                                                         <i class="bx bx-trash me-1"></i> Delete
                                                     </button>
                                                 </form>

@@ -37,6 +37,7 @@ use App\Http\Controllers\InvestmentSubCategoryController;
 use App\Http\Controllers\InvestmentTransactionController;
 use App\Http\Controllers\LiabilityTransactionController;
 use App\Http\Controllers\OccassionController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TemplateController;
 use App\Http\Controllers\UserController;
 use App\Models\AssetSubSubCategory;
@@ -56,7 +57,8 @@ Route::post('/password/send-code', [AdminAuthController::class, 'sendResetCode']
 Route::post('/password/verify-code', [AdminAuthController::class, 'verifyCode'])->name('password.verify.code');
 Route::post('/password/reset', [AdminAuthController::class, 'updatePassword'])->name('password.reset.update');
 
-
+Route::get('/guest/report/assetreport/{slug}', [AssetController::class, 'singleassetReport'])->name('admin.asset.assetreport.guest');
+Route::get('/guest/report/liabilityreport/{slug}', [LiabilityController::class, 'singleliabilityReport'])->name('admin.liability.liabilityreport.guest');
 // User-only area
 Route::middleware(['auth', 'user.only'])->group(function () {
 
@@ -192,6 +194,30 @@ Route::prefix('admin')->middleware(['auth:admin', 'admin.only'])->group(function
     Route::get('/emailsmsTemplate', [TemplateController::class, 'index'])->name('emailsmsTemplate');
     Route::post('/smsTemplate/update/{id}', [TemplateController::class, 'update'])->name('smsTemplate.update');
     Route::post('/emailTemplate/update/{id}', [TemplateController::class, 'emailTemplate'])->name('emailTemplate.update');
+
+    Route::get('/profile', [ProfileController::class, 'profile'])->name('profile');
+    Route::get('/site/settings', [ProfileController::class, 'siteSettings'])->name('site.settings');
+    Route::post('/admin/profile/update', [ProfileController::class, 'updateProfile'])->name('admin.profile.update');
+    Route::post('/admin/site-settings/update', [ProfileController::class, 'update'])->name('admin.site-settings.update');
+
+    Route::get('/admin/income/modal', [DashboardController::class, 'Incomemodal'])->name('admin.income.modal');
+    Route::get('/admin/expense/modal', [DashboardController::class, 'Expensemodal'])->name('admin.expense.modal');
+    
+    Route::get('/admin/currentasset/modal', [DashboardController::class, 'assetmodal'])->name('admin.currentasset.modal');
+    Route::get('/admin/currentassettransaction/modal', [DashboardController::class, 'currentassettransaction'])->name('admin.currentassettransaction.modal');
+    Route::get('/admin/fixedasset/modal', [DashboardController::class, 'fixedasset'])->name('admin.fixedasset.modal');
+    Route::get('/admin/fixedassettransaction/modal', [DashboardController::class, 'fixedassettransaction'])->name('admin.fixedassettransaction.modal');
+
+    Route::get('/admin/current/liability/modal', [DashboardController::class, 'currentliability'])->name('admin.currentliability.modal');
+    Route::get('/admin/currentliabilitytransaction/modal', [DashboardController::class, 'currentliabilitytransaction'])->name('admin.currentliabilitytransaction.modal');
+    Route::get('/admin/fixedliability/modal', [DashboardController::class, 'fixedliability'])->name('admin.fixedliability.modal');
+    Route::get('/admin/fixedliabilitytransaction/modal', [DashboardController::class, 'fixedliabilitytransaction'])->name('admin.fixedliabilitytransaction.modal');
+
+    Route::get('/admin/investment/modal', [DashboardController::class, 'investmentmodal'])->name('admin.investment.modal');
+    Route::get('/admin/investmenttransaction/modal', [DashboardController::class, 'investmenttransaction'])->name('admin.investmenttransaction.modal');
+    Route::get('/admin/investment/income/modal', [DashboardController::class, 'investmentincome'])->name('admin.investmentincome.modal');
+    Route::get('/admin/investment/expense/modal', [DashboardController::class, 'investmentexpense'])->name('admin.investmentloss.modal');
+    Route::get('/admin/bank/modal', [DashboardController::class, 'bankbook'])->name('admin.bankbook.modal');
 
 });
 

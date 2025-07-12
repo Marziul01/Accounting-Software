@@ -25,6 +25,8 @@
     <link rel="stylesheet" href="{{ asset('admin-assets')  }}/assets/vendor/css/core.css" class="template-customizer-core-css" />
     <link rel="stylesheet" href="{{ asset('admin-assets')  }}/assets/vendor/css/theme-default.css" class="template-customizer-theme-css" />
     <link rel="stylesheet" href="{{ asset('admin-assets')  }}/assets/css/demo.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Tiro+Bangla&display=swap" rel="stylesheet">
+
 
     <!-- Vendors CSS -->
     <link rel="stylesheet" href="{{ asset('admin-assets')  }}/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
@@ -164,6 +166,47 @@
         @endif
       </script>
 
+<!-- Google Translate Widget -->
+
+
+<script type="text/javascript">
+  function googleTranslateElementInit() {
+    new google.translate.TranslateElement({
+      pageLanguage: 'en',
+      includedLanguages: 'en,bn',
+      layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+      autoDisplay: false
+    }, 'google_translate_element');
+  }
+</script>
+
+<script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+<script>
+  function applyBanglaFontIfNeeded() {
+    const iframe = document.querySelector('iframe.goog-te-banner-frame');
+    const htmlTag = document.documentElement;
+
+    if (iframe || document.querySelector('.goog-te-combo')?.value === 'bn') {
+      htmlTag.classList.add('bangla-font');
+    } else {
+      htmlTag.classList.remove('bangla-font');
+    }
+  }
+
+  // Listen for translation changes
+  document.addEventListener('DOMNodeInserted', function(e) {
+    if (e.target.nodeType === 1 && e.target.tagName === 'IFRAME') {
+      setTimeout(applyBanglaFontIfNeeded, 1000); // Delay to ensure Google Translate updates
+    }
+  });
+
+  // Also check when dropdown changes manually
+  document.addEventListener('change', function (e) {
+    if (e.target.className === 'goog-te-combo') {
+      setTimeout(applyBanglaFontIfNeeded, 1000);
+    }
+  });
+</script>
 
       
     @yield('scripts')
