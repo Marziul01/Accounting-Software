@@ -1,10 +1,7 @@
-<footer class="s-footer">
+{{-- <footer class="s-footer">
 
     <div class="row">
-        <div class="column ss-copyright">
-            <span>© Copyright Luther 2021</span> 
-            <span>Design by <a href="https://www.styleshout.com/">StyleShout</a> Distribution By <a href="https://themewagon.com">Themewagon</a></span>
-        </div>
+        
 
         <div class="ss-go-top">
             <a class="smoothscroll" title="Back to Top" href="#top">
@@ -13,4 +10,4 @@
         </div>
     </div>
 
-</footer>
+</footer> --}}

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\Home;
 use App\Models\SiteSetting;
 use Illuminate\Container\Attributes\Auth;
 use Illuminate\Http\Request;
@@ -20,6 +21,12 @@ class ProfileController extends Controller
     public static function siteSettings(){
         return view('admin.profile.siteSettings',[
 
+        ]);
+    }
+
+    public static function homesettings(){
+        return view('admin.profile.homesettings',[
+            'home' => Home::find(1),
         ]);
     }
 
@@ -120,6 +127,58 @@ class ProfileController extends Controller
         $setting->save();
 
         return response()->json(['message' => 'Site settings updated successfully!']);
+    }
+
+
+    public function homeupdate(Request $request)
+    {
+        $setting = Home::first(); // Assuming only 1 record
+
+        $validator = Validator::make($request->all(), [
+            'email'     => 'nullable|email|max:255',
+            'phone'     => 'nullable|string|max:255',
+            'address'   => 'nullable|string|max:255',
+            'whatsapp'  => 'nullable|string|max:255',
+            'facebook'  => 'nullable|string|max:255',
+            'telegram'  => 'nullable|string|max:255',
+            'insta'     => 'nullable|string|max:255',
+            'name'      => 'nullable|string|max:255',
+            'desc'      => 'nullable|string|max:255',
+            'image'     => 'nullable|image|mimes:png,jpg,jpeg|max:2048',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        $setting->email    = $request->email;
+        $setting->phone    = $request->phone;
+        $setting->address  = $request->address;
+        $setting->whatsapp = $request->whatsapp;
+        $setting->facebook = $request->facebook;
+        $setting->telegram = $request->telegram;
+        $setting->insta    = $request->insta;
+        $setting->name     = $request->name;
+        $setting->desc     = $request->desc;
+
+        // File storage path
+        $uploadPath = public_path('admin-assets/img/');
+        $relativePath = 'admin-assets/img/';
+
+        // Save Image
+        if ($request->hasFile('image')) {
+            if ($setting->image && file_exists(public_path($setting->image))) {
+                unlink(public_path($setting->image));
+            }
+
+            $imageName = 'home_image_' . time() . '.' . $request->image->extension();
+            $request->image->move($uploadPath, $imageName);
+            $setting->image = $relativePath . $imageName;
+        }
+
+        $setting->save();
+
+        return response()->json(['message' => 'Landing Page Details updated successfully!']);
     }
 
 }

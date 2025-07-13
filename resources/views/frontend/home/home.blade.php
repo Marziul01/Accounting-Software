@@ -1,48 +1,217 @@
 @extends('frontend.master')
 
 @section('content')
-<main class="s-content">
+    <main class="s-content min-h-screen">
 
 
-    <!-- ### intro
-    ================================================== -->
-    <section id="intro" class="s-intro target-section">
+        <!-- ### intro
+        ================================================== -->
+        <section id="intro" class="s-intro target-section">
 
-        <div class="row intro-content wide">
+            <div class="row intro-content wide">
 
-            <div class="column">
-                <div class="text-pretitle with-line">
-                    Hello World
+                {{-- <div class="col-md-8">
+                <div class="intro-content__pic">
+                    <img src="{{ asset('frontend-assets') }}/images/avatars/user-04.jpg" class="" >
                 </div>
-
-                <h1 class="text-huge-title">
-                    I am Luther, <br>
-                    a digital designer <br>
-                    & frontend <br> 
-                    developer based <br>
-                    in Somewhere.
-                </h1>
+                <div class="text-pretitle with-line">
+                    <h1 class="text-huge-title">
+                        {{ $home->name ?? 'Rashel Mia.' }}
+                    </h1>
+                </div>
+                <div>
+                    <p class="intro-content__desc">
+                        {{ $home->description ?? 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.' }}
+                    </p>
+                </div>
             </div>
 
-            <ul class="intro-social">
-                <li><a href="#0">Behance</a></li>
-                <li><a href="#0">Twitter</a></li>
-                <li><a href="#0">Dribbble</a></li>
-                <li><a href="#0">Instagram</a></li>
-            </ul>
+            <div class="col-md-4">
+                
+                <div class="card p-4">
+                    <div class="mb-3 h1 d-flex align-items-center mt-0">
+                        <i class="fas fa-phone-alt me-2"></i>
+                        <span>{{ $home->phone ?? '+123 456 7890' }}</span>
+                    </div>
+                    <div class="mb-3 h1 d-flex align-items-center">
+                        <i class="fas fa-envelope me-2"></i>
+                        <span>{{ $home->email ?? 'example@email.com' }}</span>
+                    </div>
+                    <div class="mb-3 h1 d-flex align-items-center">
+                        <i class="fas fa-map-marker-alt me-2"></i>
+                        <span>{{ $home->address ?? '123 Main St, City, Country' }}</span>
+                    </div>
+                </div>
+                
+            </div> --}}
 
-        </div> <!-- end intro content -->
+                <div class=" flex items-center justify-center p-4 sm:p-6 md:p-8">
+                    <div class="profile-container w-full max-w-5xl bg-white rounded-2xl overflow-hidden">
+                        <div class="flex flex-container">
 
-        <a href="#about" class="intro-scrolldown smoothscroll">
+                            <div class="w-full md:w-3/5 p-8 md:p-10 flex flex-col justify-center">
+                                <div class="flex flex-col md:flex-row items-center md:items-start mb-6">
+                                    <div
+                                        class="rounded-full overflow-hidden mb-4 md:mb-0 md:mr-6 flex-shrink-0 border-4 border-indigo-100">
+                                        <img src="{{ asset($home->image) }}" class="" >
+                                    </div>
+                                    
+                                </div>
+                                <div>
+                                        <h1 class="text-huge-title">
+                                            {{ $home->name ?? 'Rashel Mia.' }}
+                                        </h1>
+                                </div>
+                                <div class="mobile-hidden">
+                                    <a href="{{ $home->whatsapp }}" title="Whatsapp">
+                                        <i class="fab fa-whatsapp"></i>
+                                    </a>
+                                    <a href="{{ $home->facebook }}" title="Facebook">
+                                        <i class="fab fa-facebook-f"></i>
+                                    </a>
+                                    <a href="{{ $home->telegram }}" title="Telegram">
+                                        <i class="fab fa-telegram-plane"></i>
+                                    </a>
+                                    <a href="{{ $home->insta }}" title="Instagram">
+                                        <i class="fab fa-instagram"></i>
+                                    </a>
+                                </div>
+                                <div class="space-y-4 mt-3">
+                                    <p class="text-white leading-relaxed">
+                                        {{ $home->desc ?? 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.' }}
+                                    </p>
+
+                                    {{-- <div class="flex flex-wrap gap-2 mt-2">
+                                        <span
+                                            class="px-3 py-1 bg-indigo-100 text-indigo-600 rounded-full text-sm font-medium">UI
+                                            Design</span>
+                                        <span
+                                            class="px-3 py-1 bg-indigo-100 text-indigo-600 rounded-full text-sm font-medium">UX
+                                            Research</span>
+                                        <span
+                                            class="px-3 py-1 bg-indigo-100 text-indigo-600 rounded-full text-sm font-medium">Frontend</span>
+                                        <span
+                                            class="px-3 py-1 bg-indigo-100 text-indigo-600 rounded-full text-sm font-medium">Prototyping</span>
+                                    </div>
+
+                                    <div class="pt-4">
+                                        <button
+                                            class="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors duration-300 flex items-center">
+                                            <span>View Portfolio</span>
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-2" viewBox="0 0 20 20"
+                                                fill="currentColor">
+                                                <path fill-rule="evenodd"
+                                                    d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z"
+                                                    clip-rule="evenodd"></path>
+                                            </svg>
+                                        </button>
+                                    </div> --}}
+                                </div>
+                            </div>
+                            <!-- Left Side - Contact Details -->
+                            <div class="w-full md:w-2/5 gradient-bg text-white p-8 md:p-10 flex flex-col justify-center">
+                                <h2 class="text-2xl md:text-3xl font-bold mb-8">Get in Touch</h2>
+
+                                <div class="space-y-6">
+                                    <div
+                                        class="contact-item flex items-center space-x-4 p-4 bg-white bg-opacity-10 rounded-lg">
+                                        <div class="flex-shrink-0">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none"
+                                                viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z">
+                                                </path>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <p class="text-sm opacity-80">Email</p>
+                                            <p class="font-medium">{{ $home->email }}</p>
+                                        </div>
+                                    </div>
+
+                                    <div
+                                        class="contact-item flex items-center space-x-4 p-4 bg-white bg-opacity-10 rounded-lg">
+                                        <div class="flex-shrink-0">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none"
+                                                viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z">
+                                                </path>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <p class="text-sm opacity-80">Phone</p>
+                                            <p class="font-medium">{{ $home->phone }}</p>
+                                        </div>
+                                    </div>
+
+                                    <div
+                                        class="contact-item flex items-center space-x-4 p-4 bg-white bg-opacity-10 rounded-lg">
+                                        <div class="flex-shrink-0">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none"
+                                                viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z">
+                                                </path>
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <p class="text-sm opacity-80">Address</p>
+                                            <p class="font-medium">{{ $home->address }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Right Side - Profile Info -->
+                            
+                        </div>
+                    </div>
+                </div>
+
+                <ul class="intro-social align-items-center justify-content-center">
+                    <li>
+                        <a href="{{ $home->whatsapp }}" title="Whatsapp">
+                            <i class="fab fa-whatsapp"></i>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ $home->facebook }}" title="Facebook">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ $home->telegram }}" title="Telegram">
+                            <i class="fab fa-telegram-plane"></i>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ $home->insta }}" title="Instagram">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                    </li>
+                </ul>
+
+
+
+            </div> <!-- end intro content -->
+            {{-- <div class="column ss-copyright">
+                <span>© Copyright Luther 2021</span>
+                <span>Design by <a href="https://www.styleshout.com/">StyleShout</a> Distribution By <a
+                        href="https://themewagon.com">Themewagon</a></span>
+            </div> --}}
+            {{-- <a href="#about" class="intro-scrolldown smoothscroll">
             <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill-rule="evenodd" clip-rule="evenodd"><path d="M11 21.883l-6.235-7.527-.765.644 7.521 9 7.479-9-.764-.645-6.236 7.529v-21.884h-1v21.883z"/></svg>
-        </a>
+        </a> --}}
 
-    </section> <!-- end s-intro -->
+        </section> <!-- end s-intro -->
 
 
-    <!-- ### about
-    ================================================== -->
-    <section id="about" class="s-about target-section">
+        <!-- ### about
+        ================================================== -->
+        {{-- <section id="about" class="s-about target-section">
 
 
         <div class="row about-info wide" data-animate-block>
@@ -167,12 +336,14 @@
 
         </div> <!-- end about-timelines -->
 
-    </section> <!-- end s-about -->
+    </section>  --}}
+
+        <!-- end s-about -->
 
 
-    <!-- ### works
-    ================================================== -->
-    <section id="works" class="s-works target-section">
+        <!-- ### works
+        ================================================== -->
+        {{-- <section id="works" class="s-works target-section">
 
 
         <div class="row works-portfolio">
@@ -499,12 +670,14 @@
             </div> <!-- end column -->
         </div> <!-- end row testimonials -->
 
-    </section> <!-- end s-works -->
+    </section> 
+    
+    <!-- end s-works --> --}}
 
 
-    <!-- ### contact
-    ================================================== -->
-    <section id="contact" class="s-contact target-section">
+        <!-- ### contact
+        ================================================== -->
+        {{-- <section id="contact" class="s-contact target-section">
 
         <div class="row contact-top">
             <div class="column lg-12">
@@ -543,10 +716,11 @@
             </div>
         </div> <!-- end contact-bottom -->
 
-    </section> <!-- end contact -->
+    </section> 
+    
+    <!-- end contact --> --}}
 
-</main>
-
+    </main>
 @endsection
 
 @section('scripts')

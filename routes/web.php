@@ -197,8 +197,10 @@ Route::prefix('admin')->middleware(['auth:admin', 'admin.only'])->group(function
 
     Route::get('/profile', [ProfileController::class, 'profile'])->name('profile');
     Route::get('/site/settings', [ProfileController::class, 'siteSettings'])->name('site.settings');
+    Route::get('/home/settings', [ProfileController::class, 'homesettings'])->name('home.settings');
     Route::post('/admin/profile/update', [ProfileController::class, 'updateProfile'])->name('admin.profile.update');
     Route::post('/admin/site-settings/update', [ProfileController::class, 'update'])->name('admin.site-settings.update');
+    Route::post('/admin/home-settings/update', [ProfileController::class, 'homeupdate'])->name('admin.home-settings.update');
 
     Route::get('/admin/income/modal', [DashboardController::class, 'Incomemodal'])->name('admin.income.modal');
     Route::get('/admin/expense/modal', [DashboardController::class, 'Expensemodal'])->name('admin.expense.modal');

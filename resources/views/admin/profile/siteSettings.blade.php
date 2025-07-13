@@ -2,7 +2,8 @@
 
 @section('content')
     <div class="container-fluid flex-grow-1 container-p-y">
-        <div class="row m-0 p-0">
+        <div class="card card-body">
+            <div class="row m-0 p-0">
             <form id="siteSettingForm" enctype="multipart/form-data">
                 @csrf
                 <div class="row">
@@ -72,6 +73,7 @@
                 </div>
                 <button type="submit" class="btn btn-primary mt-3">Save Changes</button>
             </form>
+        </div>
         </div>
     </div>
 @endsection

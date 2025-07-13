@@ -42,25 +42,12 @@
                 </li>
 
                 <li class="menu-item ">
-                    <a href=""
+                    <a href="{{ route('home.settings') }}"
                         class="menu-link">
                         <div class="text-truncate" data-i18n="CRM"> Landing Page Setting </div>
                     </a>
                 </li>
-                <li class="menu-item ">
-                    <a href=""
-                        class="menu-link">
-                        <div class="text-truncate" data-i18n="eCommerce">Login Notification</div>
-                        
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href=""
-                        class="menu-link">
-                        <div class="text-truncate" data-i18n="eCommerce">SMS configuration</div>
-                        
-                    </a>
-                </li>
+                
                 <li class="menu-item {{ Route::currentRouteName() == 'Export-Data' ? 'active' : '' }}">
                     <a href="{{ route('Export-Data') }}"
                         class="menu-link">

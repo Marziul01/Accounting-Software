@@ -1,4 +1,4 @@
-<header class="s-header">
+{{-- <header class="s-header">
 
     <div class="header-mobile">
         <span class="mobile-home-link"><a href="index.html">Luther.</a></span>
@@ -17,4 +17,4 @@
         </nav>
     </div>
 
-</header> 
+</header>  --}}
