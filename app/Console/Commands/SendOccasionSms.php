@@ -1,31 +1,40 @@
 <?php
 
+namespace App\Console\Commands;
+
 use Illuminate\Console\Command;
 use App\Models\Contact;
 use App\Models\Occasion;
 use App\Models\SMSEMAILTEMPLATE;
 use Carbon\Carbon;
+use Symfony\Component\Console\Attribute\AsCommand;
 
+#[AsCommand(name: 'send:occasion-sms', description: 'Send SMS to contacts based on their occasion dates')]
 class SendOccasionSms extends Command
 {
-    protected $signature = 'send:occasion-sms';
-    protected $description = 'Send SMS to contacts based on their occasion dates';
-
     public function handle()
     {
+        $currentDate = Carbon::now('Asia/Dhaka');
+        $currentYear = $currentDate->year;
         $today = Carbon::today();
-
         $occasions = SMSEMAILTEMPLATE::all();
 
         foreach ($occasions as $occasion) {
+
+            if ($occasion->next_send !== null && $occasion->next_send != $currentYear) {
+                continue;
+            }
+
             $contactIds = explode(',', $occasion->contact_ids);
             $contacts = Contact::whereIn('id', $contactIds)->get();
+
+            $sentAnyMessage = false;
 
             foreach ($contacts as $contact) {
                 $shouldSend = false;
                 $dateToCheck = null;
                 $prefix = '';
-                $occasionType = strtolower($occasion->occassion); // e.g. 'birthday'
+                $occasionType = strtolower($occasion->occassion);
 
                 switch ($occasionType) {
                     case 'birthday':
@@ -75,7 +84,20 @@ class SendOccasionSms extends Command
                     $response = sendSMS($mobileNumber, $finalMessage);
 
                     \Log::info("✅ SMS sent to {$mobileNumber} for {$occasion->occassion}. Response: {$response}");
+
+                    $sentAnyMessage = true;
+
+                    if ($occasionType !== 'birthday' && $occasionType !== 'anniversary') {
+                        $customDate = Carbon::parse($occasion->custom_date);
+                        $customDate->year = $currentYear + 1;
+                        $occasion->custom_date = $customDate->toDateString();
+                    }
                 }
+            }
+
+            if ($sentAnyMessage) {
+                $occasion->next_send = $currentYear + 1;
+                $occasion->save();
             }
         }
     }
@@ -84,6 +106,4 @@ class SendOccasionSms extends Command
     {
         return strtr($number, ['0'=>'০','1'=>'১','2'=>'২','3'=>'৩','4'=>'৪','5'=>'৫','6'=>'৬','7'=>'৭','8'=>'৮','9'=>'৯']);
     }
-
-
 }

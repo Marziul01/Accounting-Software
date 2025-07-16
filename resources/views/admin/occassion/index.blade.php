@@ -50,6 +50,12 @@
                                                 {{ $loop->iteration }}</p>
 
                                             <p>Date : {{ $occasion->custom_date ?? 'Auto Selected' }} </p>
+                                            @if ($occasion->next_send)
+                                                <p class="text-success"> "Message has been sented this year. Next will be sented on {{ $occasion->next_send }} " </p>
+                                                @if ($occasion->occassion != 'Birhthday' && $occasion->occassion != 'Anniversary')
+                                                    <p class="text-wraning"> "Update the date for next year , if not updated yet . Thank You!" </p>
+                                                @endif
+                                            @endif
                                             <p>Message : {{ $occasion->message ?? 'N/A' }} </p>
                                             <p>Total Contacts: 
                                                 @php
