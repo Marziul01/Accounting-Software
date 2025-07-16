@@ -247,8 +247,25 @@ $message="আসসালামু আলাইকুম,
         if (auth()->user()->access->asset != 2) {
             return redirect()->route('admin.dashboard')->with('error', 'You do not have permission to delete asset transactions.');
         }
+
         // Find the asset transaction
         $assetTransaction = AssetTransaction::findOrFail($id);
+        
+        // Get the asset related to the transaction
+        $asset = Asset::findOrFail($assetTransaction->asset_id);
+
+        // Determine the transaction type and update the asset amount accordingly
+        if ($assetTransaction->transaction_type === 'Deposit') {
+            // Subtract the transaction amount from asset amount
+            $asset->amount -= $assetTransaction->amount;
+        } elseif ($assetTransaction->transaction_type === 'Withdraw') {
+            // Add the transaction amount to asset amount
+            $asset->amount += $assetTransaction->amount;
+        }
+
+        // Save the updated asset amount
+        $asset->save();
+        
 
         // Now delete the transaction
         $assetTransaction->delete();

@@ -243,6 +243,21 @@ $message="আসসালামু আলাইকুম,
         }
         $assetTransaction = LiabilityTransaction::findOrFail($id);
 
+        // Get the asset related to the transaction
+        $asset = Liability::findOrFail($assetTransaction->liability_id);
+
+        // Determine the transaction type and update the asset amount accordingly
+        if ($assetTransaction->transaction_type === 'Deposit') {
+            // Subtract the transaction amount from asset amount
+            $asset->amount -= $assetTransaction->amount;
+        } elseif ($assetTransaction->transaction_type === 'Withdraw') {
+            // Add the transaction amount to asset amount
+            $asset->amount += $assetTransaction->amount;
+        }
+
+        // Save the updated asset amount
+        $asset->save();
+
         // Now delete the transaction
         $assetTransaction->delete();
 

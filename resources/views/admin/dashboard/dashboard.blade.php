@@ -337,7 +337,7 @@
                                 </div>
                                 <p class="mb-1">Total Investments</p>
                                 <h4 class="card-title mb-3 ttoalsamount">
-                                    {{ number_format($investments->sum('amount'), 2) }} BDT</h4>
+                                    {{ number_format($alltotalinvestments, 2) }} BDT</h4>
                                 {{-- <small class="text-danger fw-medium"><i class="bx bx-down-arrow-alt"></i> -14.82%</small> --}}
                             </div>
                         </div>

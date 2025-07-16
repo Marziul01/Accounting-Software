@@ -150,6 +150,11 @@ class DashboardController extends Controller
             ->values();
 
 
+        $allInvestmentss = Investment::all();
+        $alltotalinvestments = 0;
+        foreach ($allInvestmentss as $investment) {
+            $alltotalinvestments += $investment->transactions->where('transaction_type', 'Deposit')->sum('amount') - $investment->transactions->where('transaction_type', 'Withdraw')->sum('amount');
+        }
 
         return view('admin.dashboard.dashboard', [
             'monthlyData' => $monthlyData,
@@ -160,7 +165,7 @@ class DashboardController extends Controller
             'allassets' => Asset::all(),
             'allliabilities' => Liability::all(),
             'expenses' => $expenses,
-            'investments' => $investments,
+            'alltotalinvestments' => $alltotalinvestments,
             'totalbank' => $totalbank,
             'incomeCategories' => IncomeCategory::where('status', 1)->where('id', '!=', 13)->get(),
         ]);
