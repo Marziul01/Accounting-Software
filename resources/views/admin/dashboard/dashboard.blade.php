@@ -284,7 +284,7 @@
                                     </div> --}}
                                 </div>
                                 <p class="mb-1">Total Assets</p>
-                                <h4 class="card-title mb-3 ttoalsamount">{{ number_format($assets->sum('amount'), 2) }} BDT
+                                <h4 class="card-title mb-3 ttoalsamount">{{ number_format($allassets->sum('amount'), 2) }} BDT
                                 </h4>
                                 {{-- <small class="text-danger fw-medium"><i class="bx bx-down-arrow-alt"></i> -14.82%</small> --}}
                             </div>
@@ -311,7 +311,7 @@
                                 </div>
                                 <p class="mb-1">Total Liability</p>
                                 <h4 class="card-title mb-3 ttoalsamount">
-                                    {{ number_format($liabilities->sum('amount'), 2) }} BDT</h4>
+                                    {{ number_format($allliabilities->sum('amount'), 2) }} BDT</h4>
                                 {{-- <small class="text-success fw-medium"><i class="bx bx-up-arrow-alt"></i> +28.14%</small> --}}
                             </div>
                         </div>

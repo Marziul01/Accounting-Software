@@ -79,7 +79,7 @@ class AssetController extends Controller
             
         ]);
 
-        $data = $request->except('amount');
+        $data = $request->all();
         $photoPath = null;
 
         if($request->category_id == 4){

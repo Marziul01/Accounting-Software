@@ -78,7 +78,7 @@ class LiabilityController extends Controller
             'entry_date' => 'required',
         ]);
 
-        $data = $request->except('amount');
+        $data = $request->all();
         $photoPath = null;
 
         if( $request->category_id == 3){
