@@ -35,7 +35,7 @@
                                         <form action="{{ route('occassion.destroy', $occasion->id) }}" method="POST"
                                             class="d-inline">
                                             @csrf
-                                            @method('DELETE')
+                                            
                                             <button type="submit"
                                                 class="btn btn-sm btn-outline-danger delete-confirm {{ Auth::user()->access->sms_and_email == 1 ? 'disabled' : '' }}"><i
                                                     class="bx bx-trash me-1"></i> Delete</button>
