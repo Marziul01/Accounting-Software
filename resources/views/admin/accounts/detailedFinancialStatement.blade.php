@@ -534,9 +534,28 @@
                             <td class="font-semibold text-right">মোট স্বল্পমেয়াদী বিনিয়োগ</td>
                             
                             <td class="font-semibold text-end">{!! bn_number(number_format($shortTermInvestTotal,2)) !!}</td>
-                            <td class="font-semibold text-right">নীট লাভ বা ক্ষতি</td>
+                            {{-- <td class="font-semibold text-right">নীট লাভ বা ক্ষতি</td>
                             
-                            <td class="text-end">{!! bn_number(number_format($totalNetGainorLossBalance, 2)) !!}</td>
+                            <td class="text-end">{!! bn_number(number_format($totalNetGainorLossBalance, 2)) !!}</td> --}}
+
+                            <td class="font-semibold text-right">মূলধন বা মালিকানা সত্ত্ব <span class="font-xs text-warning"> ( নীট লাভ বা ক্ষতি  এর সাথে যুক্ত )</span> </td>
+                            @php
+                               $totalEquity = (
+                                    ($totalBankDeposit - $totalBankWithdraw)
+                                + $totalInvestAmount
+                                + $totalFixedAsset
+                                + $handCash
+                                + ($totalCurrentAssetDeposit - $totalCurrentAssetWithdraw)
+                                ) - (
+                                    ($totalShortLiabilityDeposit - $totalShortLiabilityWithdraw)
+                                + ($totalLongLiabilityDeposit - $totalLongLiabilityWithdraw)
+                                );
+
+                            @endphp
+                            <td class="font-semibold text-end">
+                                {!! bn_number(number_format($totalEquity,2)) !!}
+                            </td>
+
                         </tr>
                         <tr>
                             <td style="padding: 0px !important;">
@@ -611,8 +630,10 @@
                             <td class="font-semibold text-right">মোট দীর্ঘমেয়াদী বিনিয়োগ</td>
                             
                             <td class="font-semibold text-end">{!! bn_number(number_format($longTermInvestTotal,2)) !!}</td>
-                            <td class="font-semibold text-right">মূলধন বা মালিকানা সত্ত্ব</td>
-                            @php
+                            <td class="font-semibold text-right">
+                                {{-- মূলধন বা মালিকানা সত্ত্ব --}}
+                            </td>
+                            {{-- @php
                                $totalEquity = (
                                     ($totalBankDeposit - $totalBankWithdraw)
                                 + $totalInvestAmount
@@ -624,8 +645,10 @@
                                 + ($totalLongLiabilityDeposit - $totalLongLiabilityWithdraw)
                                 );
 
-                            @endphp
-                            <td class="font-semibold text-end">{!! bn_number(number_format($totalEquity,2)) !!}</td>
+                            @endphp --}}
+                            <td class="font-semibold text-end">
+                                {{-- {!! bn_number(number_format($totalEquity,2)) !!} --}}
+                            </td>
                         </tr>
 
                         <!-- Section for "দীর্ঘমেয়াদী বিনিয়োগ হতে মোট প্রাপ্ত আয়" and "মোট প্রদান" -->

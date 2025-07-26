@@ -644,8 +644,8 @@
                         $bankBalance = $totalBankDeposit - $totalBankWithdraw;
 
                         
-                        $handcash = $closingBalance - $bankBalance;
-                        
+                        // $handcash = $closingBalance - $bankBalance;
+                        $handcash = $closingBalance;
 
                         // Total cash (hand + bank)
                         $totalCash = $handcash + $bankBalance;

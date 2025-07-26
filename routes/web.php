@@ -49,6 +49,7 @@ use PHPUnit\Util\Exporter;
 
 Route::get('/', [Homecontroller::class, 'index'])->name('home');
 
+
 Route::get('/admin/login', [AdminAuthController::class, 'login'])->name('login');
 Route::get('/admin/forget/pass', [AdminAuthController::class, 'forgotPass'])->name('forgotPass');
 Route::post('/admin/login/auth', [AdminAuthController::class, 'authenticate'])->name('admin.authenticate');

@@ -195,18 +195,13 @@
                                বিনিয়োগ
                             </td>
                             <td class="text-end">{!! bn_number(number_format( $totalInvestAmount , 2)) !!}</td>
-                            <td>
+                            {{-- <td>
                               নীট লাভ বা ক্ষতি 
                             </td>
-                            <td class="text-end">{!! bn_number(number_format($totalNetGainorLossBalance, 2)) !!}</td>
-                        </tr>
-                        <tr>
+                            <td class="text-end">{!! bn_number(number_format($totalNetGainorLossBalance, 2)) !!}</td> --}}
+
                             <td>
-                               হাতে নগদ
-                            </td>
-                            <td class="text-end">{!! bn_number(number_format($handCash, 2)) !!}</td>
-                            <td>
-                              মালিকানা সত্ত্ব  
+                              মালিকানা সত্ত্ব  <span class="font-xs text-warning"> ( নীট লাভ বা ক্ষতি  এর সাথে যুক্ত )</span>
                             </td>
                             @php
                                $totalEquity = (
@@ -221,6 +216,32 @@
                                 );
                             @endphp
                             <td class="text-end">{!! bn_number(number_format($totalEquity, 2)) !!}</td>
+
+                        </tr>
+                        <tr>
+                            <td>
+                               হাতে নগদ
+                            </td>
+                            <td class="text-end">{!! bn_number(number_format($handCash, 2)) !!}</td>
+                            <td>
+                              {{-- মালিকানা সত্ত্ব   --}}
+                            </td>
+                            {{-- @php
+                               $totalEquity = (
+                                    ($totalBankDeposit - $totalBankWithdraw)
+                                + $totalInvestAmount
+                                + $totalFixedAsset
+                                + $handCash
+                                + ($totalCurrentAssetDeposit - $totalCurrentAssetWithdraw)
+                                ) - (
+                                    ($totalShortLiabilityDeposit - $totalShortLiabilityWithdraw)
+                                + ($totalLongLiabilityDeposit - $totalLongLiabilityWithdraw)
+                                );
+                            @endphp --}}
+                            <td class="text-end">
+                                {{-- {!! bn_number(number_format($totalEquity, 2)) !!} --}}
+
+                            </td>
                         </tr>
                         <tr>
                             <td>
