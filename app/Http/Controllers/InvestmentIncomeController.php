@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\BankExport;
+use App\Models\BankAccount;
+use App\Models\BankTransaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -11,6 +14,7 @@ use App\Models\IncomeCategory;
 use App\Models\IncomeSubCategory;
 use App\Models\Investment;
 use App\Models\InvestmentExpense;
+use App\Models\Notification;
 use Illuminate\Support\Str;
 
 class InvestmentIncomeController extends Controller
@@ -35,10 +39,14 @@ class InvestmentIncomeController extends Controller
         $expenses = InvestmentExpense::where('investment_id', $investment->id)->get();
 
         $merged = $incomes->concat($expenses)->sortBy('date')->values();
+        $banks = BankAccount::all();
+        $bankTransaction = BankTransaction::where('from', 'InvestmentIncome')->get();
 
         return view('admin.investment.incomeexpenses', [
             'investment' => $investment,
             'records' => $merged,
+            'banks' => $banks,
+            'bankTransaction' => $bankTransaction,
         ]);
     }
 
@@ -115,7 +123,32 @@ class InvestmentIncomeController extends Controller
                 $InvestmentIncome->income_id = $income->id;
                 $InvestmentIncome->save();
 
+
+                if($request->has('bank_account_id') && $request->bank_account_id) {
+                    $bankAccount = BankAccount::find($request->bank_account_id);
+                    if ($bankAccount) {
+                        $bankTransaction = new BankTransaction();
+                        $bankTransaction->bank_account_id = $bankAccount->id;
+                        $bankTransaction->transaction_date = $request->date;
+                        $bankTransaction->amount = $request->amount;
+                        $bankTransaction->transaction_type = 'credit';
+                        $bankTransaction->description = $request->bank_description;
+                        $bankTransaction->name = 'InvestmentIncome: '.$investment->name;
+                        $bankTransaction->slug = 'InvestmentIncome-' . $investment->slug;
+                        $bankTransaction->from = 'InvestmentIncome';
+                        $bankTransaction->from_id = $InvestmentIncome->id;
+                        $bankTransaction->save();
+                    }
+                }
+
+                Notification::create([
+                    'message' => Auth()->user()->name . ' created a new Gain investment: ' . $investment->name .'('. $request->amount .' BDT)' .'.',
+                    'sent_date' => now(),
+                ]);
+
             });
+
+            
 
             return response()->json(['message' => 'Gain recorded successfully!']);
         } catch (\Throwable $e) {
@@ -167,6 +200,9 @@ class InvestmentIncomeController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
+
+        
+
         try {
             DB::transaction(function () use ($request, $id) {
                 $investmentIncome = InvestmentIncome::findOrFail($id);
@@ -190,6 +226,53 @@ class InvestmentIncomeController extends Controller
                         'date'        => $request->date,
                     ]);
                 }
+
+                // update or create bank transaction
+                if($request->has('bank_account_id') && $request->bank_account_id) {
+                    $bankAccount = BankAccount::find($request->bank_account_id);
+                    if ($bankAccount) {
+                        $bankTransaction = BankTransaction::where('from', 'InvestmentIncome')
+                            ->where('from_id', $investmentIncome->id)
+                            ->first();
+                        if ($bankTransaction) {
+                            // update existing transaction
+                            $bankTransaction->update([
+                                'bank_account_id' => $bankAccount->id,
+                                'transaction_date' => $request->date,
+                                'amount' => $request->amount,
+                                'description' => $request->bank_description,
+                            ]);
+                        } else {
+                            // create new transaction
+                            $newTransaction = new BankTransaction();
+                            $newTransaction->bank_account_id = $bankAccount->id;
+                            $newTransaction->transaction_date = $request->date;
+                            $newTransaction->amount = $request->amount;
+                            $newTransaction->transaction_type = 'credit';  
+                            $newTransaction->description = $request->bank_description;
+                            $newTransaction->name = 'InvestmentIncome: '.$investmentIncome->investment->name;
+                            $newTransaction->slug = 'InvestmentIncome-' . $investmentIncome->investment->slug;
+                            $newTransaction->from = 'InvestmentIncome';
+                            $newTransaction->from_id = $investmentIncome->id;
+                            $newTransaction->save();
+                        }
+                    }
+                } else {
+                    // if no bank_account_id provided, delete existing transaction
+                    $existtingtransaction = BankTransaction::where('from', 'InvestmentIncome')
+                        ->where('from_id', $investmentIncome->id)
+                        ->first();
+                    if ($existtingtransaction) {
+                        $existtingtransaction->delete();
+                    }
+                }
+
+                $investment = Investment::findOrFail($investmentIncome->investment_id);
+                Notification::create([
+                    'message' => Auth()->user()->name . ' updated a new Gain investment: ' . $investment->name .'('. $request->amount .' BDT)' .'.',
+                    'sent_date' => now(),
+                ]);
+
             });
 
             return response()->json(['message' => 'Gain updated successfully!']);
@@ -224,8 +307,23 @@ class InvestmentIncomeController extends Controller
                     Income::destroy($investmentIncome->income_id);
                 }
 
+                // delete related bank transaction
+                $existtingtransaction = BankTransaction::where('from', 'InvestmentIncome')
+                        ->where('from_id', $investmentIncome->id)
+                        ->first();
+                    if ($existtingtransaction) {
+                        $existtingtransaction->delete();
+                    }
+
+                $investment = Investment::findOrFail($investmentIncome->investment_id);
+                Notification::create([
+                    'message' => Auth()->user()->name . ' deleted a Gain investment: ' . $investment->name .'('. $investmentIncome->amount .' BDT)' .'.',
+                    'sent_date' => now(),
+                ]);
                 // delete the investment income record
                 $investmentIncome->delete();
+
+                
             });
 
             return back()->with('success', 'Investment Gain deleted successfully!');

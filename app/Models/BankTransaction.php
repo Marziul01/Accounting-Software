@@ -15,6 +15,10 @@ class BankTransaction extends Model
         'name',
         'transaction_id',
         'slug',
+        'from_id',
+        'from',
+        'transfer_from',
+        'transfer_to'
     ];
 
     // Define any relationships or additional methods here

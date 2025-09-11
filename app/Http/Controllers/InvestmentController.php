@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\BankAccount;
+use App\Models\BankTransaction;
 use Illuminate\Http\Request;
 use App\Models\Investment;
 use App\Models\InvestmentCategory;
@@ -9,7 +11,9 @@ use App\Models\InvestmentExpense;
 use App\Models\InvestmentIncome;
 use App\Models\InvestmentSubCategory;
 use App\Models\InvestmentTransaction;
+use App\Models\Notification;
 use Carbon\Carbon;
+use Illuminate\Container\Attributes\Auth;
 use Illuminate\Support\Facades\Validator;
 
 class InvestmentController extends Controller
@@ -31,6 +35,7 @@ class InvestmentController extends Controller
             'investmentSubCategories' => InvestmentSubCategory::where('status', 1)->get(),
             'investments' => Investment::all(),
             'investmentTransactions' => InvestmentTransaction::all(),
+            'banks' => BankAccount::all(),
         ]);
     }
 
@@ -58,9 +63,23 @@ class InvestmentController extends Controller
             'investment_sub_category_id' => 'required|exists:investment_sub_categories,id',
             'amount' => 'required|numeric|min:0',
             'date' => 'required|date',
-            
             'slug' => 'required|string|max:255',
         ]);
+
+        
+        if ($request->has('bank_account_id') && $request->bank_account_id) {
+            $bankAccount = BankAccount::find($request->bank_account_id);
+            $balance = $bankAccount->transactions()->where('transaction_type', 'credit')->sum('amount')
+                    - $bankAccount->transactions()->where('transaction_type', 'debit')->sum('amount');
+
+            if ($bankAccount && $request->amount > $balance) {
+                return response()->json([
+                    'errors' => [
+                        'amount' => ['Investment amount cannot be greater than the bank balance.']
+                    ]
+                ], 422);
+            }
+        }
         
         $baseSlug = $request->name;
         $slug = $baseSlug;
@@ -80,6 +99,30 @@ class InvestmentController extends Controller
         $firsttransaction->transaction_type = 'Deposit';
         $firsttransaction->transaction_date = $request->date;
         $firsttransaction->save();
+
+
+        if($request->has('bank_account_id') && $request->bank_account_id) {
+            $bankAccount = BankAccount::find($request->bank_account_id);
+            if ($bankAccount) {
+                $bankTransaction = new BankTransaction();
+                $bankTransaction->bank_account_id = $bankAccount->id;
+                $bankTransaction->transaction_date = $request->date;
+                $bankTransaction->amount = $request->amount;
+                $bankTransaction->transaction_type = 'debit';
+                $bankTransaction->description = $request->bank_description;
+                $bankTransaction->name = 'Investment: '.$investment->name;
+                $bankTransaction->slug = 'investment-' . $investment->slug;
+                $bankTransaction->from = 'investment';
+                $bankTransaction->from_id = $firsttransaction->id;
+                $bankTransaction->save();
+            }
+        }
+
+        Notification::create([
+            'message' => Auth()->user()->name . ' created a new investment: ' . $investment->name .'('. $request->amount .' BDT)' .'.',
+            'sent_date' => now(),
+        ]);
+
         // Redirect back to the index with a success message
         return response()->json([
             'message' => 'Investment created successfully!',
@@ -136,6 +179,11 @@ class InvestmentController extends Controller
         $request->merge(['slug' => $data['slug']]);
         $investment->update($request->all());
 
+        Notification::create([
+            'message' => Auth()->user()->name . ' updated the investment: ' . $investment->name .'.',
+            'sent_date' => now(),
+        ]);
+
         // Redirect back to the index with a success message
         return response()->json([
             'message' => 'Investment updated successfully!',
@@ -158,10 +206,22 @@ class InvestmentController extends Controller
         // Check if there are any transactions associated with this investment
         $transactions = InvestmentTransaction::where('investment_id', $investment->id)->get();
         foreach ($transactions as $transaction) {
+            $bankTransaction = BankTransaction::where('from', 'investment')
+                ->where('from_id', $transaction->id)
+                ->first();
+            // Delete associated bank transaction if exists
+            if ($bankTransaction) {
+                $bankTransaction->delete();
+            }
             // Delete each transaction
             $transaction->delete();
         }
         $investment->delete();
+
+        Notification::create([
+            'message' => Auth()->user()->name . ' deleted the investment: ' . $investment->name .'.',
+            'sent_date' => now(),
+        ]);
 
         // Redirect back to the index with a success message
         return back()->with('success', 'Investment deleted successfully!');

@@ -1,3 +1,5 @@
+@if($row->from === null || $row->from === 'scheduled')
+
 <div class="d-flex align-items-center gap-1 cursor-pointer">
     <button type="button" class="btn btn-sm btn-outline-secondary openBankEditModal"
         data-id="{{ $row->id }}"
@@ -9,6 +11,8 @@
         data-type="{{ $row->transaction_type }}"
         data-description="{{ $row->description }}"
         data-bank-id="{{ $row->bank_account_id }}"
+        data-transfared-from="{{ $row->transfer_to ? $row->bank_account_id : '' }}"
+        data-transfared-to="{{ $row->transfer_to ? $row->transfer_to : '' }}"
         {{ Auth::user()->access->bankbook == 1 ? 'disabled' : '' }}>
         <i class="bx bx-edit-alt me-1"></i> Edit
     </button>
@@ -22,3 +26,4 @@
         </button>
     </form>
 </div>
+@endif

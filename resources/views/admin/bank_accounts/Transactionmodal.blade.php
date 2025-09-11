@@ -52,7 +52,24 @@
                             <label for="Description" class="form-label">Description</label>
                             <textarea class="form-control description-input" id="Description" name="description" rows="3"></textarea>
                         </div>
-                        
+                        <div class="mb-3">
+                            <label for="edittransfer_from" class="form-label">Transfer From (optional)</label>
+                            <select class="form-select" id="edittransfer_from" name="transfer_from">
+                                <option value="">Select Bank Account</option>
+                                @foreach ($bankaccounts as $bankaccount)
+                                    <option value="{{ $bankaccount->id }}">{{ $bankaccount->bank_name }} ({{ $bankaccount->account_type }})</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="edittransfer_to" class="form-label">Transfer To (optional)</label>
+                            <select class="form-select" id="edittransfer_to" name="transfer_to">
+                                <option value="">Select Bank Account</option>
+                                @foreach ($bankaccounts as $bankaccount)
+                                    <option value="{{ $bankaccount->id }}">{{ $bankaccount->bank_name }} ({{ $bankaccount->account_type }})</option>
+                                @endforeach
+                            </select>
+                        </div>
                     </div>
                     <div class="modal-footer">
                         <button type="submit" class="btn btn-primary">Confirm</button>

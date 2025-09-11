@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\BankAccount;
+use App\Models\BankTransaction;
 use Illuminate\Http\Request;
 use App\Models\Income;
 use App\Models\IncomeCategory;
 use App\Models\IncomeSubCategory;
+use App\Models\Notification;
 use Illuminate\Support\Facades\Auth;
 use Yajra\DataTables\Facades\DataTables;
 
@@ -22,8 +25,9 @@ class IncomeController extends Controller
 
         if ($request->ajax()) {
             $incomes = Income::with(['incomeCategory', 'incomeSubCategory'])->orderByDesc('date');
-
+            
             return DataTables::of($incomes)
+            
                 ->addIndexColumn()
                 ->editColumn('income_category', function ($row) {
                     return $row->incomeCategory->name ?? 'Not Assigned';
@@ -35,6 +39,7 @@ class IncomeController extends Controller
                     return \Carbon\Carbon::parse($row->date)->format('d M, Y');
                 })
                 ->addColumn('action', function ($row) {
+                    
                     return view('admin.income._actions', compact('row'))->render();
                 })
                 ->rawColumns(['action']) // so buttons don’t get escaped
@@ -51,6 +56,8 @@ class IncomeController extends Controller
             'incomeSubCategories' => IncomeSubCategory::where('status', 1)->get(),
             'firstDate' => $firstDate,
             'lastDate' => $lastDate,
+            'banks' => BankAccount::all(),
+            'bankTransaction' => BankTransaction::where('from', 'Income')->get(),
         ]);
     }
 
@@ -70,6 +77,7 @@ class IncomeController extends Controller
             'firstDate' => $firstDate,
             'lastDate' => $lastDate,
             'incomeCategory' => $incomeCategory,
+            
         ]);
     }
 
@@ -113,7 +121,29 @@ class IncomeController extends Controller
         $request->merge(['slug' => $data['slug']]);
 
         // Create a new income record
-        Income::create($request->all());
+        $newincome = Income::create($request->all());
+
+        if($request->has('bank_account_id') && $request->bank_account_id) {
+            $bankAccount = BankAccount::find($request->bank_account_id);
+            if ($bankAccount) {
+                $bankTransaction = new BankTransaction();
+                $bankTransaction->bank_account_id = $bankAccount->id;
+                $bankTransaction->transaction_date = $request->date;
+                $bankTransaction->amount = $request->amount;
+                $bankTransaction->transaction_type = 'credit';
+                $bankTransaction->description = $request->bank_description;
+                $bankTransaction->name = 'Income: '.$newincome->name;
+                $bankTransaction->slug = 'Income-' . $newincome->slug;
+                $bankTransaction->from = 'Income';
+                $bankTransaction->from_id = $newincome->id;
+                $bankTransaction->save();
+            }
+        }
+
+        Notification::create([
+            'message' => Auth()->user()->name . ' created a new Income: ' . $newincome->name .'('. $request->amount .' BDT)' .'.',
+            'sent_date' => now(),
+        ]);
 
         // Redirect back to the index with a success message
         return response()->json([
@@ -177,6 +207,37 @@ class IncomeController extends Controller
         $income = Income::findOrFail($id);
         $income->update($request->all());
 
+        if($request->has('bank_account_id') && $request->bank_account_id) {
+            $bankAccount = BankAccount::find($request->bank_account_id);
+            if ($bankAccount) {
+                $bankTransaction = BankTransaction::where('from', 'Income')->where('from_id', $income->id)->first();
+                if(!$bankTransaction) {
+                    $bankTransaction = new BankTransaction();
+                    $bankTransaction->bank_account_id = $bankAccount->id;
+                    $bankTransaction->transaction_type = 'credit';
+                    $bankTransaction->from = 'Income';
+                    $bankTransaction->from_id = $income->id;
+                }
+                $bankTransaction->transaction_date = $request->date;
+                $bankTransaction->amount = $request->amount;
+                $bankTransaction->description = $request->bank_description;
+                $bankTransaction->name = 'Income: '.$income->name;
+                $bankTransaction->slug = 'Income-' . $income->slug;
+                $bankTransaction->save();
+            }
+        } else {
+            // If no bank account is selected, delete any existing bank transaction
+            $icnomebanktran = BankTransaction::where('from', 'Income')->where('from_id', $income->id)->first();
+            if($icnomebanktran) {
+                $icnomebanktran->delete();
+            }
+        }
+
+        Notification::create([
+            'message' => Auth()->user()->name . ' updated a Income: ' . $income->name .'('. $request->amount .' BDT)' .'.',
+            'sent_date' => now(),
+        ]);
+
         // Redirect back to the index with a success message
         return response()->json([
             'message' => 'Income record updated successfully!',
@@ -199,6 +260,16 @@ class IncomeController extends Controller
         if($income->income_category_id == 13) {
             return back()->with('error', 'You cannot delete this income record.');
         }
+
+        $bankTransaction = BankTransaction::where('from', 'Income')->where('from_id', $income->id)->first();
+        if($bankTransaction) {
+            $bankTransaction->delete();
+        }
+
+        Notification::create([
+            'message' => Auth()->user()->name . ' deleted a Income: ' . $income->name .'('. $income->amount .' BDT)' .'.',
+            'sent_date' => now(),
+        ]);
 
         // Delete the income record
         $income->delete();

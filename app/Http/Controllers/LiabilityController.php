@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Mail\LiabilityInvoiceMail;
+use App\Models\BankAccount;
+use App\Models\BankTransaction;
 use App\Models\Liability;
 use App\Models\LiabilitySubCategory;
 use App\Models\LiabilityTransaction;
@@ -10,6 +12,7 @@ use Illuminate\Http\Request;
 use App\Models\Contact;
 use App\Models\LiabilityCategory;
 use App\Models\LiabilitySubSubCategory;
+use App\Models\Notification;
 use App\Models\SiteSetting;
 use App\Models\SMSTemplate;
 use Illuminate\Support\Str;
@@ -33,6 +36,7 @@ class LiabilityController extends Controller
             'liabilityCategories' => LiabilitySubCategory::where('liability_category_id', 3)->where('status', 1)->get(),
             'liabilityTransactions' => LiabilityTransaction::all(),
             'users' => Contact::all(),
+            'banks' => BankAccount::all(),
         ]);
     }
 
@@ -47,6 +51,7 @@ class LiabilityController extends Controller
             'liabilityCategories' => LiabilitySubCategory::where('liability_category_id', 4)->where('status', 1)->get(),
             'liabilityTransactions' => LiabilityTransaction::all(),
             'users' => Contact::all(),
+            'banks' => BankAccount::all(),
         ]);
     }
 
@@ -77,6 +82,7 @@ class LiabilityController extends Controller
             'contact_id' => 'required_if:category_id,3|nullable|exists:contacts,id',
             'entry_date' => 'required',
         ]);
+
 
         $data = $request->all();
         $photoPath = null;
@@ -205,14 +211,14 @@ class LiabilityController extends Controller
                 $accountNumber = '#'.$assetsfdf->slug.$assetsfdf->id; // or $assetsfdf->id if you prefer
                 $amount = $this->engToBnNumber($request->amount);
 
-                $message = "প্রিয় {$accountName}, $templateText {$accountNumber} ।  রাসেল এর নিকট আপনার প্রদত্ত মোট অবশিষ্ট পাওনা ঋণের পরিমাণ $amount টাকা।
+                $message = "প্রিয় {$accountName}, $templateText ।  রাসেল এর নিকট আপনার প্রদত্ত মোট অবশিষ্ট পাওনা ঋণের পরিমাণ $amount টাকা।
 
 ধন্যবাদান্তে,
 
 $site_name->site_owner";
 
                 $response = sendSMS($number, $message);
-
+                $smsSent = $request->send_sms == 1 ? 1 : 0;
                 // Optional: Map response code to readable message
                 $errorMessages = [
                     '1001' => '❌ ভুল API কী প্রদান করা হয়েছে।',
@@ -231,9 +237,55 @@ $site_name->site_owner";
 
 
             if ($request->send_email == 1) {
-                Mail::to($request->email)->send(new LiabilityInvoiceMail($assetsfdf, $request));
+                
             }
 
+            if ($request->send_email == 1) {
+                try {
+                    Mail::to($request->email)->send(new LiabilityInvoiceMail($assetsfdf, $request));
+                    $emailSent = 1;
+                } catch (\Exception $e) {
+                    // Log the error but continue the execution
+                    \Log::error('Email sending failed: ' . $e->getMessage());
+                    $emailSent = 0;
+                }
+            }
+
+        }
+
+        if($request->has('bank_account_id') && $request->bank_account_id) {
+            $bankAccount = BankAccount::find($request->bank_account_id);
+            if ($bankAccount) {
+                $bankTransaction = new BankTransaction();
+                $bankTransaction->bank_account_id = $bankAccount->id;
+                $bankTransaction->transaction_date = $request->entry_date;
+                $bankTransaction->amount = $request->amount;
+                $bankTransaction->transaction_type = 'credit';
+                $bankTransaction->description = $request->bank_description;
+                $bankTransaction->name = 'Liability: '.$assetsfdf->name;
+                $bankTransaction->slug = 'Liability-' . $assetsfdf->slug;
+                $bankTransaction->from = 'Liability';
+                $bankTransaction->from_id = $firsttransaction->id;
+                $bankTransaction->save();
+            }
+        }
+
+        if($request->category_id == 3){
+            Notification::create([
+                
+                'sender_name' => $contact->name,
+                'message' => $message,
+                'sent_date' => now(),
+                'email_sent' => $emailSent,
+                'sms_sent' => $smsSent,
+                'occasion_name' => Auth()->user()->name . ' created a new Short Term Liability: ' . $assetsfdf->name,
+                'contact_id' => $data['contact_id'],
+            ]);
+        }else{
+            Notification::create([
+                'sent_date' => now(),
+                'message' => Auth()->user()->name . ' created a new Long Term Liability: ' . $assetsfdf->name . '('. $request->amount .' BDT)' .'.',
+            ]);
         }
 
         return response()->json([
@@ -416,6 +468,17 @@ $site_name->site_owner";
         // --- Update asset (except amount) ---
         $asset->update($data);
 
+        if($request->category_id == 3){
+            $assetis = 'Short Term';
+        }else{
+            $assetis = 'Long Term';
+        }
+
+        Notification::create([
+                'sent_date' => now(),
+                'message' => Auth()->user()->name . ' updated ' . $assetis . ' Liability: ' . $asset->name .'.',
+            ]);
+
         return response()->json([
             'status' => 'success',
             'message' => 'Liability updated successfully.',
@@ -441,9 +504,29 @@ $site_name->site_owner";
 
         $transactions = LiabilityTransaction::where('liability_id' , $asset->id )->get();
         foreach ($transactions as $transaction) {
+
+            $bankTransaction = BankTransaction::where('from', 'Liability')
+                ->where('from_id', $transaction->id)
+                ->first();
+            // Delete associated bank transaction if exists
+            if ($bankTransaction) {
+                $bankTransaction->delete();
+            }
+
             // Delete each transaction
             $transaction->delete();
         }
+
+        if($asset->category_id == 3){
+            $assetis = 'Short Term';
+        }else{
+            $assetis = 'Long Term';
+        }
+
+        Notification::create([
+            'sent_date' => now(),
+            'message' => Auth()->user()->name . ' deleted '. $assetis  . 'Liability: ' . $asset->name .'.',
+        ]);
 
         $asset->delete();
 

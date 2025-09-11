@@ -63,6 +63,7 @@
         .summary-box {
             background: #fff3cd;
             padding: 15px;
+            font-weight: 900;
         }
 
         table tbody tr td {
@@ -112,12 +113,12 @@
             <img src="{{ asset($setting->site_logo) }}" height="100%" class="img" alt="">
             <h2>{{ $setting->site_name_bangla }}</h2>
             <h4>{{ $subsubcategory->name }} এর সম্পদের রিপোর্ট</h4>
-            <p class=""> {!! bn_number($startDate ?? 'সর্বপ্রথম') !!} থেকে {!! bn_number($endDate ?? now()->format('Y-m-d')) !!} পর্যন্ত </p>
+            <p class=""> {!! bn_number($startDate ?? 'সর্বপ্রথম') !!} ইং থেকে {!! bn_number($endDate ?? now()->format('Y-m-d')) !!} ইং পর্যন্ত </p>
         </div>
 
         @if ($subsubcategory->assets->count())
             <div class="card mb-4">
-                <div class="card-header bg-dark text-white">
+                <div class="card-header bg-dark text-white text-center">
                     <strong>{{ $subsubcategory->name }} এর সম্পদের তালিকা</strong>
                 </div>
                 <div class="card-body p-0">
@@ -125,8 +126,8 @@
                         <table class="table table-bordered m-0">
                             <thead class="table-light">
                                 <tr>
-                                    <th>ক্রমিক নম্বর</th>
-                                    <th>তারিখ</th>
+                                    <th class="text-center">ক্রমিক নম্বর</th>
+                                    <th class="text-center">তারিখ</th>
                                     <th>নাম</th>
                                     <th class="text-end">প্রারম্ভিক জমা / পূর্বের ব্যালেন্স</th>
                                     <th class="text-end">মোট জমা</th>
@@ -135,7 +136,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach ($assets->where('subsubcategory_id' , $subsubcategory->id ) as $asset)
+                                @foreach ($assets->where('subsubcategory_id', $subsubcategory->id) as $asset)
                                     @php
                                         $totalDeposits = $asset->allTransactions
                                             ->where('transaction_type', 'Deposit')
@@ -181,8 +182,8 @@
                                     @endphp
                                     @php $isLast = $loop->last; @endphp
                                     <tr class="{{ $isLast ? 'last-row' : '' }}">
-                                        <td>{!! bn_number($loop->iteration) !!}</td>
-                                        <td>{!! bn_number(\Carbon\Carbon::parse($asset->entry_date)->format('d-m-y')) !!}</td>
+                                        <td class="text-center">{!! bn_number($loop->iteration) !!}</td>
+                                        <td class="text-center">{!! bn_number(\Carbon\Carbon::parse($asset->entry_date)->format('d-m-y')) !!} ইং</td>
                                         <td>{{ $asset->name }}</td>
                                         <td class="text-end tiro">{!! $previousAmount ? bn_number(number_format($previousAmount, 2)) : bn_number(number_format($initialAmount, 2)) !!} টাকা</td>
                                         <td class="text-end tiro">{!! bn_number(number_format($depositInRange, 2)) !!} টাকা</td>
@@ -218,15 +219,15 @@
                 <tbody>
 
                     <tr class="table-info">
-                        <td  class=""><strong>মোট জমা</strong></td>
+                        <td class=""><strong>মোট জমা</strong></td>
                         <td class="text-end" colspan="2">{!! bn_number(number_format($subsubdeposit, 2)) !!} টাকা</td>
                     </tr>
                     <tr class="table-warning">
-                        <td  class=""><strong>মোট উত্তোলন</strong></td>
+                        <td class=""><strong>মোট উত্তোলন</strong></td>
                         <td class="text-end " colspan="2">{!! bn_number(number_format($subsubwithdraw, 2)) !!} টাকা</td>
                     </tr>
                     <tr class="grand-total">
-                        <td><strong>{{ $subsubcategory->name }} সর্বমোট  </strong></td>
+                        <td><strong>{{ $subsubcategory->name }} সর্বমোট </strong></td>
                         <td class="tiro text-end"><strong>
                                 @if ($subsubtotal < 0)
                                     <span class="text-success">সম্পদের বিক্রয়: {!! bn_number(number_format(abs($subsubtotal), 2)) !!} টাকা</span>
@@ -243,7 +244,12 @@
 
         <div class="report-footer mt-4">
             <div class="text-center">
-                <p class="bangla-text">{{ $setting->site_name_bangla }}</p>
+                <div class="d-flex justify-content-start mb-3">
+                    <img src="{{ asset($setting->signature) }}" height="100%" class="signature_img" alt="">
+                </div>
+                
+
+                <p class="bangla-text">{{ $setting->site_owner }}</p>
 
                 <p class="bangla-text">
                     ঠিকানা: {!! preg_replace_callback(
@@ -271,7 +277,7 @@
                         function ($m) {
                             return '<span class="tiro-font">' . $m[0] . '</span>';
                         },
-                        e($setting->site_website ?? 'www.example.com'),
+                        e($setting->site_link ?? 'www.example.com'),
                     ) !!}
                 </p>
 
@@ -298,7 +304,7 @@
                 $banglaMeridiem = ['AM' => 'পূর্বাহ্ণ', 'PM' => 'অপরাহ্ণ'];
 
                 $now = Carbon::now();
-                $formatted = $now->format('d F, Y h:i A'); // Example: 31 May, 2025 09:45 PM
+                $formatted = $now->format('d F, Y') . ' ইং ' . $now->format('h:i A');
 
                 // Translate English month and AM/PM to Bangla
                 $formatted = str_replace(array_keys($banglaMonths), array_values($banglaMonths), $formatted);
@@ -307,13 +313,84 @@
                 $banglaDateTime = bn_number($formatted);
             @endphp
 
-            <p class="mt-4">রাসেল বুক দ্বারা প্রস্তুতকৃত - {!! $banglaDateTime !!} </p>
+            <p class="mt-4 text-center">রাসেল বুক দ্বারা প্রস্তুতকৃত - {!! $banglaDateTime !!} </p>
         </div>
 
         <div class="text-center no-print">
-            <button onclick="window.print()" class="btn btn-primary mt-3">প্রিন্ট করুন</button>
+            <button onclick="window.print()" class="btn btn-success mt-3">প্রিন্ট করুন</button>
         </div>
     </div>
+
+    <div>
+        <style>
+            .go-top {
+                position: fixed;
+                bottom: 80px;
+                right: 20px;
+                background: #333;
+                color: #fff;
+                border: none;
+                border-radius: 50%;
+                font-size: 18px;
+                cursor: pointer;
+                display: none; /* Hidden by default */
+                transition: opacity 0.3s ease;
+                z-index: 999;
+                width: 50px;
+                height: 50px;
+                padding: 0px;
+                align-items: center;
+                justify-content: center;
+            }
+            .go-top.back{
+                bottom: 20px;
+            }
+            .go-top.show {
+                display: flex;
+                opacity: 0.8;
+            }
+
+            .go-top:hover {
+                opacity: 1;
+            }
+            a{
+                text-decoration: none;
+            }
+        </style>
+        @if($categorysettings->report_up == 2)
+        <button id="goTopBtn" class="go-top">⬆</button>
+        @endif
+
+        @if($categorysettings->report_back == 2)
+        <a href="{{ url()->previous() }}" id="goBackBtn" class="go-top back">⬅</a>
+        @endif
+    </div>
+    <script>
+        const goTopBtn = document.getElementById('goTopBtn');
+        const goBackBtn = document.getElementById('goBackBtn');
+        // Show button when user scrolls down
+        window.addEventListener('scroll', function() {
+            if (window.scrollY > 300) {
+                goTopBtn.classList.add('show');
+            } else {
+                goTopBtn.classList.remove('show');
+            }
+        });
+        window.addEventListener('scroll', function() {
+            if (window.scrollY > 300) {
+                goBackBtn.classList.add('show');
+            } else {
+                goBackBtn.classList.remove('show');
+            }
+        });
+        // Smooth scroll to top on click
+        goTopBtn.addEventListener('click', function() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+    </script>
 </body>
 
 </html>

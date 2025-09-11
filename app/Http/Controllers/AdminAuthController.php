@@ -66,9 +66,18 @@ class AdminAuthController extends Controller
 
                 // Send the SMS
                 sendSMS($adminMobile, $message);
+
+                // 📧 Send Email
+                Mail::raw($message, function ($mail) use ($admin) {
+                    $mail->to($admin->email)
+                        ->subject('New User Login Alert');
+                });
             }
         }
 
+        // Update last login datetime BEFORE login
+        $user->last_login_at = now();
+        $user->save();
         // Authenticate the user with the instructor guard
         Auth::guard('admin')->login($user);
 

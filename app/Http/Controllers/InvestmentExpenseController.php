@@ -12,6 +12,7 @@ use App\Models\IncomeCategory;
 use App\Models\IncomeSubCategory;
 use App\Models\Investment;
 use App\Models\InvestmentExpense;
+use App\Models\Notification;
 use Illuminate\Support\Str;
 
 
@@ -97,6 +98,11 @@ class InvestmentExpenseController extends Controller
                 $Investmentexpense->expense_id = $expense->id;
                 $Investmentexpense->save();
 
+                Notification::create([
+                    'message' => Auth()->user()->name . ' created a new Loss investment: ' . $investment->name .'('. $request->amount .' BDT)' .'.',
+                    'sent_date' => now(),
+                ]);
+
             });
 
             return response()->json(['message' => 'loss recorded successfully!']);
@@ -172,6 +178,12 @@ class InvestmentExpenseController extends Controller
                         'date'        => $request->date,
                     ]);
                 }
+
+                $investment = Investment::findOrFail($investmentexpense->investment_id);
+                Notification::create([
+                    'message' => Auth()->user()->name . ' updated a Loss investment: ' . $investment->name .'('. $request->amount .' BDT)' .'.',
+                    'sent_date' => now(),
+                ]);
             });
 
             return response()->json(['message' => 'loss updated successfully!']);
@@ -203,6 +215,11 @@ class InvestmentExpenseController extends Controller
                 // Delete the expense record
                 $expense->delete();
 
+                $investment = Investment::findOrFail($investmentexpense->investment_id);
+                Notification::create([
+                    'message' => Auth()->user()->name . ' deleted a Loss investment: ' . $investment->name .'('. $investmentexpense->amount .' BDT)' .'.',
+                    'sent_date' => now(),
+                ]);
                 // Delete the investment expense record
                 $investmentexpense->delete();
             });

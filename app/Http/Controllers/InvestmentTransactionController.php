@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\BankAccount;
+use App\Models\BankTransaction;
 use App\Models\Investment;
 use App\Models\InvestmentTransaction;
+use App\Models\Notification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
@@ -25,8 +28,9 @@ class InvestmentTransactionController extends Controller
 
         // Fetch all transactions related to this investment
         $transactions = InvestmentTransaction::where('investment_id', $investment->id)->orderBy('transaction_date' , 'asc' )->get();
-
-        return view('admin.investment.transactions', compact('investment', 'transactions'));
+        $banks = BankAccount::all();
+        $bankTransaction = BankTransaction::where('from', 'investment')->get();
+        return view('admin.investment.transactions', compact('investment', 'transactions','banks','bankTransaction'));
     }
 
     /**
@@ -59,6 +63,22 @@ class InvestmentTransactionController extends Controller
         // Update the asset amount based on the transaction type
         $investment = Investment::findOrFail($request->investment_id);
 
+        if($request->transaction_type === 'Deposit'){
+            if ($request->has('bank_account_id') && $request->bank_account_id) {
+                $bankAccount = BankAccount::find($request->bank_account_id);
+                $balance = $bankAccount->transactions()->where('transaction_type', 'credit')->sum('amount')
+                        - $bankAccount->transactions()->where('transaction_type', 'debit')->sum('amount');
+
+                if ($bankAccount && $request->amount > $balance) {
+                    return response()->json([
+                        'errors' => [
+                            'amount' => ['Investment amount cannot be greater than the bank balance.']
+                        ]
+                    ], 422);
+                }
+            }
+        }
+
         if ($request->transaction_type === 'Deposit') {
             $investment->amount += $request->amount;
         } elseif ($request->transaction_type === 'Withdraw') {
@@ -66,6 +86,34 @@ class InvestmentTransactionController extends Controller
         }
 
         $investment->save();
+
+        if($request->has('bank_account_id') && $request->bank_account_id) {
+            $bankAccount = BankAccount::find($request->bank_account_id);
+            if ($bankAccount) {
+                $bankTransaction = new BankTransaction();
+                $bankTransaction->bank_account_id = $bankAccount->id;
+                $bankTransaction->transaction_date = $request->transaction_date;
+                $bankTransaction->amount = $request->amount;
+
+                if($request->transaction_type === 'Deposit'){
+                    $bankTransaction->transaction_type = 'debit';
+                }else{
+                    $bankTransaction->transaction_type = 'credit';
+                }
+
+                $bankTransaction->description = $request->bank_description;
+                $bankTransaction->name = 'Investment: '.$investment->name;
+                $bankTransaction->slug = 'investment-' . $investment->slug;
+                $bankTransaction->from = 'investment';
+                $bankTransaction->from_id = $investmentTransaction->id;
+                $bankTransaction->save();
+            }
+        }
+
+        Notification::create([
+            'message' => Auth()->user()->name . ' created a new ' . $request->transaction_type . ' Transaction investment: ' . $investment->name .'('. $request->amount .' BDT)' .'.',
+            'sent_date' => now(),
+        ]);
 
         return response()->json([
             'message' => 'Investment Transaction created successfully!',
@@ -105,6 +153,23 @@ class InvestmentTransactionController extends Controller
             'transaction_date' => 'required|date',
         ]);
 
+        if($request->transaction_type === 'Deposit'){
+            if ($request->has('bank_account_id') && $request->bank_account_id) {
+                $bankAccount = BankAccount::find($request->bank_account_id);
+                $currentTransaction = BankTransaction::where('from', 'investment')->where('from_id', $id)->first();
+                $balance = $bankAccount->transactions()->where('transaction_type', 'credit')->sum('amount')
+                        - $bankAccount->transactions()->where('transaction_type', 'debit')->sum('amount') + ($currentTransaction ? $currentTransaction->amount : 0);
+
+                if ($bankAccount && $request->amount > $balance) {
+                    return response()->json([
+                        'errors' => [
+                            'amount' => ['Investment amount cannot be greater than the bank balance.']
+                        ]
+                    ], 422);
+                }
+            }
+        }
+
         // Find the existing asset transaction
         $investmentTransaction = InvestmentTransaction::findOrFail($id);
         
@@ -135,8 +200,46 @@ class InvestmentTransactionController extends Controller
             $investment->amount -= $newAmount;
         }
 
-        // Save the updated asset amount
         $investment->save();
+
+        if($request->has('bank_account_id') && $request->bank_account_id) {
+            $bankAccount = BankAccount::find($request->bank_account_id);
+            if ($bankAccount) {
+                $bankTransaction = BankTransaction::where('from', 'investment')->where('from_id', $id)->first();
+                if (!$bankTransaction) {
+                    $bankTransaction = new BankTransaction();
+                    $bankTransaction->bank_account_id = $bankAccount->id;
+                    $bankTransaction->from = 'investment';
+                    $bankTransaction->from_id = $investmentTransaction->id;
+                    $bankTransaction->name = 'Investment: '.$investment->name; 
+                    $bankTransaction->slug = 'investment-' . $investment->slug;
+                } else {
+                    // If bank account changed, update it
+                    if ($bankTransaction->bank_account_id != $bankAccount->id) {
+                        $bankTransaction->bank_account_id = $bankAccount->id;
+                    }
+                }
+                $bankTransaction->transaction_date = $request->transaction_date;
+                $bankTransaction->amount = $request->amount;
+                if($request->transaction_type === 'Deposit'){
+                    $bankTransaction->transaction_type = 'debit';
+                }else{
+                    $bankTransaction->transaction_type = 'credit';
+                }
+                $bankTransaction->description = $request->bank_description;
+                $bankTransaction->save();
+            }
+        } else {
+            $bankTransaction = BankTransaction::where('from', 'investment')->where('from_id', $id)->first();
+            if ($bankTransaction) {
+                $bankTransaction->delete();
+            }
+        }
+
+        Notification::create([
+            'message' => Auth()->user()->name . ' updated a ' . $request->transaction_type . ' Transaction investment: ' . $investment->name .'('. $request->amount .' BDT)' .'.',
+            'sent_date' => now(),
+        ]);
 
         return response()->json([
             'message' => 'Investment Transaction updated successfully!',
@@ -155,8 +258,27 @@ class InvestmentTransactionController extends Controller
         }
         $investmentTransaction = InvestmentTransaction::findOrFail($id);
 
-        // Now delete the transaction
+        // Fetch the associated investment
+        $investment = Investment::findOrFail($investmentTransaction->investment_id);    
+        // Reverse the transaction effect on investment amount
+        if ($investmentTransaction->transaction_type === 'Deposit') {
+            $investment->amount -= $investmentTransaction->amount;
+        } elseif ($investmentTransaction->transaction_type === 'Withdraw') {
+            $investment->amount += $investmentTransaction->amount;
+        }
+        $investment->save();    
+
+        $bankTransaction = BankTransaction::where('from', 'investment')->where('from_id', $id)->first();
+        if ($bankTransaction) {
+            $bankTransaction->delete();
+        }
+
         $investmentTransaction->delete();
+
+        Notification::create([
+            'message' => Auth()->user()->name . ' deleted a ' . $investmentTransaction->transaction_type . ' Transaction investment: ' . $investment->name .'('. $investmentTransaction->amount .' BDT)' .'.',
+            'sent_date' => now(),
+        ]); 
 
         // Return back with success
         return back()->with('success', 'Investment Transaction deleted successfully!');

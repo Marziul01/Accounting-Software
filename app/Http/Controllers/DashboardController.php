@@ -19,6 +19,8 @@ use App\Models\InvestmentTransaction;
 use App\Models\Liability;
 use App\Models\LiabilitySubCategory;
 use App\Models\LiabilityTransaction;
+use App\Models\Notification;
+use App\Models\SMSEMAILTEMPLATE;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
@@ -30,6 +32,11 @@ class DashboardController extends Controller
     {
         if (!Auth::check()) {
             return redirect()->route('login');
+        }
+
+        if (Notification::where('created_at', '<', now()->subDays(3))->exists()) {
+            Notification::where('created_at', '<', now()->subDays(3))
+            ->delete();
         }
 
         // Monthly Chart
@@ -156,6 +163,53 @@ class DashboardController extends Controller
             $alltotalinvestments += $investment->transactions->where('transaction_type', 'Deposit')->sum('amount') - $investment->transactions->where('transaction_type', 'Withdraw')->sum('amount');
         }
 
+
+        $occasions = SMSEMAILTEMPLATE::get();
+        $events = collect();
+
+        foreach ($occasions as $occasion) {
+            if (in_array($occasion->occassion, ['Birthday', 'Anniversary']) && $occasion->contact_ids) {
+                $contactIds = explode(',', $occasion->contact_ids);
+
+                $contacts = Contact::whereIn('id', $contactIds)->get();
+
+                foreach ($contacts as $contact) {
+                    $eventDate = $occasion->occassion === 'Birthday' 
+                        ? $contact->date_of_birth 
+                        : $contact->marriage_date;
+
+                    $events->push([
+                        'title' => $contact->name,
+                        'date'  => $eventDate,
+                        'type'  => $occasion->occassion,
+                    ]);
+                }
+            } else {
+                $events->push([
+                    'title' => $occasion->occassion,
+                    'date'  => $occasion->custom_date,
+                ]);
+            }
+        }
+
+        // Sort by date and take max 5
+        $finalOccasions = $events->sortByDesc('date')->take(5);
+
+
+        $startOfMonth = Carbon::now()->startOfMonth();
+        $endOfMonth   = Carbon::now()->endOfMonth();
+
+        $currentMonthtotals = [
+            'incomes'     => Income::whereBetween('date', [$startOfMonth, $endOfMonth])->sum('amount'),
+            'expenses'    => Expense::whereBetween('date', [$startOfMonth, $endOfMonth])->sum('amount'),
+            'assets'      => AssetTransaction::whereBetween('transaction_date', [$startOfMonth, $endOfMonth])->where('transaction_type','Deposit')->sum('amount') - AssetTransaction::whereBetween('transaction_date', [$startOfMonth, $endOfMonth])->where('transaction_type','Withdraw')->sum('amount'),
+            'liabilities' => LiabilityTransaction::whereBetween('transaction_date', [$startOfMonth, $endOfMonth])->where('transaction_type','Deposit')->sum('amount') - LiabilityTransaction::whereBetween('transaction_date', [$startOfMonth, $endOfMonth])->where('transaction_type','Withdraw')->sum('amount'),
+            'investments' => InvestmentTransaction::whereBetween('transaction_date', [$startOfMonth, $endOfMonth])->where('transaction_type','Deposit')->sum('amount') - InvestmentTransaction::whereBetween('transaction_date', [$startOfMonth, $endOfMonth])->where('transaction_type','Withdraw')->sum('amount'),
+            'bankbooks'   => BankTransaction::whereBetween('transaction_date', [$startOfMonth, $endOfMonth])->where('transaction_type','credit')->sum('amount') - BankTransaction::whereBetween('transaction_date', [$startOfMonth, $endOfMonth])->where('transaction_type','debit')->sum('amount'),
+        ];
+
+        
+
         return view('admin.dashboard.dashboard', [
             'monthlyData' => $monthlyData,
             'latestBankTransactions' => $latestBankTransactions,
@@ -168,6 +222,9 @@ class DashboardController extends Controller
             'alltotalinvestments' => $alltotalinvestments,
             'totalbank' => $totalbank,
             'incomeCategories' => IncomeCategory::where('status', 1)->where('id', '!=', 13)->get(),
+            'finalOccasions' => $finalOccasions,
+            'currentMonthtotals' => $currentMonthtotals,
+            'banks' => $banks,
         ]);
     }
 
@@ -238,6 +295,7 @@ class DashboardController extends Controller
 
         return view('admin.income.modal' ,[
             'incomeCategories' => IncomeCategory::where('status', 1)->where('id', '!=', 13)->get(),
+            'banks' => BankAccount::all(),
         ]);
     }
 
@@ -249,6 +307,7 @@ class DashboardController extends Controller
 
         return view('admin.expense.modal' ,[
             'expenseCategories' => ExpenseCategory::where('status', 1)->where('id', '!=', 7)->get(),
+            'banks' => BankAccount::all(),
         ]);
     }
 
@@ -265,6 +324,7 @@ class DashboardController extends Controller
             'assetCategories' => AssetSubCategory::where('asset_category_id', 4)->where('status', 1)->get(),
             'assetTransactions' => AssetTransaction::all(),
             'users' => Contact::all(),
+            'banks' => BankAccount::all(),
         ]);
     }
 
@@ -279,6 +339,7 @@ class DashboardController extends Controller
             'assetCategories' => AssetSubCategory::where('asset_category_id', 4)->where('status', 1)->get(),
             'assetTransactions' => AssetTransaction::all(),
             'users' => Contact::all(),
+            'banks' => BankAccount::all(),
         ]);
     }
 
@@ -295,6 +356,7 @@ class DashboardController extends Controller
             'assetCategories' => AssetSubCategory::where('asset_category_id', 5)->where('status', 1)->get(),
             'assetTransactions' => AssetTransaction::all(),
             'users' => Contact::all(),
+            'banks' => BankAccount::all(),
         ]);
     }
 
@@ -309,6 +371,7 @@ class DashboardController extends Controller
             'assetCategories' => AssetSubCategory::where('asset_category_id', 5)->where('status', 1)->get(),
             'assetTransactions' => AssetTransaction::all(),
             'users' => Contact::all(),
+            'banks' => BankAccount::all(),
         ]);
     }
 
@@ -328,6 +391,7 @@ class DashboardController extends Controller
             'liabilityCategories' => LiabilitySubCategory::where('liability_category_id', 3)->where('status', 1)->get(),
             'liabilityTransactions' => LiabilityTransaction::all(),
             'users' => Contact::all(),
+            'banks' => BankAccount::all(),
         ]);
     }
 
@@ -342,6 +406,7 @@ class DashboardController extends Controller
             'liabilityCategories' => LiabilitySubCategory::where('liability_category_id', 3)->where('status', 1)->get(),
             'liabilityTransactions' => LiabilityTransaction::all(),
             'users' => Contact::all(),
+            'banks' => BankAccount::all(),
         ]);
     }
 
@@ -358,6 +423,7 @@ class DashboardController extends Controller
             'liabilityCategories' => LiabilitySubCategory::where('liability_category_id', 4)->where('status', 1)->get(),
             'liabilityTransactions' => LiabilityTransaction::all(),
             'users' => Contact::all(),
+            'banks' => BankAccount::all(),
         ]);
     }
 
@@ -372,6 +438,7 @@ class DashboardController extends Controller
             'liabilityCategories' => LiabilitySubCategory::where('liability_category_id', 4)->where('status', 1)->get(),
             'liabilityTransactions' => LiabilityTransaction::all(),
             'users' => Contact::all(),
+            'banks' => BankAccount::all(),
         ]);
     }
 
@@ -390,6 +457,7 @@ class DashboardController extends Controller
             'investmentSubCategories' => InvestmentSubCategory::where('status', 1)->get(),
             'investments' => Investment::all(),
             'investmentTransactions' => InvestmentTransaction::all(),
+            'banks' => BankAccount::all(),
         ]);
     }
 
@@ -404,6 +472,7 @@ class DashboardController extends Controller
             'investmentSubCategories' => InvestmentSubCategory::where('status', 1)->get(),
             'investments' => Investment::all(),
             'investmentTransactions' => InvestmentTransaction::all(),
+            'banks' => BankAccount::all(),
         ]);
     }
 
@@ -420,6 +489,7 @@ class DashboardController extends Controller
             'investmentSubCategories' => InvestmentSubCategory::where('status', 1)->get(),
             'investments' => Investment::all(),
             'investmentTransactions' => InvestmentTransaction::all(),
+            'banks' => BankAccount::all(),
         ]);
     }
 
@@ -434,6 +504,7 @@ class DashboardController extends Controller
             'investmentSubCategories' => InvestmentSubCategory::where('status', 1)->get(),
             'investments' => Investment::all(),
             'investmentTransactions' => InvestmentTransaction::all(),
+            'banks' => BankAccount::all(),
         ]);
     }
 
@@ -446,6 +517,7 @@ class DashboardController extends Controller
         return view('admin.bank_accounts.Transactionmodal' ,[
             'banktransactions' => $bankTransactions,
             'bankaccounts' => BankAccount::all(),
+            'banks' => BankAccount::all(),
         ]);
     }
 

@@ -40,6 +40,21 @@
                                             <label>Description</label>
                                             <textarea name="description" class="form-control"> </textarea>
                                         </div>
+
+                                        <div class="mb-3">
+                                            <label for="edit_bank_account_id" class="form-label">Select Bank Account (Optional)</label>
+                                            <select class="form-select" id="edit_bank_account_id" name="bank_account_id">
+                                                <option value="">Select Bank</option>
+                                                @foreach ($banks as $bank)
+                                                    <option value="{{ $bank->id }}">{{ $bank->bank_name }}- ({{ $bank->account_type }})</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label class="form-label">Bank Description (Optional)</label>
+                                            <textarea class="form-control" id="editBankDescription" name="bank_description" rows="3"></textarea>
+                                        </div>
     
                                         <div class="col-12 mb-3">
                                             <button type="submit" class="btn btn-primary">Submit</button>

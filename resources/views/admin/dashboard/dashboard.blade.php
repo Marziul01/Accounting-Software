@@ -6,195 +6,458 @@
         const revenueData = @json($monthlyComparisonData);
     </script>
     <div class="container-fluid flex-grow-1 container-p-y">
-        <div class="d-flex flex-wrap mb-4 ">
-            <div class="quickdivs">
-                <button type="button" class="btn btn-primary {{ Auth::user()->access->income != 2 ? 'disabled' : '' }}"
-                    id="loadIncomeModal" data-url="{{ route('admin.income.modal') }}">Add New Income</button>
-            </div>
-            <div class="quickdivs">
-                <button type="button" class="btn btn-primary {{ Auth::user()->access->expense != 2 ? 'disabled' : '' }}"
-                    id="loadExpenseModal" data-url="{{ route('admin.expense.modal') }}">Add New Expense</button>
-            </div>
-            <div class="quickdivs">
-                <button class="btn btn-primary" type="button" id="cardOpt3" data-bs-toggle="dropdown" aria-haspopup="true"
-                    aria-expanded="false">
-                    Asset Options
-                </button>
-                <div class="dropdown-menu dropdown-menu-end" aria-labelledby="cardOpt3">
-                    <button type="button" class="dropdown-item {{ Auth::user()->access->asset != 2 ? 'disabled' : '' }}"
-                        id="loadcurrentAssetModal" data-url="{{ route('admin.currentasset.modal') }}">Add New Current Asset</button>
-                    <button type="button" class="dropdown-item {{ Auth::user()->access->asset != 2 ? 'disabled' : '' }}"
-                        id="loadcurrentAssetTransactionModal"
-                        data-url="{{ route('admin.currentassettransaction.modal') }}">Add New Current Asset Transaction</button>
-                    <button type="button" class="dropdown-item {{ Auth::user()->access->asset != 2 ? 'disabled' : '' }}"
-                        id="loadfixedAssetModal" data-url="{{ route('admin.fixedasset.modal') }}">Add New Fixed Asset</button>
-                    <button type="button" class="dropdown-item {{ Auth::user()->access->asset != 2 ? 'disabled' : '' }}"
-                        id="loadfixedAssetTransactionModal"
-                        data-url="{{ route('admin.fixedassettransaction.modal') }}">Add New Fixed Asset Transaction</button>
-                </div>
-            </div>
-            <div class="quickdivs">
-                <button class="btn btn-primary" type="button" id="cardOpt4" data-bs-toggle="dropdown" aria-haspopup="true"
-                    aria-expanded="false">
-                    Liability Options
-                </button>
-                <div class="dropdown-menu dropdown-menu-end" aria-labelledby="cardOpt4">
-                    <button type="button" class="dropdown-item {{ Auth::user()->access->liability != 2 ? 'disabled' : '' }}"
-                        id="loadcurrentAssetModal" data-url="{{ route('admin.currentliability.modal') }}">Add New Short Term Liability</button>
-                    <button type="button" class="dropdown-item {{ Auth::user()->access->liability != 2 ? 'disabled' : '' }}"
-                        id="loadcurrentAssetTransactionModal"
-                        data-url="{{ route('admin.currentliabilitytransaction.modal') }}">Add New Short Term Liability Transaction</button>
-                    <button type="button" class="dropdown-item {{ Auth::user()->access->liability != 2 ? 'disabled' : '' }}"
-                        id="loadfixedAssetModal" data-url="{{ route('admin.fixedliability.modal') }}">Add New Long Term Liability</button>
-                    <button type="button" class="dropdown-item {{ Auth::user()->access->liability != 2 ? 'disabled' : '' }}"
-                        id="loadfixedliabilityTransactionModal"
-                        data-url="{{ route('admin.fixedliabilitytransaction.modal') }}">Add New Long Term Liability Transaction</button>
-                </div>
-            </div>
-            <div class="quickdivs">
-                <button class="btn btn-primary" type="button" id="cardOpt5" data-bs-toggle="dropdown" aria-haspopup="true"
-                    aria-expanded="false">
-                    Investment Options
-                </button>
-                <div class="dropdown-menu dropdown-menu-end" aria-labelledby="cardOpt5">
-                    <button type="button" class="dropdown-item {{ Auth::user()->access->investment != 2 ? 'disabled' : '' }}"
-                        id="loadcurrentAssetModal" data-url="{{ route('admin.investment.modal') }}">Add New Investment</button>
-                    <button type="button" class="dropdown-item {{ Auth::user()->access->investment != 2 ? 'disabled' : '' }}"
-                        id="loadcurrentAssetTransactionModal"
-                        data-url="{{ route('admin.investmenttransaction.modal') }}">Add New Investment Transaction</button>
-                    <button type="button" class="dropdown-item {{ Auth::user()->access->investment != 2 ? 'disabled' : '' }}"
-                        id="loadfixedAssetModal" data-url="{{ route('admin.investmentincome.modal') }}">Add New Investment Gain</button>
-                    <button type="button" class="dropdown-item {{ Auth::user()->access->investment != 2 ? 'disabled' : '' }}"
-                        id="loadfixedliabilityTransactionModal"
-                        data-url="{{ route('admin.investmentloss.modal') }}">Add New Investment Loss</button>
-                </div>
-            </div>
-            <div class="quickdivs">
-                <button type="button" class="btn btn-primary {{ Auth::user()->access->bankbook != 2 ? 'disabled' : '' }}"
-                    id="loadExpenseModal" data-url="{{ route('admin.bankbook.modal') }}">Add New Bank Transaction</button>
-            </div>
-            <div id="ModalContainer"></div>
-        </div>
-
         <div class="row">
-            <div class="col-xxl-8 mb-6 order-0">
-                <div class="card">
+            <div class="col-xxl-8 mb-4 order-0">
+                <div class="card contact-card">
                     <div class="d-flex align-items-start row">
                         <div class="col-sm-7">
                             <div class="card-body">
                                 <h5 class="card-title text-primary mb-3">Hello, Welcome again <span
                                         class="text-uppercase">{{ Auth::user()->name }}</span>! 🎉</h5>
+                                <h6 class="text-secondary mb-3">
+                                    @php
+                                        use Carbon\Carbon;
+
+                                        $now = Carbon::now();
+                                        $hour = $now->format('H');
+
+                                        if ($hour >= 3 && $hour < 12) {
+                                            $greeting = 'Good Morning';
+                                        } elseif ($hour >= 12 && $hour < 18) {
+                                            $greeting = 'Good Afternoon';
+                                        } elseif ($hour >= 18 && $hour < 20) {
+                                            $greeting = 'Good Evening';
+                                        } else {
+                                            $greeting = 'Good Night';
+                                        }
+                                    @endphp
+
+                                    <p>{{ $greeting }}. Today {{ $now->format('d F Y, l') }}</p>
+                                </h6>
                                 {{-- <p class="mb-6">
                                     You have done 72% more sales today.<br />Check your new badge in your profile.
                                 </p> --}}
 
                                 <a href="{{ route('profile') }}" class="btn btn-sm btn-outline-primary">View Profile</a>
+
+                                <p class="mt-3">Upcoming Events :</p>
+
+                                <div class="d-flex flex-wrap gap-2">
+                                    @foreach($finalOccasions as $event)
+                                        <span class="badge btn-secondary d-flex align-items-center">
+                                            <strong class="me-1">{{ $event['title'] }}</strong> 
+                                            - {{ \Carbon\Carbon::parse($event['date'])->format('d F Y') }}
+                                            @if (isset($event['type']))
+                                                <span class="ms-1">({{ $event['type'] }})</span>
+                                            @endif
+                                            
+                                        </span>
+                                    @endforeach
+                                </div>
                             </div>
                         </div>
-                        <div class="col-sm-5 text-center text-sm-left">
+                        <div class="col-sm-5 text-center text-sm-left d-none d-md-block">
                             <div class="card-body pb-0 px-0 px-md-6">
-                                <img src="{{ asset('admin-assets') }}/assets/img/illustrations/man.png" height="175"
+                                <img src="{{ asset('admin-assets') }}/assets/img/illustrations/man.png" height="230px"
                                     class="scaleX-n1-rtl" alt="View Badge User" />
                             </div>
                         </div>
                     </div>
                 </div>
+                <div class="card card-body contact-card d-flex flex-wrap flex-row mt-4 ">
+                    <h6 class="d-block w-100 mx-2">Quick Posting :</h6>
+                    <div class="quickdivs">
+                        <button type="button" class="btn btn-primary {{ Auth::user()->access->income != 2 ? 'disabled' : '' }}"
+                            id="loadIncomeModal" data-url="{{ route('admin.income.modal') }}">Add New Income</button>
+                    </div>
+                    <div class="quickdivs">
+                        <button type="button" class="btn btn-primary {{ Auth::user()->access->expense != 2 ? 'disabled' : '' }}"
+                            id="loadExpenseModal" data-url="{{ route('admin.expense.modal') }}">Add New Expense</button>
+                    </div>
+                    <div class="quickdivs">
+                        <button class="btn btn-primary" type="button" id="cardOpt3" data-bs-toggle="dropdown" aria-haspopup="true"
+                            aria-expanded="false">
+                            Asset Options
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-end bg-menu-theme" aria-labelledby="cardOpt3">
+                            <button type="button" class=" dropdown-item {{ Auth::user()->access->asset != 2 ? 'disabled' : '' }}"
+                                id="loadcurrentAssetModal" data-url="{{ route('admin.currentasset.modal') }}">Add New Current Asset</button>
+                            <button type="button" class=" dropdown-item {{ Auth::user()->access->asset != 2 ? 'disabled' : '' }}"
+                                id="loadcurrentAssetTransactionModal"
+                                data-url="{{ route('admin.currentassettransaction.modal') }}">Add New Current Asset Transaction</button>
+                            <button type="button" class=" dropdown-item {{ Auth::user()->access->asset != 2 ? 'disabled' : '' }}"
+                                id="loadfixedAssetModal" data-url="{{ route('admin.fixedasset.modal') }}">Add New Fixed Asset</button>
+                            <button type="button" class=" dropdown-item {{ Auth::user()->access->asset != 2 ? 'disabled' : '' }}"
+                                id="loadfixedAssetTransactionModal"
+                                data-url="{{ route('admin.fixedassettransaction.modal') }}">Add New Fixed Asset Transaction</button>
+                        </div>
+                    </div>
+                    <div class="quickdivs">
+                        <button class="btn btn-primary" type="button" id="cardOpt4" data-bs-toggle="dropdown" aria-haspopup="true"
+                            aria-expanded="false">
+                            Liability Options
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-end bg-menu-theme" aria-labelledby="cardOpt4">
+                            <button type="button" class=" dropdown-item {{ Auth::user()->access->liability != 2 ? 'disabled' : '' }}"
+                                id="loadcurrentAssetModal" data-url="{{ route('admin.currentliability.modal') }}">Add New Short Term Liability</button>
+                            <button type="button" class=" dropdown-item {{ Auth::user()->access->liability != 2 ? 'disabled' : '' }}"
+                                id="loadcurrentAssetTransactionModal"
+                                data-url="{{ route('admin.currentliabilitytransaction.modal') }}">Add New Short Term Liability Transaction</button>
+                            <button type="button" class=" dropdown-item {{ Auth::user()->access->liability != 2 ? 'disabled' : '' }}"
+                                id="loadfixedAssetModal" data-url="{{ route('admin.fixedliability.modal') }}">Add New Long Term Liability</button>
+                            <button type="button" class=" dropdown-item {{ Auth::user()->access->liability != 2 ? 'disabled' : '' }}"
+                                id="loadfixedliabilityTransactionModal"
+                                data-url="{{ route('admin.fixedliabilitytransaction.modal') }}">Add New Long Term Liability Transaction</button>
+                        </div>
+                    </div>
+                    <div class="quickdivs">
+                        <button class="btn btn-primary" type="button" id="cardOpt5" data-bs-toggle="dropdown" aria-haspopup="true"
+                            aria-expanded="false">
+                            Investment Options
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-end bg-menu-theme" aria-labelledby="cardOpt5">
+                            <button type="button" class=" dropdown-item {{ Auth::user()->access->investment != 2 ? 'disabled' : '' }}"
+                                id="loadcurrentAssetModal" data-url="{{ route('admin.investment.modal') }}">Add New Investment</button>
+                            <button type="button" class=" dropdown-item {{ Auth::user()->access->investment != 2 ? 'disabled' : '' }}"
+                                id="loadcurrentAssetTransactionModal"
+                                data-url="{{ route('admin.investmenttransaction.modal') }}">Add New Investment Transaction</button>
+                            <button type="button" class=" dropdown-item {{ Auth::user()->access->investment != 2 ? 'disabled' : '' }}"
+                                id="loadfixedAssetModal" data-url="{{ route('admin.investmentincome.modal') }}">Add New Investment Gain</button>
+                            <button type="button" class=" dropdown-item {{ Auth::user()->access->investment != 2 ? 'disabled' : '' }}"
+                                id="loadfixedliabilityTransactionModal"
+                                data-url="{{ route('admin.investmentloss.modal') }}">Add New Investment Loss</button>
+                        </div>
+                    </div>
+                    <div class="quickdivs">
+                        <button type="button" class="btn btn-primary {{ Auth::user()->access->bankbook != 2 ? 'disabled' : '' }}"
+                            id="loadExpenseModal" data-url="{{ route('admin.bankbook.modal') }}">Add New Bank Transaction</button>
+                    </div>
+                    <div id="ModalContainer"></div>
+                </div>
             </div>
-            <div class="col-lg-4 col-md-4 order-1">
+            <div class="col-lg-4 col-md-4">
                 <div class="row">
-                    <div class="col-lg-6 col-md-12 col-6 mb-6">
-                        <div class="card h-100">
-                            <div class="card-body">
-                                <div class="card-title d-flex align-items-start justify-content-between mb-4">
+                    <div class="col-lg-6 col-md-12 col-6 mb-4">
+                        <div class="card h-100 contact-card">
+                            <div class="card-body p-4">
+                                <div class="card-title d-flex align-items-start justify-content-between mb-3">
                                     <div class="avatar flex-shrink-0">
                                         <img src="{{ asset('admin-assets') }}/assets/img/icons/unicons/chart-success.png"
                                             alt="chart success" class="rounded" />
                                     </div>
-                                    {{-- <div class="dropdown">
-                                        <button class="btn p-0" type="button" id="cardOpt3" data-bs-toggle="dropdown"
-                                            aria-haspopup="true" aria-expanded="false">
-                                            <i class="bx bx-dots-vertical-rounded text-muted"></i>
-                                        </button>
-                                        <div class="dropdown-menu dropdown-menu-end" aria-labelledby="cardOpt3">
-                                            <a class="dropdown-item" href="javascript:void(0);">View More</a>
-                                            <a class="dropdown-item" href="javascript:void(0);">Delete</a>
-                                        </div>
-                                    </div> --}}
+                                    
                                 </div>
-                                <p class="mb-1">Total Income</p>
-                                <h4 class="card-title mb-3 ttoalsamount">{{ number_format($incomes->sum('amount'), 2) }} BDT
+                                <p class="mb-0">This Month Income</p>
+                                <h4 class="card-title ttoalsamount mb-0">{{ $currentMonthtotals['incomes'] }} BDT
                                 </h4>
-                                {{-- <small class="text-success fw-medium"><i class="bx bx-up-arrow-alt"></i> +72.80%</small> --}}
+                                
                             </div>
                         </div>
                     </div>
-                    <div class="col-lg-6 col-md-12 col-6 mb-6">
-                        <div class="card h-100">
-                            <div class="card-body">
-                                <div class="card-title d-flex align-items-start justify-content-between mb-4">
+                    <div class="col-lg-6 col-md-12 col-6 mb-4">
+                        <div class="card h-100 contact-card">
+                            <div class="card-body p-4">
+                                <div class="card-title d-flex align-items-start justify-content-between mb-3">
                                     <div class="avatar flex-shrink-0">
                                         <img src="{{ asset('admin-assets') }}/assets/img/icons/unicons/wallet-info.png"
                                             alt="wallet info" class="rounded" />
                                     </div>
-                                    {{-- <div class="dropdown">
-                                        <button class="btn p-0" type="button" id="cardOpt6" data-bs-toggle="dropdown"
-                                            aria-haspopup="true" aria-expanded="false">
-                                            <i class="bx bx-dots-vertical-rounded text-muted"></i>
-                                        </button>
-                                        <div class="dropdown-menu dropdown-menu-end" aria-labelledby="cardOpt6">
-                                            <a class="dropdown-item" href="javascript:void(0);">View More</a>
-                                            <a class="dropdown-item" href="javascript:void(0);">Delete</a>
-                                        </div>
-                                    </div> --}}
+                                    
                                 </div>
-                                <p class="mb-1">Total Expenses</p>
-                                <h4 class="card-title mb-3 ttoalsamount">{{ number_format($expenses->sum('amount'), 2) }}
+                                <p class="mb-0">This Month Expenses</p>
+                                <h4 class="card-title ttoalsamount mb-0">{{ $currentMonthtotals['expenses'] }}
                                     BDT</h4>
-                                {{-- <small class="text-success fw-medium"><i class="bx bx-up-arrow-alt"></i> +28.42%</small> --}}
+                                
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 col-md-12 col-6 mb-4">
+                        <div class="card h-100 contact-card">
+                            <div class="card-body p-4">
+                                <div class="card-title d-flex align-items-start justify-content-between mb-3">
+                                    <div class="avatar flex-shrink-0">
+                                        <img src="{{ asset('admin-assets') }}/assets/img/icons/unicons/chart-success.png"
+                                            alt="chart success" class="rounded" />
+                                    </div>
+                                    
+                                </div>
+                                <p class="mb-0">This Month Assets</p>
+                                <h4 class="card-title ttoalsamount mb-0">{{ $currentMonthtotals['assets'] }} BDT
+                                </h4>
+                                
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 col-md-12 col-6 mb-4">
+                        <div class="card h-100 contact-card">
+                            <div class="card-body p-4">
+                                <div class="card-title d-flex align-items-start justify-content-between mb-3">
+                                    <div class="avatar flex-shrink-0">
+                                        <img src="{{ asset('admin-assets') }}/assets/img/icons/unicons/wallet-info.png"
+                                            alt="wallet info" class="rounded" />
+                                    </div>
+                                    
+                                </div>
+                                <p class="mb-0">This Month Liabilities</p>
+                                <h4 class="card-title ttoalsamount mb-0">{{ $currentMonthtotals['liabilities'] }}
+                                    BDT</h4>
+                                
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 col-md-12 col-6 mb-4">
+                        <div class="card h-100 contact-card">
+                            <div class="card-body p-4">
+                                <div class="card-title d-flex align-items-start justify-content-between mb-3">
+                                    <div class="avatar flex-shrink-0">
+                                        <img src="{{ asset('admin-assets') }}/assets/img/icons/unicons/chart-success.png"
+                                            alt="chart success" class="rounded" />
+                                    </div>
+                                    
+                                </div>
+                                <p class="mb-0">This Month Investments</p>
+                                <h4 class="card-title ttoalsamount mb-0">{{ $currentMonthtotals['investments'] }} BDT
+                                </h4>
+                                
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 col-md-12 col-6 mb-4">
+                        <div class="card h-100 contact-card">
+                            <div class="card-body p-4">
+                                <div class="card-title d-flex align-items-start justify-content-between mb-3">
+                                    <div class="avatar flex-shrink-0">
+                                        <img src="{{ asset('admin-assets') }}/assets/img/icons/unicons/wallet-info.png"
+                                            alt="wallet info" class="rounded" />
+                                    </div>
+                                    
+                                </div>
+                                <p class="mb-0">This Month Bank Amount</p>
+                                <h4 class="card-title ttoalsamount mb-0">{{ $currentMonthtotals['bankbooks'] }}
+                                    BDT</h4>
+                                
+                            </div>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+            <div class="col-12 mb-3 mt-1">
+                <div class="row">
+                    <div class="col-lg-2 col-md-3 col-6 mb-4">
+                        <div class="card contact-card h-100">
+                            <div class="card-body p-4">
+                                <div class="card-title d-flex align-items-start justify-content-between mb-3">
+                                    <div class="avatar flex-shrink-0">
+                                        <img src="{{ asset('admin-assets') }}/assets/img/icons/unicons/chart-success.png"
+                                            alt="chart success" class="rounded" />
+                                    </div>
+                                    
+                                </div>
+                                <p class="mb-0">Total Incomes</p>
+                                <h4 class="card-title ttoalsamount mb-0">{{ number_format($incomes->sum('amount'), 2) }} BDT
+                                </h4>
+                                
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-2 col-md-3 col-6 mb-4">
+                        <div class="card contact-card h-100">
+                            <div class="card-body p-4">
+                                <div class="card-title d-flex align-items-start justify-content-between mb-">
+                                    <div class="avatar flex-shrink-0">
+                                        <img src="{{ asset('admin-assets') }}/assets/img/icons/unicons/wallet-info.png"
+                                            alt="wallet info" class="rounded" />
+                                    </div>
+                                    
+                                </div>
+                                <p class="mb-0">Total Expenses</p>
+                                <h4 class="card-title ttoalsamount mb-0">{{ number_format($expenses->sum('amount'), 2) }}
+                                    BDT</h4>
+                                
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-2 col-md-3 col-6 mb-4">
+                        <div class="card contact-card h-100">
+                            <div class="card-body p-4">
+                                <div class="card-title d-flex align-items-start justify-content-between mb-3">
+                                    <div class="avatar flex-shrink-0">
+                                        <img src="{{ asset('admin-assets') }}/assets/img/icons/unicons/paypal.png"
+                                            alt="paypal" class="rounded" />
+                                    </div>
+                                    
+                                </div>
+                                <p class="mb-0">Total Assets</p>
+                                <h4 class="card-title mb-3 ttoalsamount mb-0">{{ number_format($allassets->sum('amount'), 2) }} BDT
+                                </h4>
+                                
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-2 col-md-3 col-6 mb-4">
+                        <div class="card contact-card h-100">
+                            <div class="card-body p-4">
+                                <div class="card-title d-flex align-items-start justify-content-between mb-3">
+                                    <div class="avatar flex-shrink-0">
+                                        <img src="{{ asset('admin-assets') }}/assets/img/icons/unicons/cc-primary.png"
+                                            alt="Credit Card" class="rounded" />
+                                    </div>
+                                    
+                                </div>
+                                <p class="mb-0">Total Liability</p>
+                                <h4 class="card-title mb-0 ttoalsamount">
+                                    {{ number_format($allliabilities->sum('amount'), 2) }} BDT</h4>
+                                
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-2 col-md-3 col-6 mb-4">
+                        <div class="card contact-card h-100">
+                            <div class="card-body p-4">
+                                <div class="card-title d-flex align-items-start justify-content-between mb-3">
+                                    <div class="avatar flex-shrink-0">
+                                        <img src="{{ asset('admin-assets') }}/assets/img/icons/unicons/paypal.png"
+                                            alt="paypal" class="rounded" />
+                                    </div>
+                                    
+                                </div>
+                                <p class="mb-0">Total Investments</p>
+                                <h4 class="card-title mb- ttoalsamount">
+                                    {{ number_format($alltotalinvestments, 2) }} BDT</h4>
+                                
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-2 col-md-3 col-6 mb-4">
+                        <div class="card contact-card h-100">
+                            <div class="card-body p-4">
+                                <div class="card-title d-flex align-items-start justify-content-between mb-3">
+                                    <div class="avatar flex-shrink-0">
+                                        <img src="{{ asset('admin-assets') }}/assets/img/icons/unicons/cc-primary.png"
+                                            alt="Credit Card" class="rounded" />
+                                    </div>
+                                    
+                                </div>
+                                <p class="mb-0">Total Bank Amount</p>
+                                <h4 class="card-title mb-0 ttoalsamount">{{ number_format($totalbank, 2) }} BDT</h4>
+                                
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+            <div class="col-md-6 order-0 mb-6">
+                <div class="card contact-card h-100">
+                    <div class="card-header d-flex justify-content-between">
+                        <div class="card-title mb-0">
+                            <h5 class="mb-1 me-2">Transaction Statistics</h5>
+
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <ul class="p-0 m-0">
+                            @if ($merged->isNotEmpty())
+                                @foreach ($merged as $trx)
+                                    <li class="d-flex align-items-center mb-5 gap-2">
+                                        <div class="avatar flex-shrink-0">
+                                            <img src="{{ asset('admin-assets') }}/assets/img/icons/unicons/chart-success.png"
+                                                alt="chart success" class="rounded" />
+                                        </div>
+                                        <div
+                                            class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
+                                            <div class="me-2">
+                                                <h6 class="mb-0">{{ $trx->type }}</h6>
+                                                <small>{{ $trx->name }}
+                                                    {{ $trx->transaction_type ? '- (' . $trx->transaction_type . ')' : '' }}
+                                                </small>
+                                            </div>
+                                            <div class="user-progress">
+                                                <h6 class="mb-0">{{ number_format($trx->amount, 2) }} BDT</h6>
+                                            </div>
+                                        </div>
+                                    </li>
+                                @endforeach
+                            @endif
+
+
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 order-1 mb-6">
+                <div class="card  contact-card h-100">
+                    <div class="card-header nav-align-top">
+                        <h5 class="mb-1 me-2 mb-4">Monthly Statistics</h5>
+                        <ul class="nav nav-pills" role="tablist">
+                            <li class="nav-item">
+                                <button type="button" class="nav-link active" role="tab" data-bs-toggle="tab"
+                                    data-bs-target="#income-tab">Income</button>
+                            </li>
+                            <li class="nav-item">
+                                <button type="button" class="nav-link" role="tab" data-bs-toggle="tab"
+                                    data-bs-target="#expenses-tab">Expense</button>
+                            </li>
+                            <li class="nav-item">
+                                <button type="button" class="nav-link" role="tab" data-bs-toggle="tab"
+                                    data-bs-target="#assets-tab">Asset</button>
+                            </li>
+                            <li class="nav-item">
+                                <button type="button" class="nav-link" role="tab" data-bs-toggle="tab"
+                                    data-bs-target="#liabilities-tab">Liability</button>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="card-body">
+                        <div class="tab-content p-0">
+                            <div class="tab-pane fade show active" id="income-tab"> <!-- added show active -->
+                                <div id="incomeChart"></div>
+                            </div>
+                            <div class="tab-pane fade" id="expenses-tab">
+                                <div id="expensesChart"></div>
+                            </div>
+                            <div class="tab-pane fade" id="assets-tab">
+                                <div id="assetsChart"></div>
+                            </div>
+                            <div class="tab-pane fade" id="liabilities-tab">
+                                <div id="liabilitiesChart"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
             <!-- Total Revenue -->
             <div class="col-12 col-xxl-8 order-2 order-md-3 order-xxl-2 mb-6">
-                <div class="card">
+                <div class="card contact-card">
                     <div class="row row-bordered g-0">
                         <div class="col-lg-12">
-                            <div class="card-header d-flex align-items-center justify-content-between">
-                                <div class="card-title mb-0">
+                            <div class="card-header d-flex align-items-start justify-content-start flex-column">
+                                <div class="card-title mb-4">
                                     <h5 class="m-0 me-2">Total Revenue</h5>
                                 </div>
-                                {{-- <div class="dropdown">
-                                    <button class="btn p-0" type="button" id="totalRevenue" data-bs-toggle="dropdown"
-                                        aria-haspopup="true" aria-expanded="false">
-                                        <i class="bx bx-dots-vertical-rounded bx-lg text-muted"></i>
-                                    </button>
-                                    <div class="dropdown-menu dropdown-menu-end" aria-labelledby="totalRevenue">
-                                        <a class="dropdown-item" href="javascript:void(0);">Select All</a>
-                                        <a class="dropdown-item" href="javascript:void(0);">Refresh</a>
-                                        <a class="dropdown-item" href="javascript:void(0);">Share</a>
-                                    </div>
-                                </div> --}}
+                                <ul class="nav nav-pills">
+                                    <li class="nav-item">
+                                        <button class="nav-link active" data-bs-toggle="tab"
+                                            data-bs-target="#revenue-income">Income</button>
+                                    </li>
+                                    <li class="nav-item">
+                                        <button class="nav-link" data-bs-toggle="tab"
+                                            data-bs-target="#revenue-expense">Expense</button>
+                                    </li>
+                                    <li class="nav-item">
+                                        <button class="nav-link" data-bs-toggle="tab"
+                                            data-bs-target="#revenue-asset">Asset</button>
+                                    </li>
+                                    <li class="nav-item">
+                                        <button class="nav-link" data-bs-toggle="tab"
+                                            data-bs-target="#revenue-liability">Liability</button>
+                                    </li>
+                                </ul>
                             </div>
-                            <ul class="nav nav-tabs">
-                                <li class="nav-item">
-                                    <button class="nav-link active" data-bs-toggle="tab"
-                                        data-bs-target="#revenue-income">Income</button>
-                                </li>
-                                <li class="nav-item">
-                                    <button class="nav-link" data-bs-toggle="tab"
-                                        data-bs-target="#revenue-expense">Expense</button>
-                                </li>
-                                <li class="nav-item">
-                                    <button class="nav-link" data-bs-toggle="tab"
-                                        data-bs-target="#revenue-asset">Asset</button>
-                                </li>
-                                <li class="nav-item">
-                                    <button class="nav-link" data-bs-toggle="tab"
-                                        data-bs-target="#revenue-liability">Liability</button>
-                                </li>
-                            </ul>
+                            
 
                             <!-- ✅ Single chart container always visible -->
                             <div class="mt-4">
@@ -261,244 +524,8 @@
                     </div>
                 </div>
             </div>
-            <!--/ Total Revenue -->
-            <div class="col-12 col-md-8 col-lg-12 col-xxl-4 order-3 order-md-2">
-                <div class="row">
-                    <div class="col-6 mb-6">
-                        <div class="card h-100">
-                            <div class="card-body">
-                                <div class="card-title d-flex align-items-start justify-content-between mb-4">
-                                    <div class="avatar flex-shrink-0">
-                                        <img src="{{ asset('admin-assets') }}/assets/img/icons/unicons/paypal.png"
-                                            alt="paypal" class="rounded" />
-                                    </div>
-                                    {{-- <div class="dropdown">
-                                        <button class="btn p-0" type="button" id="cardOpt4" data-bs-toggle="dropdown"
-                                            aria-haspopup="true" aria-expanded="false">
-                                            <i class="bx bx-dots-vertical-rounded text-muted"></i>
-                                        </button>
-                                        <div class="dropdown-menu dropdown-menu-end" aria-labelledby="cardOpt4">
-                                            <a class="dropdown-item" href="javascript:void(0);">View More</a>
-                                            <a class="dropdown-item" href="javascript:void(0);">Delete</a>
-                                        </div>
-                                    </div> --}}
-                                </div>
-                                <p class="mb-1">Total Assets</p>
-                                <h4 class="card-title mb-3 ttoalsamount">{{ number_format($allassets->sum('amount'), 2) }} BDT
-                                </h4>
-                                {{-- <small class="text-danger fw-medium"><i class="bx bx-down-arrow-alt"></i> -14.82%</small> --}}
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-6 mb-6">
-                        <div class="card h-100">
-                            <div class="card-body">
-                                <div class="card-title d-flex align-items-start justify-content-between mb-4">
-                                    <div class="avatar flex-shrink-0">
-                                        <img src="{{ asset('admin-assets') }}/assets/img/icons/unicons/cc-primary.png"
-                                            alt="Credit Card" class="rounded" />
-                                    </div>
-                                    {{-- <div class="dropdown">
-                                        <button class="btn p-0" type="button" id="cardOpt1" data-bs-toggle="dropdown"
-                                            aria-haspopup="true" aria-expanded="false">
-                                            <i class="bx bx-dots-vertical-rounded text-muted"></i>
-                                        </button>
-                                        <div class="dropdown-menu" aria-labelledby="cardOpt1">
-                                            <a class="dropdown-item" href="javascript:void(0);">View More</a>
-                                            <a class="dropdown-item" href="javascript:void(0);">Delete</a>
-                                        </div>
-                                    </div> --}}
-                                </div>
-                                <p class="mb-1">Total Liability</p>
-                                <h4 class="card-title mb-3 ttoalsamount">
-                                    {{ number_format($allliabilities->sum('amount'), 2) }} BDT</h4>
-                                {{-- <small class="text-success fw-medium"><i class="bx bx-up-arrow-alt"></i> +28.14%</small> --}}
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-6 mb-6">
-                        <div class="card h-100">
-                            <div class="card-body">
-                                <div class="card-title d-flex align-items-start justify-content-between mb-4">
-                                    <div class="avatar flex-shrink-0">
-                                        <img src="{{ asset('admin-assets') }}/assets/img/icons/unicons/paypal.png"
-                                            alt="paypal" class="rounded" />
-                                    </div>
-                                    {{-- <div class="dropdown">
-                                        <button class="btn p-0" type="button" id="cardOpt4" data-bs-toggle="dropdown"
-                                            aria-haspopup="true" aria-expanded="false">
-                                            <i class="bx bx-dots-vertical-rounded text-muted"></i>
-                                        </button>
-                                        <div class="dropdown-menu dropdown-menu-end" aria-labelledby="cardOpt4">
-                                            <a class="dropdown-item" href="javascript:void(0);">View More</a>
-                                            <a class="dropdown-item" href="javascript:void(0);">Delete</a>
-                                        </div>
-                                    </div> --}}
-                                </div>
-                                <p class="mb-1">Total Investments</p>
-                                <h4 class="card-title mb-3 ttoalsamount">
-                                    {{ number_format($alltotalinvestments, 2) }} BDT</h4>
-                                {{-- <small class="text-danger fw-medium"><i class="bx bx-down-arrow-alt"></i> -14.82%</small> --}}
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-6 mb-6">
-                        <div class="card h-100">
-                            <div class="card-body">
-                                <div class="card-title d-flex align-items-start justify-content-between mb-4">
-                                    <div class="avatar flex-shrink-0">
-                                        <img src="{{ asset('admin-assets') }}/assets/img/icons/unicons/cc-primary.png"
-                                            alt="Credit Card" class="rounded" />
-                                    </div>
-                                    {{-- <div class="dropdown">
-                                        <button class="btn p-0" type="button" id="cardOpt1" data-bs-toggle="dropdown"
-                                            aria-haspopup="true" aria-expanded="false">
-                                            <i class="bx bx-dots-vertical-rounded text-muted"></i>
-                                        </button>
-                                        <div class="dropdown-menu" aria-labelledby="cardOpt1">
-                                            <a class="dropdown-item" href="javascript:void(0);">View More</a>
-                                            <a class="dropdown-item" href="javascript:void(0);">Delete</a>
-                                        </div>
-                                    </div> --}}
-                                </div>
-                                <p class="mb-1">Total Bank Amount</p>
-                                <h4 class="card-title mb-3 ttoalsamount">{{ number_format($totalbank, 2) }} BDT</h4>
-                                {{-- <small class="text-success fw-medium"><i class="bx bx-up-arrow-alt"></i> +28.14%</small> --}}
-                            </div>
-                        </div>
-                    </div>
-                    {{-- <div class="col-12 mb-6">
-                        <div class="card">
-                            <div class="card-body">
-                                <div
-                                    class="d-flex justify-content-between align-items-center flex-sm-row flex-column gap-10">
-                                    <div class="d-flex flex-sm-column flex-row align-items-start justify-content-between">
-                                        <div class="card-title mb-6">
-                                            <h5 class="text-nowrap mb-1">Profile Report</h5>
-                                            <span class="badge bg-label-warning">YEAR 2022</span>
-                                        </div>
-                                        <div class="mt-sm-auto">
-                                            <span class="text-success text-nowrap fw-medium"><i
-                                                    class="bx bx-up-arrow-alt"></i> 68.2%</span>
-                                            <h4 class="mb-0">$84,686k</h4>
-                                        </div>
-                                    </div>
-                                    <div id="profileReportChart"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div> --}}
-                </div>
-            </div>
-        </div>
-        <div class="row">
-            <!-- Order Statistics -->
-            <div class="col-md-6 col-lg-4 col-xl-4 order-0 mb-6">
-                <div class="card h-100">
-                    <div class="card-header d-flex justify-content-between">
-                        <div class="card-title mb-0">
-                            <h5 class="mb-1 me-2">Transaction Statistics</h5>
-
-                        </div>
-                        {{-- <div class="dropdown">
-                            <button class="btn text-muted p-0" type="button" id="orederStatistics"
-                                data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <i class="bx bx-dots-vertical-rounded bx-lg"></i>
-                            </button>
-                            <div class="dropdown-menu dropdown-menu-end" aria-labelledby="orederStatistics">
-                                <a class="dropdown-item" href="javascript:void(0);">Select All</a>
-                                <a class="dropdown-item" href="javascript:void(0);">Refresh</a>
-                                <a class="dropdown-item" href="javascript:void(0);">Share</a>
-                            </div>
-                        </div> --}}
-                    </div>
-                    <div class="card-body">
-                        {{-- <div class="d-flex justify-content-between align-items-center mb-6">
-                            <div class="d-flex flex-column align-items-center gap-1">
-                                <h3 class="mb-1">8,258</h3>
-                                <small>Total Orders</small>
-                            </div>
-                            <div id="orderStatisticsChart"></div>
-                        </div> --}}
-                        <ul class="p-0 m-0">
-                            @if ($merged->isNotEmpty())
-                                @foreach ($merged as $trx)
-                                    <li class="d-flex align-items-center mb-5 gap-2">
-                                        <div class="avatar flex-shrink-0">
-                                            <img src="{{ asset('admin-assets') }}/assets/img/icons/unicons/chart-success.png"
-                                                alt="chart success" class="rounded" />
-                                        </div>
-                                        <div
-                                            class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
-                                            <div class="me-2">
-                                                <h6 class="mb-0">{{ $trx->type }}</h6>
-                                                <small>{{ $trx->name }}
-                                                    {{ $trx->transaction_type ? '- (' . $trx->transaction_type . ')' : '' }}
-                                                </small>
-                                            </div>
-                                            <div class="user-progress">
-                                                <h6 class="mb-0">{{ number_format($trx->amount, 2) }} BDT</h6>
-                                            </div>
-                                        </div>
-                                    </li>
-                                @endforeach
-                            @endif
-
-
-                        </ul>
-                    </div>
-                </div>
-            </div>
-            <!--/ Order Statistics -->
-
-            <!-- Expense Overview -->
-            <div class="col-md-6 col-lg-4 order-1 mb-6">
-                <div class="card h-100">
-                    <div class="card-header nav-align-top">
-                        <h5 class="mb-1 me-2 mb-4">Monthly Statistics</h5>
-                        <ul class="nav nav-pills" role="tablist">
-                            <li class="nav-item">
-                                <button type="button" class="nav-link active" role="tab" data-bs-toggle="tab"
-                                    data-bs-target="#income-tab">Income</button>
-                            </li>
-                            <li class="nav-item">
-                                <button type="button" class="nav-link" role="tab" data-bs-toggle="tab"
-                                    data-bs-target="#expenses-tab">Expenses</button>
-                            </li>
-                            <li class="nav-item">
-                                <button type="button" class="nav-link" role="tab" data-bs-toggle="tab"
-                                    data-bs-target="#assets-tab">Assets</button>
-                            </li>
-                            <li class="nav-item">
-                                <button type="button" class="nav-link" role="tab" data-bs-toggle="tab"
-                                    data-bs-target="#liabilities-tab">Liabilities</button>
-                            </li>
-                        </ul>
-                    </div>
-                    <div class="card-body">
-                        <div class="tab-content p-0">
-                            <div class="tab-pane fade show active" id="income-tab"> <!-- added show active -->
-                                <div id="incomeChart"></div>
-                            </div>
-                            <div class="tab-pane fade" id="expenses-tab">
-                                <div id="expensesChart"></div>
-                            </div>
-                            <div class="tab-pane fade" id="assets-tab">
-                                <div id="assetsChart"></div>
-                            </div>
-                            <div class="tab-pane fade" id="liabilities-tab">
-                                <div id="liabilitiesChart"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!--/ Expense Overview -->
-
-            <!-- Transactions -->
             <div class="col-md-6 col-lg-4 order-2 mb-6">
-                <div class="card h-100">
+                <div class="card contact-card h-100">
                     <div class="card-header d-flex align-items-center justify-content-between">
                         <h5 class="card-title m-0 me-2">Bank Transactions</h5>
                         {{-- <div class="dropdown">
@@ -543,7 +570,6 @@
                     </div>
                 </div>
             </div>
-            <!--/ Transactions -->
         </div>
     </div>
 

@@ -44,19 +44,19 @@
                                     <div class="card-body">
                                         <div>
                                             <div class="d-flex flex-column align-items-center justify-content-center position-relative">
-                                                <h3>{{ $occasion->occassion }}</h3>
+                                                <h3>{{ $occasion->occassion }}-( {{ $occasion->english == 1 ? 'Bangla' : 'English' }} ) </h3>
                                             </div>
                                             <p class="position-absolute badge bg-success" style="top: -10px; left: -5px;">
                                                 {{ $loop->iteration }}</p>
 
                                             <p>Date : {{ $occasion->custom_date ?? 'Auto Selected' }} </p>
                                             @if ($occasion->next_send)
-                                                <p class="text-success"> "Message has been sented this year. Next will be sented on {{ $occasion->next_send }} " </p>
+                                                <p class="text-success justified-text"> "Message has been sented this year. Next will be sented on {{ $occasion->next_send }} " </p>
                                                 @if ($occasion->occassion != 'Birhthday' && $occasion->occassion != 'Anniversary')
-                                                    <p class="text-warning"> "Update the date for next year , if not updated yet . Thank You!" </p>
+                                                    <p class="text-warning justified-text"> "Update the date for next year , if not updated yet . Thank You!" </p>
                                                 @endif
                                             @endif
-                                            <p>Message : {{ $occasion->message ?? 'N/A' }} </p>
+                                            <p>Message : {{ $occasion->english == 1 ? $occasion->message : $occasion->english_message }} </p>
                                             <p>Total Contacts: 
                                                 @php
                                                     $occasionContactCount = $occasion->contact_ids ? count(explode(',', $occasion->contact_ids)) : 0;
@@ -69,7 +69,8 @@
                                                     {{ $occasionContactCount }}
                                                 @endif
                                             </p>
-                                            
+                                            <a class=" btn btn-sm btn-outline-secondary" href="" data-bs-toggle="modal"
+                                            data-bs-target="#seeModal{{ $occasion->id }}" >See Current Message </a>
                                         </div>
                                     </div>
 
@@ -130,6 +131,14 @@
                             <div class="mb-3 col-6">
                                 <label class="form-label">Date</label>
                                 <input type="date" class="form-control" name="custom_date" id="custom_date_input" disabled>
+                            </div>
+
+                            <div class="mb-3 col-12">
+                                <label class="form-label">Choose Language</label>
+                                <select name="english" id="english" class="form-select" required>
+                                    <option value="1" selected>Bangla</option>
+                                    <option value="2">English</option>
+                                </select>
                             </div>
 
                             {{-- Message --}}
@@ -216,10 +225,18 @@
                                             {{ in_array($occasion->occassion, ['Eid ul Fitr', 'Eid ul Adha']) || $isCustom ? '' : 'disabled' }}>
                                     </div>
 
+                                    <div class="mb-3 col-12">
+                                        <label class="form-label">Choose Language</label>
+                                        <select name="english" id="english" class="form-select" required>
+                                            <option value="1" {{ $occasion->english == 1 ? 'selected' : '' }}>Bangla</option>
+                                            <option value="2" {{ $occasion->english == 2 ? 'selected' : '' }}>English</option>
+                                        </select>
+                                    </div>
+
                                     {{-- Message --}}
                                     <div class="mb-3 col-12">
                                         <label class="form-label">Message</label>
-                                        <textarea name="message" class="form-control" rows="3" required>{{ $occasion->message }}</textarea>
+                                        <textarea name="message" class="form-control" rows="3" required>{{ $occasion->english == 1 ? $occasion->message : $occasion->english_message }}</textarea>
                                     </div>
 
                                 </div>
@@ -235,6 +252,50 @@
         @endforeach
     @endif
     <!-- / Modal -->
+
+    @if ($occassions->isNotEmpty())
+        @foreach ($occassions as $occassion)
+            <div class="modal fade" id="seeModal{{ $occassion->id }}">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalLabel">
+                                {{ $occassion->occassion }} Message
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">    
+                            <div>
+                                Current Message : <br> <br>
+                                <p> 
+                                    @if($occassion->english == 1)
+                                        
+                                    @if ($occassion->occassion == 'Anniversary')
+                                        প্রিয় {name}, শুভ বিবাহবার্ষিকী। আপনার " .($anniversaryYears) . " তম বিবাহ বার্ষিকীতে জানাই হৃদয় নিংড়ানো ভালোবাসা ও শুভেচ্ছা । <span class="text-warning">{{ $occassion->message }}</span> 
+                                    @elseif ($occassion->occassion == 'Birthday')
+                                        প্রিয় {name}, আপনাকে জানাই " . ($age) . " তম জন্মদিনের অনেক শুভেচ্ছা। <span class="text-warning">{{ $occassion->message }}</span> 
+                                    @else
+                                        প্রিয় {name}, <span class="text-warning">{{ $occassion->message }}</span>
+                                    @endif
+
+                                    @else
+                                        @if ($occassion->occassion == 'Anniversary')
+                                            Dear {name}, Happy Anniversary! Wishing you lots of love and happiness on your " . ($anniversaryYears) . " anniversary.  <span class="text-warning">{{ $occassion->english_message }}</span>
+                                        @elseif ($occassion->occassion == 'Birthday')
+                                            Dear {name}, Wishing you a very Happy " .($age) . " Birthday! <span class="text-warning">{{ $occassion->english_message }}</span>
+                                        @else
+                                            Dear {name}, <span class="text-warning">{{ $occassion->english_message }}</span>
+                                        @endif
+                                    @endif
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endforeach
+    @endif
 
 
     <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">

@@ -19,7 +19,7 @@
                                     Edit</a>
                                 <form action="{{ route('user.destroy', $user->id) }}" method="POST" class="d-inline">
                                     @csrf
-                                    @method('DELETE')
+                                    
                                     <button type="submit" class="btn btn-sm btn-outline-danger delete-confirm {{ Auth::user()->access->admin_panel == 1 ? 'disabled' : '' }}"><i
                                             class="bx bx-trash me-1"></i> Delete</button>
                                 </form>
@@ -32,35 +32,67 @@
                                     <h3 class="account_number">{{ $user->name }}</h3>
                                     <p class="holder_name">Email: {{ $user->email }} </p>
                                     <p class="holder_name mb-3">Mobile Number: {{ $user->mobile }}</p>
-                                    <p class="d-flex flex-wrap gap-2 mt-3"> Full Access : 
-                                        @if ($user->access->sms_and_email == 2)
-                                            <span class="bank_type ">SMS and Email</span>
-                                        @endif   
-                                        @if ($user->access->contact == 2)
-                                            <span class="bank_type">Contact</span>
+                                    <div class="mt-3">
+                                        @php
+                                            $fullAccess = [];
+                                            $viewOnly = [];
+                                            $hidden = [];
+
+                                            $accessItems = [
+                                                'sms_and_email' => 'SMS and Email',
+                                                'contact' => 'Contact',
+                                                'income' => 'Income',
+                                                'expense' => 'Expense',
+                                                'investment' => 'Investment',
+                                                'asset' => 'Asset',
+                                                'liability' => 'Liability',
+                                                'bankbook' => 'Bankbook',
+                                                'accounts' => 'Accounts',
+                                            ];
+
+                                            foreach ($accessItems as $field => $label) {
+                                                $mode = $user->access->$field ?? null;
+                                                if ($mode == 2) {
+                                                    $fullAccess[] = $label;
+                                                } elseif ($mode == 1) {
+                                                    $viewOnly[] = $label;
+                                                } elseif ($mode == 3) {
+                                                    $hidden[] = $label;
+                                                }
+                                            }
+                                        @endphp
+
+                                        {{-- Full Access --}}
+                                        @if (count($fullAccess))
+                                            <p class="d-flex flex-wrap gap-2">
+                                                <strong>Full Access:</strong>
+                                                @foreach ($fullAccess as $item)
+                                                    <span class="bank_type">{{ $item }}</span>
+                                                @endforeach
+                                            </p>
                                         @endif
-                                        @if ($user->access->income == 2)
-                                            <span class="bank_type">Income</span>
+
+                                        {{-- View Only --}}
+                                        @if (count($viewOnly))
+                                            <p class="d-flex flex-wrap gap-2">
+                                                <strong>View Only:</strong>
+                                                @foreach ($viewOnly as $item)
+                                                    <span class="bank_type">{{ $item }}</span>
+                                                @endforeach
+                                            </p>
                                         @endif
-                                        @if ($user->access->expense == 2)
-                                            <span class="bank_type">Expense</span>
+
+                                        {{-- Hidden --}}
+                                        @if (count($hidden))
+                                            <p class="d-flex flex-wrap gap-2">
+                                                <strong>Hidden:</strong>
+                                                @foreach ($hidden as $item)
+                                                    <span class="bank_type">{{ $item }}</span>
+                                                @endforeach
+                                            </p>
                                         @endif
-                                        @if ($user->access->investment == 2)
-                                            <span class="bank_type">Investment</span>
-                                        @endif
-                                        @if ($user->access->asset == 2)
-                                            <span class="bank_type">Asset</span>
-                                        @endif
-                                        @if ($user->access->liability == 2)
-                                            <span class="bank_type">Liability</span>
-                                        @endif
-                                        @if ($user->access->bankbook == 2)
-                                            <span class="bank_type">Bankbook</span>
-                                        @endif
-                                        @if ($user->access->accounts == 2)
-                                            <span class="bank_type">Accounts</span>
-                                        @endif 
-                                    </p>
+                                    </div>
+
                                 </div>
                             </div>
 

@@ -140,13 +140,28 @@
 
                             <div class="col-12 mb-3">
                                 <label>Transaction Date</label>
-                                <input type="date" name="transaction_date" class="form-control" required
+                                <input type="date" name="transaction_date" class="form-control myDate" required
                                     value="{{ date('Y-m-d') }}">
                             </div>
 
                             <div class="col-12 mb-3">
                                 <label>Description</label>
                                 <textarea name="description" class="form-control"> </textarea>
+                            </div>
+
+                            <div class="col-12 mb-3">
+                                <label for="bank_account_id" class="form-label">Select Bank Account (Optional)</label>
+                                <select class="form-select category-select" id="bank_account_id" name="bank_account_id" >
+                                    <option value="">Select Bank</option>
+                                    @foreach ($banks as $bank)
+                                        <option value="{{ $bank->id }}">{{ $bank->bank_name }}- ({{ $bank->account_type }})</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div class="col-12 mb-3">
+                                <label class="form-label">Bank Description (Optional)</label>
+                                <textarea class="form-control" name="bank_description" rows="3"></textarea>
                             </div>
 
                             <div class="col-12 mb-3">
@@ -196,13 +211,33 @@
 
                                     <div class="col-12 mb-3">
                                         <label>Transaction Date</label>
-                                        <input type="date" name="transaction_date" class="form-control" required
+                                        <input type="date" name="transaction_date" class="form-control myDate" required
                                             value="{{ $liabilityTransaction->transaction_date }}">
                                     </div>
 
                                     <div class="col-12 mb-3">
                                         <label>Description</label>
                                         <textarea name="description" class="form-control"> {{ $liabilityTransaction->description }} </textarea>
+                                    </div>
+
+                                    @php
+                                        $currentTransaction = $bankTransaction->where('from_id', $liabilityTransaction->id)->first();
+                                    @endphp
+
+                                    
+                                    <div class="mb-3">
+                                        <label for="bank_account_id" class="form-label">Select Bank Account (Optional)</label>
+                                        <select class="form-select category-select" id="bank_account_id" name="bank_account_id">
+                                            <option value="">Select Bank</option>
+                                            @foreach ($banks as $bank)
+                                                <option value="{{ $bank->id }}" {{ $currentTransaction && $currentTransaction->bank_account_id == $bank->id ? 'selected' : '' }}>{{ $bank->bank_name }}- ({{ $bank->account_type }})</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Bank Description (Optional)</label>
+                                        <textarea class="form-control" name="bank_description" rows="3">{{ $currentTransaction ? $currentTransaction->description : '' }}</textarea>
                                     </div>
 
                                     <div class="col-12 mb-3">

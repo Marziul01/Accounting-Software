@@ -16,7 +16,8 @@
  
 প্রিয় {{ $liability->name }},
     <br><br>
-    {{ $templateText }}  #{{ $liability->slug }}{{ $liability->id }}
+    {{ $templateText }}  
+    {{-- #{{ $liability->slug }}{{ $liability->id }} --}}
     
     <br><br>
 

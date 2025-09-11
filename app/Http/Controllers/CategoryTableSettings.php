@@ -38,7 +38,9 @@ class CategoryTableSettings extends Controller
             'liability_subcategory',
             'income_category',
             'expense_category',
-            'investments_category'
+            'investments_category',
+            'report_up',
+            'report_back',
         ];
 
         if (!in_array($field, $allowedFields)) {

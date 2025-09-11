@@ -178,8 +178,9 @@
 @if ($incomeCategories->isNotEmpty())
 <script>
     $('#myTable').DataTable({
-        pageLength: 20,
-        dom: 'Bfrtip',
+        pageLength: 25, // default rows per page
+        lengthMenu: [ [25, 50, 100], [25, 50, 100] ], // options in dropdown
+        dom: 'Blfrtip', // added 'l' so the length menu appears
         buttons: [
             {
                 extend: 'csv',
@@ -193,7 +194,7 @@
                 extend: 'print',
                 text: 'Print Table',
                 className: 'btn btn-sm my-custom-table-btn',
-                    exportOptions: {
+                exportOptions: {
                     columns: ':not(:last-child)' // exclude the last column
                 }
             }

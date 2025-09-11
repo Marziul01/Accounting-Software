@@ -11,13 +11,13 @@
                 <div class="d-flex align-items-start justify-content-start gap-2 flex-column flex-md-row align-items-md-end mobile-reports-filter">
                     <div class="form-group mobile-reports-filter-group">
                         <label class="form-label" for="start_date">Select Start Date:</label>
-                        <input type="date" class="form-control" id="start_date" name="start_date"
+                        <input type="date" class="form-control myDate" id="start_date" name="start_date"
                             value="{{ request('start_date') ?? $firstDate }}">
                     </div>
 
                     <div class="form-group mobile-reports-filter-group">
                         <label class="form-label" for="end_date">Select End Date:</label>
-                        <input type="date" class="form-control" id="end_date" name="end_date"
+                        <input type="date" class="form-control myDate" id="end_date" name="end_date"
                             value="{{ request('end_date') ?? $lastDate }}">
                     </div>
 

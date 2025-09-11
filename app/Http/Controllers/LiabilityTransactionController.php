@@ -4,8 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Mail\LiabilityDepositInvoiceMail;
 use App\Mail\LiabilityWithdrawInvoiceMail;
+use App\Models\BankAccount;
+use App\Models\BankTransaction;
 use App\Models\Liability;
 use App\Models\LiabilityTransaction;
+use App\Models\Notification;
 use App\Models\SiteSetting;
 use App\Models\SMSTemplate;
 use Illuminate\Http\Request;
@@ -31,8 +34,10 @@ class LiabilityTransactionController extends Controller
         // Fetch all transactions related to the liability
         $transactions = LiabilityTransaction::where('liability_id', $liability->id)->orderBy('transaction_date' , 'asc' )->get();
 
+        $banks = BankAccount::all();
+        $bankTransaction = BankTransaction::where('from', 'Liability')->get();
         // Return the view with the liability and its transactions
-        return view('admin.liability.transactions', compact('liability', 'transactions'));
+        return view('admin.liability.transactions', compact('liability', 'transactions', 'banks', 'bankTransaction'));
     }
 
     /**
@@ -60,6 +65,22 @@ class LiabilityTransactionController extends Controller
             'transaction_type' => 'required',
             'transaction_date' => 'required|date',
         ]);
+
+        if($request->transaction_type === 'Withdraw'){
+            if ($request->has('bank_account_id') && $request->bank_account_id) {
+                $bankAccount = BankAccount::find($request->bank_account_id);
+                $balance = $bankAccount->transactions()->where('transaction_type', 'credit')->sum('amount')
+                        - $bankAccount->transactions()->where('transaction_type', 'debit')->sum('amount');
+
+                if ($bankAccount && $request->amount > $balance) {
+                    return response()->json([
+                        'errors' => [
+                            'amount' => ['Liability Withdraw amount cannot be greater than the bank balance.']
+                        ]
+                    ], 422);
+                }
+            }
+        }
 
         $asset = Liability::findOrFail($request->liability_id);
 
@@ -125,6 +146,7 @@ $message="আসসালামু আলাইকুম,
                 $number = '88'.$asset->mobile;
 
                 $response = sendSMS($number, $message);
+                $smsSent = $asset->send_sms == 1 ? 1 : 0;
 
                 // Optional: Map response code to readable message
                 $errorMessages = [
@@ -143,14 +165,62 @@ $message="আসসালামু আলাইকুম,
             }
 
             if ($asset->send_email == 1) {
-                if($request->transaction_type === 'Deposit'){
-                    Mail::to($asset->email)->send(new LiabilityDepositInvoiceMail($asset, $request));
-                }else{
-                    Mail::to($asset->email)->send(new LiabilityWithdrawInvoiceMail($asset, $request));
+                try {
+                    if($request->transaction_type === 'Deposit'){
+                        Mail::to($asset->email)->send(new LiabilityDepositInvoiceMail($asset, $request));
+                    }else{
+                        Mail::to($asset->email)->send(new LiabilityWithdrawInvoiceMail($asset, $request));
+                    }
+
+                    // If no exception, email was sent successfully
+                    $emailSent = 1;
+
+                } catch (\Exception $e) {
+                    // Log error for debugging
+                    \Log::error('Email sending failed: ' . $e->getMessage());
+                    $emailSent = 0; // Remains 0 if failed
                 }
-                
             }
 
+        }
+
+        if($request->has('bank_account_id') && $request->bank_account_id) {
+            $bankAccount = BankAccount::find($request->bank_account_id);
+            if ($bankAccount) {
+                $bankTransaction = new BankTransaction();
+                $bankTransaction->bank_account_id = $bankAccount->id;
+                $bankTransaction->transaction_date = $request->transaction_date;
+                $bankTransaction->amount = $request->amount;
+                if($request->transaction_type === 'Withdraw'){
+                    $bankTransaction->transaction_type = 'debit';
+                }else{
+                    $bankTransaction->transaction_type = 'credit';
+                }
+                $bankTransaction->description = $request->bank_description;
+                $bankTransaction->name = 'Liability: '.$asset->name;
+                $bankTransaction->slug = 'Liability-' . $asset->slug;
+                $bankTransaction->from = 'Liability';
+                $bankTransaction->from_id = $assetTransaction->id;
+                $bankTransaction->save();
+            }
+        }
+
+        if($asset->category_id == 3){
+            Notification::create([
+                'sent_date' => now(),
+                'sender_name' => $asset->name,
+                'message' => $message,
+                'sent_date' => now(),
+                'email_sent' => $emailSent,
+                'sms_sent' => $smsSent,
+                'occasion_name' => Auth()->user()->name . ' created a new ' . $request->transaction_type . ' Transaction Short Term Liability: ' . $asset->name,
+                'contact_id' => $asset->contact_id,
+            ]);
+        }else{
+            Notification::create([
+                'sent_date' => now(),
+                'message' => Auth()->user()->name . ' created a new ' . $request->transaction_type . ' Transaction Long Term Liability: ' . $asset->name . '('. $request->amount .' BDT)' .'.',
+            ]);
         }
 
         // Redirect back to the index with a success message
@@ -198,6 +268,23 @@ $message="আসসালামু আলাইকুম,
             'transaction_date' => 'required|date',
         ]);
 
+        if($request->transaction_type === 'Withdraw'){
+            if ($request->has('bank_account_id') && $request->bank_account_id) {
+                $bankAccount = BankAccount::find($request->bank_account_id);
+                $currentTransaction = BankTransaction::where('from', 'Liability')->where('from_id', $id)->first();
+                $balance = $bankAccount->transactions()->where('transaction_type', 'credit')->sum('amount')
+                        - $bankAccount->transactions()->where('transaction_type', 'debit')->sum('amount') - ($currentTransaction ? $currentTransaction->amount : 0);
+
+                if ($bankAccount && $request->amount > $balance) {
+                    return response()->json([
+                        'errors' => [
+                            'amount' => ['Liability Withdraw amount cannot be greater than the bank balance.']
+                        ]
+                    ], 422);
+                }
+            }
+        }
+
         // Find the existing asset transaction
         $assetTransaction = LiabilityTransaction::findOrFail($id);
         $asset = Liability::findOrFail($request->liability_id);
@@ -225,6 +312,47 @@ $message="আসসালামু আলাইকুম,
         // Save recalculated balance to asset
         $asset->amount = $currentBalance;
         $asset->save();
+
+        // Update or create the bank transaction
+        if($request->has('bank_account_id') && $request->bank_account_id) {
+            $bankAccount = BankAccount::find($request->bank_account_id);
+            if ($bankAccount) {
+                $bankTransaction = BankTransaction::where('from', 'Liability')->where('from_id', $id)->first();
+                if (!$bankTransaction) {
+                    $bankTransaction = new BankTransaction();
+                    $bankTransaction->bank_account_id = $bankAccount->id;
+                    $bankTransaction->from = 'Liability';
+                    $bankTransaction->from_id = $assetTransaction->id;
+                    $bankTransaction->name = 'Liability: '.$asset->name; 
+                    $bankTransaction->slug = 'Liability-' . $asset->slug;
+                } else {
+                    // If bank account changed, update it
+                    if ($bankTransaction->bank_account_id != $bankAccount->id) {
+                        $bankTransaction->bank_account_id = $bankAccount->id;
+                    }
+                }
+                $bankTransaction->transaction_date = $request->transaction_date;
+                $bankTransaction->amount = $request->amount;
+                if($request->transaction_type === 'withdraw'){
+                    $bankTransaction->transaction_type = 'debit';
+                }else{
+                    $bankTransaction->transaction_type = 'credit';
+                }
+                $bankTransaction->description = $request->bank_description;
+                $bankTransaction->save();
+            }
+        } else {
+            // If no bank account selected, delete existing bank transaction if any
+            $bankTransaction = BankTransaction::where('from', 'Liability')->where('from_id', $id)->first();
+            if ($bankTransaction) {
+                $bankTransaction->delete();
+            }
+        }
+
+        Notification::create([
+            'message' => Auth()->user()->name . ' updated a ' . $request->transaction_type . ' Transaction Liability: ' . $asset->name .'('. $request->amount .' BDT)' .'.',
+            'sent_date' => now(),
+        ]);
 
         return response()->json([
             'message' => 'Liability Transaction updated successfully!',
@@ -257,6 +385,17 @@ $message="আসসালামু আলাইকুম,
 
         // Save the updated asset amount
         $asset->save();
+
+        // Delete associated bank transaction if exists
+        $bankTransaction = BankTransaction::where('from', 'Liability')->where('from_id', $id)->first();
+        if ($bankTransaction) {
+            $bankTransaction->delete();
+        }
+        
+        Notification::create([
+            'message' => Auth()->user()->name . ' deleted a ' . $assetTransaction->transaction_type . ' Transaction Liability: ' . $asset->name .'('. $assetTransaction->amount .' BDT)' .'.',
+            'sent_date' => now(),
+        ]);
 
         // Now delete the transaction
         $assetTransaction->delete();

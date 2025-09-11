@@ -47,7 +47,7 @@
                                         <div>
                                             <div
                                                 class="d-flex flex-column align-items-center justify-content-center position-relative">
-                                                <img src="{{ $contact->image ? asset($contact->image) : asset('admin-assets/img/nophoto.jpg') }}"
+                                                <img src="{{ $contact->image && \Illuminate\Support\Facades\File::exists(public_path($contact->image))  ? asset($contact->image) : asset('admin-assets/img/cropped_circle_image_(16).png') }}"
                                                     width="150px" height="150px"
                                                     style="object-fit: cover; border-radius: 50%" alt=""
                                                     class="my-2">
@@ -61,25 +61,14 @@
                                             <p>Date of Birth : {{ $contact->date_of_birth ?? 'N/A' }} </p>
                                             <p>Marrige Date : {{ $contact->marriage_date ?? 'N/A' }} </p>
                                             {{-- See More Toggle Button --}}
-<p>
-    <button type="button" class="btn btn-sm btn-outline-primary toggle-details-btn" data-target="details-{{ $loop->index }}">
-        See More
-    </button>
-</p>
-
-{{-- Hidden Details --}}
-<div id="details-{{ $loop->index }}" class="extra-details" style="display: none;">
-    <hr>
-    <p><strong>National ID:</strong> {{ $contact->national_id ?? 'N/A' }}</p>
-    <p><strong>Father's Name:</strong> {{ $contact->father_name ?? 'N/A' }}</p>
-    <p><strong>Father's Mobile:</strong> {{ $contact->father_mobile ?? 'N/A' }}</p>
-    <p><strong>Mother's Name:</strong> {{ $contact->mother_name ?? 'N/A' }}</p>
-    <p><strong>Mother's Mobile:</strong> {{ $contact->mother_mobile ?? 'N/A' }}</p>
-    <p><strong>Spouse's Name:</strong> {{ $contact->spouse_name ?? 'N/A' }}</p>
-    <p><strong>Spouse's Mobile:</strong> {{ $contact->spouse_mobile ?? 'N/A' }}</p>
-    <p><strong>Present Address:</strong> {{ $contact->present_address ?? 'N/A' }}</p>
-    <p><strong>Permanent Address:</strong> {{ $contact->permanent_address ?? 'N/A' }}</p>
-</div>
+                                            <p>
+                                                <button type="button"
+                                                    class="btn btn-sm btn-outline-primary toggle-details-btn"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#seemoreModal{{ $contact->id }}">
+                                                    See More
+                                                </button>
+                                            </p>
                                         </div>
                                     </div>
 
@@ -131,7 +120,8 @@
                             </div>
                             <div class="mb-3 col-6">
                                 <label for="income_date" class="form-label">Marrige Date</label>
-                                <input type="date" class="form-control" id="income_date" name="marriage_date" required>
+                                <input type="date" class="form-control" id="income_date" name="marriage_date"
+                                    required>
                             </div>
 
                             {{-- <div class="mb-3">
@@ -219,14 +209,14 @@
                                 <div class="row">
                                     <div class="mb-3 col-6">
                                         <label for="name" class="form-label">Name</label>
-                                        <input type="text" class="form-control name-input" id="name" name="name"
-                                            value="{{ $contact->name }}" required>
+                                        <input type="text" class="form-control name-input" id="name"
+                                            name="name" value="{{ $contact->name }}" required>
 
                                     </div>
                                     <div class="mb-3 col-6 d-none">
                                         <label for="slug" class="form-label">Slug</label>
-                                        <input type="text" class="form-control slug-output" id="slug" name="slug"
-                                            value="{{ $contact->slug }}" readonly>
+                                        <input type="text" class="form-control slug-output" id="slug"
+                                            name="slug" value="{{ $contact->slug }}" readonly>
                                     </div>
                                     <div class="mb-3 col-6">
                                         <label for="amount" class="form-label">Mobile Number</label>
@@ -235,8 +225,8 @@
                                     </div>
                                     <div class="mb-3 col-6">
                                         <label for="income_date" class="form-label">Email</label>
-                                        <input type="email" class="form-control" id="income_date" name="email" required
-                                            value="{{ $contact->email }}">
+                                        <input type="email" class="form-control" id="income_date" name="email"
+                                            required value="{{ $contact->email }}">
                                     </div>
                                     <div class="mb-3 col-6">
                                         <label for="income_date" class="form-label">Date of Birth</label>
@@ -268,22 +258,25 @@
                                             <label>{{ ucwords(str_replace('_', ' ', $field)) }}</label>
                                             <input
                                                 type="{{ in_array($field, ['email', 'entry_date']) ? ($field == 'entry_date' ? 'date' : 'email') : 'text' }}"
-                                                name="{{ $field }}" class="form-control" value=" {{ $contact->$field }} ">
+                                                name="{{ $field }}" class="form-control"
+                                                value=" {{ $contact->$field }} ">
                                         </div>
                                     @endforeach
                                     <div class="col-12 row mx-0 mb-3">
                                         <div class="mb-3 form-check">
-                                            <input class="form-check-input" type="checkbox" name="sms_option" value="1"
-                                                id="sms_option" {{ $contact->sms_option == 1 ? 'checked' : '' }}>
+                                            <input class="form-check-input" type="checkbox" name="sms_option"
+                                                value="1" id="sms_option"
+                                                {{ $contact->sms_option == 1 ? 'checked' : '' }}>
                                             <label class="form-check-label" for="sms_option">SMS Option</label>
                                         </div>
                                         <div class="col-6 form-check">
-                                            <input class="form-check-input" type="checkbox" name="send_email" value="1"
-                                                id="sendEmail1" {{ $contact->send_email == 1 ? 'checked' : '' }}>
+                                            <input class="form-check-input" type="checkbox" name="send_email"
+                                                value="1" id="sendEmail1"
+                                                {{ $contact->send_email == 1 ? 'checked' : '' }}>
                                             <label class="form-check-label" for="sendEmail1">Email Enabled</label>
                                         </div>
                                     </div>
-                                    
+
                                     {{-- <div class="mb-3">
                                         <label for="income_date" class="form-label">Image</label>
                                         <input type="file" accept="image/*" class="form-control" id="income_date"
@@ -307,7 +300,7 @@
                                             name="image">
                                     </div>
                                 </div>
-                                
+
 
                             </div>
                             <div class="modal-footer">
@@ -357,6 +350,82 @@
         </div>
     </div>
 
+    @if ($contacts->isNotEmpty())
+        @foreach ($contacts as $contact)
+            <div class="modal fade" id="seemoreModal{{ $contact->id }}">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalLabel">See Contact Other Details</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                    
+                            <div class="modal-body">
+                                
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <div class="border rounded p-3 h-100">
+                                                <strong>National ID:</strong>
+                                                <span>{{ $contact->national_id ?? 'N/A' }}</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <div class="border rounded p-3 h-100">
+                                                <strong>Father's Name:</strong>
+                                                <span>{{ $contact->father_name ?? 'N/A' }}</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <div class="border rounded p-3 h-100">
+                                                <strong>Father's Mobile:</strong>
+                                                <span>{{ $contact->father_mobile ?? 'N/A' }}</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <div class="border rounded p-3 h-100">
+                                                <strong>Mother's Name:</strong>
+                                                <span>{{ $contact->mother_name ?? 'N/A' }}</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <div class="border rounded p-3 h-100">
+                                                <strong>Mother's Mobile:</strong>
+                                                <span>{{ $contact->mother_mobile ?? 'N/A' }}</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <div class="border rounded p-3 h-100">
+                                                <strong>Spouse's Name:</strong>
+                                                <span>{{ $contact->spouse_name ?? 'N/A' }}</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <div class="border rounded p-3 h-100">
+                                                <strong>Spouse's Mobile:</strong>
+                                                <span>{{ $contact->spouse_mobile ?? 'N/A' }}</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <div class="border rounded p-3 h-100">
+                                                <strong>Present Address:</strong>
+                                                <span>{{ $contact->present_address ?? 'N/A' }}</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <div class="border rounded p-3 h-100">
+                                                <strong>Permanent Address:</strong>
+                                                <span>{{ $contact->permanent_address ?? 'N/A' }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                
+                            </div>
+                            
+                    </div>
+                </div>
+            </div>
+        @endforeach
+    @endif
 
 @endsection
 
@@ -713,17 +782,17 @@
     </script>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-    document.querySelectorAll('.toggle-details-btn').forEach(button => {
-        button.addEventListener('click', function () {
-            const targetId = this.dataset.target;
-            const details = document.getElementById(targetId);
-            const isVisible = details.style.display === 'block';
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.toggle-details-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const targetId = this.dataset.target;
+                    const details = document.getElementById(targetId);
+                    const isVisible = details.style.display === 'block';
 
-            details.style.display = isVisible ? 'none' : 'block';
-            this.textContent = isVisible ? 'See More' : 'See Less';
+                    details.style.display = isVisible ? 'none' : 'block';
+                    this.textContent = isVisible ? 'See More' : 'See Less';
+                });
+            });
         });
-    });
-});
     </script>
 @endsection

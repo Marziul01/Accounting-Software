@@ -16,7 +16,8 @@
  
 প্রিয় {{ $asset->name }},
     <br><br>
-    {{ $templateText }}  #{{ $asset->slug }}{{ $asset->id }}
+    {{ $templateText }}  
+    {{-- #{{ $asset->slug }}{{ $asset->id }} --}}
     
     <br><br>
 

@@ -31,7 +31,7 @@
 @endphp
     <div class="report-header">
         <img src="{{ asset($setting->site_logo) }}" height="auto" width="15%" class="img" alt="">
-        <p><strong>হিসাব নাম্বার:</strong> #{{ $liability->slug }}{{ $liability->id }}</p>
+        {{-- <p><strong>হিসাব নাম্বার:</strong> #{{ $liability->slug }}{{ $liability->id }}</p> --}}
         <p><strong>প্রকাশের তারিখ:</strong> {!! bn_number(now()->format('d-m-Y')) !!}</p>
     </div>
 

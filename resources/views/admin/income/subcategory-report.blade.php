@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <html lang="bn">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="1024">
-  <title>আয়ের রিপোর্ট - {{ $subcategory->name ?? 'প্রযোজ্য নয়' }}</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="1024">
+    <title>আয়ের রিপোর্ট - {{ $subcategory->name ?? 'প্রযোজ্য নয়' }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
         @import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&display=swap');
         @import url('https://fonts.googleapis.com/css2?family=Tiro+Bangla:ital@0;1&display=swap');
 
@@ -69,6 +70,7 @@
         .summary-box {
             background: #fff3cd;
             padding: 15px;
+            font-weight: 900;
         }
 
         .tiro-font {
@@ -122,91 +124,95 @@
         }
     </style>
 </head>
+
 <body>
-@php
-    function bn_number($number) {
-        $eng = ['0','1','2','3','4','5','6','7','8','9'];
-        $bang = ['০','১','২','৩','৪','৫','৬','৭','৮','৯'];
-        $converted = str_replace($eng, $bang, $number);
-        return '<span class="tiro-font">'.$converted.'</span>';
-    }
+    @php
+        function bn_number($number)
+        {
+            $eng = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+            $bang = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
+            $converted = str_replace($eng, $bang, $number);
+            return '<span class="tiro-font">' . $converted . '</span>';
+        }
 
-    $subTotal = $incomes->sum('amount');
-    $entryCount = $incomes->count();
-    $dateFrom = bn_number(optional($incomes->min('date'))->format('d-m-Y'));
-    $dateTo = bn_number(optional($incomes->max('date'))->format('d-m-Y'));
-  @endphp
-<div class="container-fluid my-4">
-    <div class="report-header">
-      <img src="{{ asset($setting->site_logo) }}"  height="100%" class="img"  alt="">
-    <h3>{{ $setting->site_logo_bangla  }}</h2>
-    <h5>{{ $subcategory->name ?? 'প্রযোজ্য নয়' }} এর আয় বিবরণী</h4>
-    <p>{!! bn_number(\Carbon\Carbon::parse($startDate)->format('d-m-y')) !!} থেকে {!! bn_number(\Carbon\Carbon::parse($endDate)->format('d-m-y')) !!} পর্যন্ত</p>
-  </div>
-  
+        $subTotal = $incomes->sum('amount');
+        $entryCount = $incomes->count();
+        $dateFrom = bn_number(optional($incomes->min('date'))->format('d-m-Y'));
+        $dateTo = bn_number(optional($incomes->max('date'))->format('d-m-Y'));
+    @endphp
+    <div class="container-fluid my-4">
+        <div class="report-header">
+            <img src="{{ asset($setting->site_logo) }}" height="100%" class="img" alt="">
+            <h3>{{ $setting->site_logo_bangla }}</h2>
+                <h5>{{ $subcategory->name ?? 'প্রযোজ্য নয়' }} এর আয় বিবরণী</h4>
+                    <p>{!! bn_number(\Carbon\Carbon::parse($startDate)->format('d-m-y')) !!} ইং থেকে {!! bn_number(\Carbon\Carbon::parse($endDate)->format('d-m-y')) !!} ইং পর্যন্ত</p>
+        </div>
 
 
-  <!-- Report Metadata -->
-  
 
-  <!-- Income Table -->
-  <div class="card shadow-sm">
-    <div class="card-body p-0">
-      <div class="table-responsive">
-        <table class="table table-bordered m-0">
-          <thead class="table-primary">
-            <tr>
-              <th colspan="5" class="text-center bg-dark text-white">উপ-বিভাগ: {{ $subcategory->name }}</th>
-            <tr>
-              <th>ক্রমিক নম্বর</th>
-              <th>তারিখ</th>
-              <th>নাম</th>
-              <th>বিবরণ</th>
-              <th class="text-end">পরিমাণ (৳)</th>
-            </tr>
-          </thead>
-          <tbody>
-            @forelse($incomes->sortBy('date') as $income)
-              @php $isLast = $loop->last; @endphp
-              <tr class="{{ $isLast ? 'last-row' : '' }}">
-                <td>{!! bn_number($loop->iteration) !!}</td>
-                <td>{!! bn_number(\Carbon\Carbon::parse($income->date)->format('d-m-y')) !!}</td>
-                <td>{{ $income->name }}</td>
-                <td>{{ $income->description }}</td>
-                <td class="text-end">{!! bn_number(number_format($income->amount, 2)) !!} টাকা</td>
-              </tr>
-            @empty
-              <tr>
-                <td colspan="5" class="text-center text-danger">এই উপ-বিভাগে কোন আয় নেই।</td>
-              </tr>
-            @endforelse
-            
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
+        <!-- Report Metadata -->
 
-  <div class="card-footer text-center bg-success text-white fw-bold p-3 mt-2">
-      {{ $subcategory->name ?? 'প্রযোজ্য নয়' }} মোট: {!! bn_number(number_format($subTotal, 2)) !!} টাকা
-    </div>
 
-  <div class="d-flex justify-content-center mt-4">
-    <table class="table table-bordered w-auto text-center align-middle" style="background: #fff3cd; border-left: 5px solid #ffc107;">
-      <tbody>
-        <tr>
-          <th class="bg-warning-subtle">মোট এন্ট্রি</th>
-          <td>{!! bn_number($entryCount) !!} টি</td>
-        </tr>
-        <tr>
-          <th class="bg-warning-subtle">মোট আয়</th>
-          <td>{!! bn_number(number_format($subTotal, 2)) !!} টাকা</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+        <!-- Income Table -->
+        <div class="card shadow-sm">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-bordered m-0">
+                        <thead class="table-primary">
+                            <tr>
+                                <th colspan="5" class="text-center bg-dark text-white">উপ-বিভাগ:
+                                    {{ $subcategory->name }}</th>
+                            <tr>
+                                <th class="text-center">ক্রমিক নম্বর</th>
+                                <th class="text-center">তারিখ</th>
+                                <th>নাম</th>
+                                <th>বিবরণ</th>
+                                <th class="text-end">পরিমাণ (৳)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($incomes->sortBy('date') as $income)
+                                @php $isLast = $loop->last; @endphp
+                                <tr class="{{ $isLast ? 'last-row' : '' }}">
+                                    <td class="text-center">{!! bn_number($loop->iteration) !!}</td>
+                                    <td class="text-center">{!! bn_number(\Carbon\Carbon::parse($income->date)->format('d-m-y')) !!} ইং</td>
+                                    <td>{{ $income->name }}</td>
+                                    <td>{{ $income->description }}</td>
+                                    <td class="text-end">{!! bn_number(number_format($income->amount, 2)) !!} টাকা</td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="5" class="text-center text-danger">এই উপ-বিভাগে কোন আয় নেই।</td>
+                                </tr>
+                            @endforelse
 
-  <div class="report-footer mt-4">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-footer text-center bg-success text-white fw-bold p-3 mt-2">
+            {{ $subcategory->name ?? 'প্রযোজ্য নয়' }} মোট: {!! bn_number(number_format($subTotal, 2)) !!} টাকা
+        </div>
+
+        <div class="d-flex justify-content-center mt-4">
+            <table class="table table-bordered w-auto text-center align-middle"
+                style="background: #fff3cd; border-left: 5px solid #ffc107;">
+                <tbody>
+                    <tr>
+                        <td class="bg-warning-subtle"><strong>মোট এন্ট্রি</strong></td>
+                        <td> <strong>{!! bn_number($entryCount) !!} টি</strong></td>
+                    </tr>
+                    <tr>
+                        <td class="bg-warning-subtle"><strong>মোট আয়</strong></td>
+                        <td> <strong>{!! bn_number(number_format($subTotal, 2)) !!} টাকা </strong></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="report-footer mt-4">
             <div class="text-center">
                 <div class="d-flex justify-content-start mb-3">
                     <img src="{{ asset($setting->signature) }}" height="100%" class="signature_img" alt="">
@@ -241,7 +247,7 @@
                         function ($m) {
                             return '<span class="tiro-font">' . $m[0] . '</span>';
                         },
-                        e($setting->site_website ?? 'www.example.com'),
+                        e($setting->site_link ?? 'www.example.com'),
                     ) !!}
                 </p>
 
@@ -268,7 +274,7 @@
                 $banglaMeridiem = ['AM' => 'পূর্বাহ্ণ', 'PM' => 'অপরাহ্ণ'];
 
                 $now = Carbon::now();
-                $formatted = $now->format('d F, Y h:i A'); // Example: 31 May, 2025 09:45 PM
+                $formatted = $now->format('d F, Y') . ' ইং ' . $now->format('h:i A');
 
                 // Translate English month and AM/PM to Bangla
                 $formatted = str_replace(array_keys($banglaMonths), array_values($banglaMonths), $formatted);
@@ -280,12 +286,82 @@
             <p class="mt-4 text-center">রাসেল বুক দ্বারা প্রস্তুতকৃত - {!! $banglaDateTime !!} </p>
         </div>
 
-  <!-- Print Button -->
-  <div class="text-center no-print">
-    <button onclick="window.print()" class="btn btn-primary mt-4">প্রিন্ট করুন</button>
-  </div>
+        <!-- Print Button -->
+        <div class="text-center no-print">
+            <button onclick="window.print()" class="btn btn-success mt-4">প্রিন্ট করুন</button>
+        </div>
 
-</div>
+    </div>
+    <div>
+        <style>
+            .go-top {
+                position: fixed;
+                bottom: 80px;
+                right: 20px;
+                background: #333;
+                color: #fff;
+                border: none;
+                border-radius: 50%;
+                font-size: 18px;
+                cursor: pointer;
+                display: none; /* Hidden by default */
+                transition: opacity 0.3s ease;
+                z-index: 999;
+                width: 50px;
+                height: 50px;
+                padding: 0px;
+                align-items: center;
+                justify-content: center;
+            }
+            .go-top.back{
+                bottom: 20px;
+            }
+            .go-top.show {
+                display: flex;
+                opacity: 0.8;
+            }
 
+            .go-top:hover {
+                opacity: 1;
+            }
+            a{
+                text-decoration: none;
+            }
+        </style>
+        @if($categorysettings->report_up == 2)
+        <button id="goTopBtn" class="go-top">⬆</button>
+        @endif
+
+        @if($categorysettings->report_back == 2)
+        <a href="{{ url()->previous() }}" id="goBackBtn" class="go-top back">⬅</a>
+        @endif
+    </div>
+    <script>
+        const goTopBtn = document.getElementById('goTopBtn');
+        const goBackBtn = document.getElementById('goBackBtn');
+        // Show button when user scrolls down
+        window.addEventListener('scroll', function() {
+            if (window.scrollY > 300) {
+                goTopBtn.classList.add('show');
+            } else {
+                goTopBtn.classList.remove('show');
+            }
+        });
+        window.addEventListener('scroll', function() {
+            if (window.scrollY > 300) {
+                goBackBtn.classList.add('show');
+            } else {
+                goBackBtn.classList.remove('show');
+            }
+        });
+        // Smooth scroll to top on click
+        goTopBtn.addEventListener('click', function() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+    </script>
 </body>
+
 </html>

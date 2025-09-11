@@ -76,6 +76,9 @@ class ContactController extends Controller
             $slug = $baseSlug . '-' . $counter++;
         }
 
+        $send_sms = $request->has('sms_option') ? 1 : 0;
+        $data['sms_option'] = $send_sms;
+        $data['send_email'] = $request->has('send_email') ? 1 : 0;
         $data['slug'] = $slug;
 
         $contact = Contact::create($data);
@@ -152,6 +155,9 @@ class ContactController extends Controller
 
         $data['slug'] = $slug;
 
+        $send_sms = $request->has('sms_option') ? 1 : 0;
+        $data['sms_option'] = $send_sms;
+        $data['send_email'] = $request->has('send_email') ? 1 : 0;
         $contact->update($data);
 
         // 2. Update related Assets
@@ -170,7 +176,7 @@ class ContactController extends Controller
             'spouse_mobile'       => $contact->spouse_mobile,
             'present_address'     => $contact->present_address,
             'permanent_address'   => $contact->permanent_address,
-            'send_sms'          => $contact->sms_option,
+            'send_sms'            => $contact->sms_option,
             'send_email'          => $contact->send_email,
         ]);
 

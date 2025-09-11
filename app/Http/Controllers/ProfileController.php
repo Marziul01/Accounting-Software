@@ -176,6 +176,46 @@ class ProfileController extends Controller
             $setting->image = $relativePath . $imageName;
         }
 
+        if ($request->hasFile('image2')) {
+            if ($setting->image2 && file_exists(public_path($setting->image2))) {
+                unlink(public_path($setting->image2));
+            }
+
+            $imageName = 'home_image_2' . time() . '.' . $request->image2->extension();
+            $request->image2->move($uploadPath, $imageName);
+            $setting->image2 = $relativePath . $imageName;
+        }
+
+        if ($request->hasFile('image3')) {
+            if ($setting->image3 && file_exists(public_path($setting->image3))) {
+                unlink(public_path($setting->image3));
+            }
+
+            $imageName = 'home_image_3' . time() . '.' . $request->image3->extension();
+            $request->image3->move($uploadPath, $imageName);
+            $setting->image3 = $relativePath . $imageName;
+        }
+
+        if ($request->hasFile('image4')) {
+            if ($setting->image4 && file_exists(public_path($setting->image4))) {
+                unlink(public_path($setting->image4));
+            }
+
+            $imageName = 'home_image_4' . time() . '.' . $request->image4->extension();
+            $request->image4->move($uploadPath, $imageName);
+            $setting->image4 = $relativePath . $imageName;
+        }
+
+        if ($request->hasFile('image5')) {
+            if ($setting->image5 && file_exists(public_path($setting->image5))) {
+                unlink(public_path($setting->image5));
+            }
+
+            $imageName = 'home_image_5' . time() . '.' . $request->image5->extension();
+            $request->image5->move($uploadPath, $imageName);
+            $setting->image5 = $relativePath . $imageName;
+        }
+
         $setting->save();
 
         return response()->json(['message' => 'Landing Page Details updated successfully!']);

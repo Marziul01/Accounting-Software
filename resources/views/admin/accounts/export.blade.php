@@ -3,7 +3,7 @@
 @section('content')
     <div class="container-fluid flex-grow-1 container-p-y">
         <!-- Basic Bootstrap Table -->
-        <div class="card mb-4">
+        <div class="card contact-card mb-4">
             <div
                 class="card-header d-flex justify-content-between align-items-start border-bottom-1 flex-column flex-md-row gap-3 align-items-md-center">
                 <div class="">
@@ -14,7 +14,7 @@
 
         <div class="row g-2">
             <div class="col-12 col-sm-6 col-lg-4 col-xxl-3 mb-2">
-                <div class="card p-4 rounded-lg shadow mb-4">
+                <div class="card contact-card p-4 rounded-lg shadow mb-4">
                     <h5 class=" mb-4">Export Investment</h5>
                     <div class="row">
                         <div class="flex p-2 col-12">
@@ -32,7 +32,7 @@
             </div>
 
             <div class="col-12 col-sm-6 col-lg-4 col-xxl-3 mb-2">
-                <div class="card p-4 rounded-lg shadow mb-4">
+                <div class="card contact-card p-4 rounded-lg shadow mb-4">
                     <h5 class=" mb-4">Export Incomes</h5>
                     <div class="row">
                         <div class="flex p-2 col-12">
@@ -50,7 +50,7 @@
             </div>
 
             <div class="col-12 col-sm-6 col-lg-4 col-xxl-3 mb-2">
-                <div class="card p-4 rounded-lg shadow mb-4">
+                <div class="card contact-card p-4 rounded-lg shadow mb-4">
                     <h5 class=" mb-4">Export Expense</h5>
                     <div class="row">
                         <div class="flex p-2 col-12">
@@ -67,7 +67,7 @@
                 </div>
             </div>
             <div class="col-12 col-sm-6 col-lg-4 col-xxl-3 mb-2">
-                <div class="card p-4 rounded-lg shadow mb-4">
+                <div class="card contact-card p-4 rounded-lg shadow mb-4">
                     <h5 class=" mb-4">Export Assets</h5>
                     <div class="row">
                         <div class="flex p-2 col-12">
@@ -84,7 +84,7 @@
                 </div>
             </div>
             <div class="col-12 col-sm-6 col-lg-4 col-xxl-3 mb-2">
-                <div class="card p-4 rounded-lg shadow mb-4">
+                <div class="card contact-card p-4 rounded-lg shadow mb-4">
                     <h5 class=" mb-4">Export Liabilities</h5>
                     <div class="row">
                         <div class="flex p-2 col-12">
@@ -101,7 +101,7 @@
                 </div>
             </div>
             <div class="col-12 col-sm-6 col-lg-4 col-xxl-3 mb-2">
-                <div class="card p-4 rounded-lg shadow mb-4">
+                <div class="card contact-card p-4 rounded-lg shadow mb-4">
                     <h5 class=" mb-4">Export BankBook</h5>
                     <div class="row">
                         <div class="flex p-2 col-12">

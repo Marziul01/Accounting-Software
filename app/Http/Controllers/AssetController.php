@@ -12,6 +12,9 @@ use App\Models\Contact;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
 use App\Models\AssetSubSubCategory;
+use App\Models\BankAccount;
+use App\Models\BankTransaction;
+use App\Models\Notification;
 use App\Models\SiteSetting;
 use App\Models\SMSTemplate;
 use Illuminate\Support\Carbon;
@@ -33,6 +36,7 @@ class AssetController extends Controller
             'assetCategories' => AssetSubCategory::where('asset_category_id', 4)->where('status', 1)->get(),
             'assetTransactions' => AssetTransaction::all(),
             'users' => Contact::all(),
+            'banks' => BankAccount::all(),
         ]);
     }
 
@@ -48,6 +52,7 @@ class AssetController extends Controller
             'assetCategories' => AssetSubCategory::where('asset_category_id', 5)->where('status', 1)->get(),
             'assetTransactions' => AssetTransaction::all(),
             'users' => Contact::all(),
+            'banks' => BankAccount::all(),
         ]);
     }
     /**
@@ -78,6 +83,20 @@ class AssetController extends Controller
             'contact_id' => 'required_if:category_id,4|nullable|exists:contacts,id',
             
         ]);
+
+        if ($request->has('bank_account_id') && $request->bank_account_id) {
+            $bankAccount = BankAccount::find($request->bank_account_id);
+            $balance = $bankAccount->transactions()->where('transaction_type', 'credit')->sum('amount')
+                    - $bankAccount->transactions()->where('transaction_type', 'debit')->sum('amount');
+
+            if ($bankAccount && $request->amount > $balance) {
+                return response()->json([
+                    'errors' => [
+                        'amount' => ['Asset amount cannot be greater than the bank balance.']
+                    ]
+                ], 422);
+            }
+        }
 
         $data = $request->all();
         $photoPath = null;
@@ -199,6 +218,9 @@ class AssetController extends Controller
         $firsttransaction->description = $request->description;
         $firsttransaction->save();
 
+        
+        
+
         if($request->category_id == 4){
 
             if ($request->send_sms == 1 && $request->mobile) {
@@ -210,7 +232,7 @@ class AssetController extends Controller
                 $accountNumber = '#'.$assetsfdf->slug.$assetsfdf->id; // or $assetsfdf->id if you prefer
                 $amount = $this->engToBnNumber($request->amount);
 
-                $message = "প্রিয় {$accountName}, $templateText {$accountNumber} । গৃহীত ঋণের পরিমাণ $amount টাকা । 
+                $message = "প্রিয় {$accountName}, $templateText । গৃহীত ঋণের পরিমাণ $amount টাকা । 
 
 ধন্যবাদান্তে,
 
@@ -218,6 +240,7 @@ $site_name->site_owner";
 
                 $response = sendSMS($number, $message);
 
+                $smsSent = $request->send_sms == 1 ? 1 : 0;
                 // Optional: Map response code to readable message
                 $errorMessages = [
                     '1001' => '❌ ভুল API কী প্রদান করা হয়েছে।',
@@ -236,9 +259,51 @@ $site_name->site_owner";
 
 
             if ($request->send_email == 1) {
-                Mail::to($request->email)->send(new AssetInvoiceMail($assetsfdf, $request));
+                try {
+                    Mail::to($request->email)->send(new AssetInvoiceMail($assetsfdf, $request));
+                    $emailSent = 1;
+                } catch (\Exception $e) {
+                    // Log the error but continue the execution
+                    \Log::error('Email sending failed: ' . $e->getMessage());
+                    $emailSent = 0;
+                }
             }
 
+        }
+
+        if($request->has('bank_account_id') && $request->bank_account_id) {
+            $bankAccount = BankAccount::find($request->bank_account_id);
+            if ($bankAccount) {
+                $bankTransaction = new BankTransaction();
+                $bankTransaction->bank_account_id = $bankAccount->id;
+                $bankTransaction->transaction_date = $request->entry_date;
+                $bankTransaction->amount = $request->amount;
+                $bankTransaction->transaction_type = 'debit';
+                $bankTransaction->description = $request->bank_description;
+                $bankTransaction->name = 'Asset: '.$assetsfdf->name;
+                $bankTransaction->slug = 'Asset-' . $assetsfdf->slug;
+                $bankTransaction->from = 'Asset';
+                $bankTransaction->from_id = $firsttransaction->id;
+                $bankTransaction->save();
+            }
+        }
+
+        if($request->category_id == 4){
+            Notification::create([
+                
+                'sender_name' => $contact->name,
+                'message' => $message,
+                'sent_date' => now(),
+                'email_sent' => $emailSent,
+                'sms_sent' => $smsSent,
+                'occasion_name' => Auth()->user()->name . ' created a new Current Asset: ' . $assetsfdf->name,
+                'contact_id' => $data['contact_id'],
+            ]);
+        }else{
+            Notification::create([
+                'sent_date' => now(),
+                'message' => Auth()->user()->name . ' created a new Fixed Asset: ' . $assetsfdf->name . '('. $request->amount .' BDT)' .'.',
+            ]);
         }
 
         return response()->json([
@@ -427,6 +492,17 @@ $site_name->site_owner";
         // --- Update asset (except amount) ---
         $asset->update($data);
 
+        if($request->category_id == 4){
+            $assetis = 'Current';
+        }else{
+            $assetis = 'Fixed';
+        }
+
+        Notification::create([
+                'sent_date' => now(),
+                'message' => Auth()->user()->name . ' updated ' . $assetis . ' Asset: ' . $asset->name .'.',
+            ]);
+
         return response()->json([
             'status' => 'success',
             'message' => 'Asset updated successfully.',
@@ -455,11 +531,29 @@ $site_name->site_owner";
 
         $transactions = AssetTransaction::where('asset_id' , $asset->id )->get();
         foreach ($transactions as $transaction) {
+            $bankTransaction = BankTransaction::where('from', 'Asset')
+                ->where('from_id', $transaction->id)
+                ->first();
+            // Delete associated bank transaction if exists
+            if ($bankTransaction) {
+                $bankTransaction->delete();
+            }
             // Delete each transaction
             $transaction->delete();
         }
 
+        if($asset->category_id == 4){
+            $assetis = 'Current';
+        }else{
+            $assetis = 'Fixed';
+        }
+
         $asset->delete();
+
+        Notification::create([
+            'sent_date' => now(),
+            'message' => Auth()->user()->name . ' deleted '. $assetis  . 'Asset: ' . $asset->name .'.',
+        ]);
 
         return back()->with('success', 'Asset deleted successfully.');
     }

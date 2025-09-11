@@ -11,11 +11,11 @@
         <div class="card-body d-flex justify-content-start align-items-start gap-2 flex-column flex-md-row align-items-md-end mobile-reports-filter">
             <div class="mobile-reports-filter-group">
                 <label for="start_date">Start Date:</label>
-                <input type="date" id="start_date" class="form-control" value="{{ $startDate }}">
+                <input type="date" id="start_date" class="form-control myDate" value="{{ $startDate }}">
             </div>
             <div class="mobile-reports-filter-group">
                 <label for="end_date">End Date:</label>
-                <input type="date" id="end_date" class="form-control" value="{{ $endDate }}">
+                <input type="date" id="end_date" class="form-control myDate" value="{{ $endDate }}">
             </div>
             <div class="mobile-reports-filter-group">
                 <label for="investment_category">Category:</label>

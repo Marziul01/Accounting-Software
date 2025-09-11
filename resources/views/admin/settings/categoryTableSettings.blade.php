@@ -3,7 +3,7 @@
 @section('content')
     <div class="container-fluid flex-grow-1 container-p-y">
         <!-- Basic Bootstrap Table -->
-        <div class="card mb-4">
+        <div class="card mb-4 contact-card">
             <div class="card-header d-flex justify-content-between align-items-start border-bottom-1 flex-column flex-md-row gap-3 align-items-md-center">
                 <div class="">
                     <h5 class="mb-0">Category & Table Settings</h5>
@@ -18,12 +18,12 @@
                             'Investment' => ['investments_category'],
                             'Asset' => ['asset_category_table', 'asset_name_table', 'asset_category'],
                             'Liability' => ['liability_category_table', 'liability_name_table', 'liability_category'],
-                            
+                            'Report Buttons' => ['report_up', 'report_back'],
                         ];
                     @endphp
 
                     @foreach($categories as $title => $fields)
-                    <div class="card p-4 rounded-lg shadow mb-4">
+                    <div class="card contact-card p-4 rounded-lg shadow mb-4">
                         <h5 class=" mb-4">{{ $title }}</h5>
                         <div class="row">
                             @foreach($fields as $field)

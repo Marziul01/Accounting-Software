@@ -7,6 +7,9 @@ use App\Mail\AssetWithdrawInvoiceMail;
 use App\Models\AssetTransaction;
 use Illuminate\Http\Request;
 use App\Models\Asset;
+use App\Models\BankAccount;
+use App\Models\BankTransaction;
+use App\Models\Notification;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 use App\Models\SiteSetting;
@@ -32,8 +35,10 @@ class AssetTransactionController extends Controller
         // Fetch all transactions related to the asset
         $transactions = AssetTransaction::where('asset_id', $asset->id)->orderBy('transaction_date' , 'asc' )->get();
 
+        $banks = BankAccount::all();
+        $bankTransaction = BankTransaction::where('from', 'Asset')->get();
         // Return the view with the asset and its transactions
-        return view('admin.asset.transactions', compact('asset', 'transactions'));
+        return view('admin.asset.transactions', compact('asset', 'transactions','banks','bankTransaction'));
     }
 
     /**
@@ -61,7 +66,21 @@ class AssetTransactionController extends Controller
             'transaction_date' => 'required|date',
         ]);
 
+        if($request->transaction_type === 'Deposit'){
+            if ($request->has('bank_account_id') && $request->bank_account_id) {
+                $bankAccount = BankAccount::find($request->bank_account_id);
+                $balance = $bankAccount->transactions()->where('transaction_type', 'credit')->sum('amount')
+                        - $bankAccount->transactions()->where('transaction_type', 'debit')->sum('amount');
 
+                if ($bankAccount && $request->amount > $balance) {
+                    return response()->json([
+                        'errors' => [
+                            'amount' => ['Asset Deposit amount cannot be greater than the bank balance.']
+                        ]
+                    ], 422);
+                }
+            }
+        }
 
         // Create a new asset sub-subcategory
         
@@ -127,6 +146,8 @@ $message="আসসালামু আলাইকুম,
                 $number = '88'.$asset->mobile;
                 $response = sendSMS($number, $message);
 
+                $smsSent = $asset->send_sms == 1 ? 1 : 0;
+
                 // Optional: Map response code to readable message
                 $errorMessages = [
                     '1001' => '❌ ভুল API কী প্রদান করা হয়েছে।',
@@ -143,15 +164,65 @@ $message="আসসালামু আলাইকুম,
                 }
             }
 
+            $emailSent = 0; // Default as not sent
+
             if ($asset->send_email == 1) {
-                if($request->transaction_type === 'Deposit'){
-                    Mail::to($asset->email)->send(new AssetDepositInvoiceMail($asset, $request));
-                }else{
-                    Mail::to($asset->email)->send(new AssetWithdrawInvoiceMail($asset, $request));
+                try {
+                    if ($request->transaction_type === 'Deposit') {
+                        Mail::to($asset->email)->send(new AssetDepositInvoiceMail($asset, $request));
+                    } else {
+                        Mail::to($asset->email)->send(new AssetWithdrawInvoiceMail($asset, $request));
+                    }
+
+                    // If no exception, email was sent successfully
+                    $emailSent = 1;
+
+                } catch (\Exception $e) {
+                    // Log error for debugging
+                    \Log::error('Email sending failed: ' . $e->getMessage());
+                    $emailSent = 0; // Remains 0 if failed
                 }
-                
             }
 
+        }
+
+        if($request->has('bank_account_id') && $request->bank_account_id) {
+            $bankAccount = BankAccount::find($request->bank_account_id);
+            if ($bankAccount) {
+                $bankTransaction = new BankTransaction();
+                $bankTransaction->bank_account_id = $bankAccount->id;
+                $bankTransaction->transaction_date = $request->transaction_date;
+                $bankTransaction->amount = $request->amount;
+                if($request->transaction_type === 'Deposit'){
+                    $bankTransaction->transaction_type = 'debit';
+                }else{
+                    $bankTransaction->transaction_type = 'credit';
+                }
+                $bankTransaction->description = $request->bank_description;
+                $bankTransaction->name = 'Asset: '.$asset->name;
+                $bankTransaction->slug = 'Asset-' . $asset->slug;
+                $bankTransaction->from = 'Asset';
+                $bankTransaction->from_id = $assetTransaction->id;
+                $bankTransaction->save();
+            }
+        }
+
+        if($asset->category_id == 4){
+            Notification::create([
+                'sent_date' => now(),
+                'sender_name' => $asset->name,
+                'message' => $message,
+                'sent_date' => now(),
+                'email_sent' => $emailSent,
+                'sms_sent' => $smsSent,
+                'occasion_name' => Auth()->user()->name . ' created a new ' . $request->transaction_type . ' Transaction Current Asset: ' . $asset->name,
+                'contact_id' => $asset->contact_id,
+            ]);
+        }else{
+            Notification::create([
+                'sent_date' => now(),
+                'message' => Auth()->user()->name . ' created a new ' . $request->transaction_type . ' Transaction Fixed Asset: ' . $asset->name . '('. $request->amount .' BDT)' .'.',
+            ]);
         }
 
         // Redirect back to the index with a success message
@@ -201,6 +272,23 @@ $message="আসসালামু আলাইকুম,
             'transaction_date' => 'required|date',
         ]);
 
+        if($request->transaction_type === 'Deposit'){
+            if ($request->has('bank_account_id') && $request->bank_account_id) {
+                $bankAccount = BankAccount::find($request->bank_account_id);
+                $currentTransaction = BankTransaction::where('from', 'Asset')->where('from_id', $id)->first();
+                $balance = $bankAccount->transactions()->where('transaction_type', 'credit')->sum('amount')
+                        - $bankAccount->transactions()->where('transaction_type', 'debit')->sum('amount') + ($currentTransaction ? $currentTransaction->amount : 0);
+
+                if ($bankAccount && $request->amount > $balance) {
+                    return response()->json([
+                        'errors' => [
+                            'amount' => ['Asset Deposit amount cannot be greater than the bank balance.']
+                        ]
+                    ], 422);
+                }
+            }
+        }
+
         // Get the transaction and asset
         $assetTransaction = AssetTransaction::findOrFail($id);
         $asset = Asset::findOrFail($request->asset_id);
@@ -229,6 +317,47 @@ $message="আসসালামু আলাইকুম,
         // Save recalculated balance to asset
         $asset->amount = $currentBalance;
         $asset->save();
+
+        // Update or create the bank transaction
+        if($request->has('bank_account_id') && $request->bank_account_id) {
+            $bankAccount = BankAccount::find($request->bank_account_id);
+            if ($bankAccount) {
+                $bankTransaction = BankTransaction::where('from', 'Asset')->where('from_id', $id)->first();
+                if (!$bankTransaction) {
+                    $bankTransaction = new BankTransaction();
+                    $bankTransaction->bank_account_id = $bankAccount->id;
+                    $bankTransaction->from = 'Asset';
+                    $bankTransaction->from_id = $assetTransaction->id;
+                    $bankTransaction->name = 'Asset: '.$asset->name; 
+                    $bankTransaction->slug = 'Asset-' . $asset->slug;
+                } else {
+                    // If bank account changed, update it
+                    if ($bankTransaction->bank_account_id != $bankAccount->id) {
+                        $bankTransaction->bank_account_id = $bankAccount->id;
+                    }
+                }
+                $bankTransaction->transaction_date = $request->transaction_date;
+                $bankTransaction->amount = $request->amount;
+                if($request->transaction_type === 'Deposit'){
+                    $bankTransaction->transaction_type = 'debit';
+                }else{
+                    $bankTransaction->transaction_type = 'credit';
+                }
+                $bankTransaction->description = $request->bank_description;
+                $bankTransaction->save();
+            }
+        } else {
+            // If no bank account selected, delete existing bank transaction if any
+            $bankTransaction = BankTransaction::where('from', 'Asset')->where('from_id', $id)->first();
+            if ($bankTransaction) {
+                $bankTransaction->delete();
+            }
+        }
+
+        Notification::create([
+            'message' => Auth()->user()->name . ' updated a ' . $request->transaction_type . ' Transaction Asset: ' . $asset->name .'('. $request->amount .' BDT)' .'.',
+            'sent_date' => now(),
+        ]);
 
         return response()->json([
             'message' => 'Asset Transaction updated successfully!',
@@ -265,7 +394,17 @@ $message="আসসালামু আলাইকুম,
 
         // Save the updated asset amount
         $asset->save();
+
+        // Delete associated bank transaction if exists
+        $bankTransaction = BankTransaction::where('from', 'Asset')->where('from_id', $id)->first();
+        if ($bankTransaction) {
+            $bankTransaction->delete();
+        }
         
+        Notification::create([
+            'message' => Auth()->user()->name . ' deleted a ' . $assetTransaction->transaction_type . ' Transaction Asset: ' . $asset->name .'('. $assetTransaction->amount .' BDT)' .'.',
+            'sent_date' => now(),
+        ]);
 
         // Now delete the transaction
         $assetTransaction->delete();

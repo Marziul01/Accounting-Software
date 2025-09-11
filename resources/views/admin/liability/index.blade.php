@@ -92,7 +92,7 @@
                             @endforeach
                             @else
                             <tr>
-                                <td colspan="4" class="text-center">No liability found.</td>
+                                <td colspan="8" class="text-center">No liability found.</td>
                             </tr>
                             @endif
                         </tbody>
@@ -167,7 +167,7 @@
                             </div>
                             <div class="col-6 mb-3">
                                 <label>Entry Date</label>
-                                <input type="date" name="entry_date" class="form-control" value="{{ date('Y-m-d') }}" required>
+                                <input type="date" name="entry_date" class="form-control myDate" value="{{ date('Y-m-d') }}" required>
                             </div>
 
                             
@@ -182,16 +182,25 @@
                                     @endforeach
                                 </select>
                             </div>
-                            {{-- <div class="col-6 mb-3">
-                                <label for="add_income_sub_category_id" class="form-label">Sub Category</label>
-                                <select class="form-select subcategory-select" id="add_income_sub_category_id" name="subsubcategory_id" required>
-                                    <option value="">Select Sub Category</option>
-                                </select>
-                            </div> --}}
 
                             <div class="col-12 mb-3">
                                 <label>Description</label>
                                 <textarea name="description" class="form-control"></textarea>
+                            </div>
+
+                            <div class="col-12 mb-3">
+                                <label for="bank_account_id" class="form-label">Select Bank Account (Optional)</label>
+                                <select class="form-select category-select" id="bank_account_id" name="bank_account_id" >
+                                    <option value="">Select Bank</option>
+                                    @foreach ($banks as $bank)
+                                        <option value="{{ $bank->id }}">{{ $bank->bank_name }}- ({{ $bank->account_type }})</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div class="col-12 mb-3">
+                                <label class="form-label">Bank Description (Optional)</label>
+                                <textarea class="form-control" name="bank_description" rows="3"></textarea>
                             </div>
                 
                             <div class="col-12">
@@ -321,7 +330,7 @@
 
                                         <div class="col-6 mb-3">
                                             <label>Entry Date</label>
-                                            <input type="date" name="entry_date" class="form-control" required value="{{ $liability->entry_date ? \Carbon\Carbon::parse($liability->entry_date)->format('Y-m-d') : '' }}"
+                                            <input type="date" name="entry_date" class="form-control myDate" required value="{{ $liability->entry_date ? \Carbon\Carbon::parse($liability->entry_date)->format('Y-m-d') : '' }}"
                                             >
                                         </div>
                             
@@ -340,16 +349,7 @@
                                                 @endforeach
                                             </select>
                                         </div>
-                                        {{-- <div class="col-6 mb-3">
-                                            <label for="add_income_sub_category_id" class="form-label">Sub Category</label>
-                                            <select class="form-select subcategory-select" 
-                                                    id="edit_income_sub_category_id{{ $liability->id }}" 
-                                                    name="subsubcategory_id" 
-                                                    data-selected="{{ $liability->subsubcategory_id }}" 
-                                                    required>
-                                                <option value="">Select Sub Category</option>
-                                            </select>
-                                        </div> --}}
+                                        
 
                                         <div class="col-12 mb-3">
                                             <label>Description</label>
@@ -504,12 +504,27 @@
                                     
                                         <div class="col-12 mb-3">
                                             <label>Transaction Date</label>
-                                            <input type="date" name="transaction_date" class="form-control" required value="{{ date('Y-m-d') }}">
+                                            <input type="date" name="transaction_date" class="form-control myDate" required value="{{ date('Y-m-d') }}">
                                         </div>
 
                                         <div class="col-12 mb-3">
                                             <label>Description</label>
                                             <textarea name="description" class="form-control"> </textarea>
+                                        </div>
+
+                                        <div class="col-12 mb-3">
+                                            <label for="bank_account_id" class="form-label">Select Bank Account (Optional)</label>
+                                            <select class="form-select category-select" id="bank_account_id" name="bank_account_id" >
+                                                <option value="">Select Bank</option>
+                                                @foreach ($banks as $bank)
+                                                    <option value="{{ $bank->id }}">{{ $bank->bank_name }}- ({{ $bank->account_type }})</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+
+                                        <div class="col-12 mb-3">
+                                            <label class="form-label">Bank Description (Optional)</label>
+                                            <textarea class="form-control" name="bank_description" rows="3"></textarea>
                                         </div>
     
                                         <div class="col-12 mb-3">
@@ -524,122 +539,6 @@
         </div>
         @endforeach
     @endif
-
-
-    {{-- @if($liabilities->isNotEmpty())
-        @foreach ($liabilities as $liability )
-
-        <div class="modal fade" id="seeModal{{ $liability->id }}">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalLabel"> See All Liability Transactions </h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    
-                        <div class="modal-body">
-                            <div class="table-responsive">
-                                <table class="table" id="myTable">
-                                    <thead>
-                                        <tr>
-                                            <th>Sl</th>
-                                            <th>Transaction Type</th>
-                                            <th>Amount</th>
-                                            <th>Transaction Date </th>
-                                            <th>Description</th>
-                                            <th>Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody class="table-border-bottom-0">
-                                        @if($liabilityTransactions->where('liability_id', $liability->id )->isNotEmpty())
-                                        @foreach ($liabilityTransactions->where('liability_id', $liability->id ) as $liabilityTransaction )
-                                        <tr>
-                                            <td>{{ $loop->iteration }}</td>
-                                            <td>{{ $liabilityTransaction->transaction_type }}</td>
-                                            <td>{{ $liabilityTransaction->amount }}</td>
-                                            <td>{{ $liabilityTransaction->transaction_date }} </td>
-                                            <td>{{ $liabilityTransaction->description }} </td>
-                                            
-                                            <td>
-                                                <div class="d-flex align-items-center gap-1 cursor-pointer">
-                                                        <a class=" btn btn-sm btn-outline-secondary {{ Auth::user()->access->liability == 1 ? 'disabled' : '' }}" href="" data-bs-toggle="modal"
-                                                        data-bs-target="#edittranModal{{ $liabilityTransaction->id }}"><i
-                                                                class="bx bx-edit-alt me-1"></i> Edit</a>
-                                                    <form action="{{ route('liabilitytransaction.destroy', $liabilityTransaction->id) }}" method="POST" class="d-inline">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <button type="submit" class="btn btn-sm btn-outline-danger delete-confirm {{ Auth::user()->access->liability == 1 ? 'disabled' : '' }}" ><i
-                                                                class="bx bx-trash me-1"></i> Delete</button>
-                                                    </form>
-                                                </div>
-                                            </td>
-                                        </tr> 
-                                        @endforeach
-                                        @else
-                                        <tr>
-                                            <td colspan="4" class="text-center">No Liability Transaction found.</td>
-                                        </tr>
-                                        @endif
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                </div>  
-            </div>
-        </div>
-        @endforeach
-    @endif --}}
-
-    {{-- @if($liabilityTransactions->isNotEmpty())
-        @foreach ($liabilityTransactions as $liabilityTransaction )
-
-        <div class="modal fade" id="edittranModal{{ $liabilityTransaction->id }}">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalLabel">Edit Liability Transaction</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <form id="editTransCategoryForms{{ $liabilityTransaction->id }}" action="{{ route('liabilitytransaction.update', $liabilityTransaction->id) }}">
-                        @csrf
-                        @method('PUT')
-                        <div class="modal-body">
-                            <div class="row">
-                                <input type="hidden" name="liability_id" value="{{ $liabilityTransaction->liability_id }}">
-                                <div class="col-12 mb-3">
-                                    <label>Transation Type</label>
-                                    <select name="transaction_type" id="" class="form-select">
-                                        <option value="Deposit" {{ $liabilityTransaction->transaction_type == 'Deposit' ? 'Selected' : '' }} >জমা </option>
-                                        <option value="Withdraw" {{ $liabilityTransaction->transaction_type == 'Withdraw' ? 'Selected' : '' }}>উত্তোলন</option>
-                                    </select>
-                                </div>
-                                <div class="col-12 mb-3">
-                                    <label>Amount</label>
-                                    <input type="number" name="amount" class="form-control" required value="{{ $liabilityTransaction->amount }}">
-                                </div>
-                            
-                                <div class="col-12 mb-3">
-                                    <label>Transaction Date</label>
-                                    <input type="date" name="transaction_date" class="form-control" required value="{{ $liabilityTransaction->transaction_date }}" >
-                                </div>
-
-                                <div class="col-12 mb-3">
-                                            <label>Description</label>
-                                            <textarea name="description" class="form-control"> {{ $liabilityTransaction->description }} </textarea>
-                                        </div>
-
-                                <div class="col-12 mb-3">
-                                    <button type="submit" class="btn btn-primary">Submit</button>
-                                </div>
-                        </div>
-                        </div>
-                    </form>
-                    
-                </div>  
-            </div>
-        </div>
-        @endforeach
-    @endif --}}
 
     <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
@@ -673,8 +572,9 @@
 @if ($liabilities->isNotEmpty())
 <script>
     $('#myTable').DataTable({
-        pageLength: 20,
-        dom: 'Bfrtip',
+        pageLength: 25, // default rows per page
+        lengthMenu: [ [25, 50, 100], [25, 50, 100] ], // options in dropdown
+        dom: 'Blfrtip', // added 'l' so the length menu appears
         buttons: [
             {
                 extend: 'csv',
@@ -688,7 +588,7 @@
                 extend: 'print',
                 text: 'Print Table',
                 className: 'btn btn-sm my-custom-table-btn',
-                    exportOptions: {
+                exportOptions: {
                     columns: ':not(:last-child)' // exclude the last column
                 }
             }

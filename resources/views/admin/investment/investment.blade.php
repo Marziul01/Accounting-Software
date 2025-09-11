@@ -155,15 +155,29 @@
                         </div>
                         <div class="mb-3">
                             <label for="income_date" class="form-label">investment Date</label>
-                            <input type="date" class="form-control" id="income_date" name="date" value="{{ date('Y-m-d') }}" required>
+                            <input type="date" class="form-control myDate" id="income_date" name="date" value="{{ date('Y-m-d') }}" required>
                         </div>
                         
                         <div class="mb-3">
                             <label for="Description" class="form-label">Description</label>
                             <textarea class="form-control" id="Description" name="description" rows="3"></textarea>
-                            
                         </div>
-                        
+
+                        <div class="mb-3">
+                            <label for="bank_account_id" class="form-label">Select Bank Account (Optional)</label>
+                            <select class="form-select category-select" id="bank_account_id" name="bank_account_id" >
+                                <option value="">Select Bank</option>
+                                @foreach ($banks as $bank)
+                                    <option value="{{ $bank->id }}">{{ $bank->bank_name }}- ({{ $bank->account_type }})</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Bank Description (Optional)</label>
+                            <textarea class="form-control" name="bank_description" rows="3"></textarea>
+                        </div>
+
                     </div>
                     <div class="modal-footer">
                         <button type="submit" class="btn btn-primary">Confirm</button>
@@ -228,14 +242,12 @@
                             
                             <div class="mb-3">
                                 <label for="income_date" class="form-label">investment Date</label>
-                                <input type="date" class="form-control" id="date" name="date" value="{{ $investment->date }}" required>
+                                <input type="date" class="form-control myDate" id="date" name="date" value="{{ $investment->date }}" required>
                             </div>
                             <div class="mb-3">
                                 <label for="Description" class="form-label">Description</label>
                                 <textarea class="form-control" id="Description" name="description" rows="3">{{ $investment->description }}</textarea>
-                                
                             </div>
-                            
                         </div>
                         <div class="modal-footer">
                             <button type="submit" class="btn btn-primary">Confirm</button>
@@ -279,12 +291,27 @@
                                     
                                         <div class="col-12 mb-3">
                                             <label>Transaction Date</label>
-                                            <input type="date" name="transaction_date" class="form-control" value="{{ date('Y-m-d') }}" required >
+                                            <input type="date" name="transaction_date" class="form-control myDate" value="{{ date('Y-m-d') }}" required >
                                         </div>
 
                                         <div class="col-12 mb-3">
                                             <label>Description</label>
                                             <textarea name="description" class="form-control"> </textarea>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="bank_account_id" class="form-label">Select Bank Account (Optional)</label>
+                                            <select class="form-select category-select" id="bank_account_id" name="bank_account_id">
+                                                <option value="">Select Bank</option>
+                                                @foreach ($banks as $bank)
+                                                    <option value="{{ $bank->id }}">{{ $bank->bank_name }}- ({{ $bank->account_type }})</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label class="form-label">Bank Description (Optional)</label>
+                                            <textarea class="form-control" name="bank_description" rows="3"></textarea>
                                         </div>
     
                                         <div class="col-12 mb-3">
@@ -394,7 +421,7 @@
                             
                                 <div class="col-12 mb-3">
                                     <label>Transaction Date</label>
-                                    <input type="date" name="transaction_date" class="form-control" required value="{{ $investmentTransaction->transaction_date }}" >
+                                    <input type="date" name="transaction_date" class="form-control " required value="{{ $investmentTransaction->transaction_date }}" >
                                 </div>
 
                                 <div class="col-12 mb-3">
@@ -440,12 +467,26 @@
                             </div>
                             <div class="mb-3">
                                 <label for="income_date" class="form-label">Income Date</label>
-                                <input type="date" class="form-control" id="date" name="date" value="{{ date('Y-m-d') }}" required>
+                                <input type="date" class="form-control myDate" id="date" name="date" value="{{ date('Y-m-d') }}" required>
                             </div>
                             <div class="mb-3">
                                 <label for="Description" class="form-label">Description</label>
                                 <textarea class="form-control" id="Description" name="description" rows="3"></textarea>
-                                
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="bank_account_id" class="form-label">Select Bank Account (Optional)</label>
+                                <select class="form-select category-select" id="bank_account_id" name="bank_account_id">
+                                    <option value="">Select Bank</option>
+                                    @foreach ($banks as $bank)
+                                        <option value="{{ $bank->id }}">{{ $bank->bank_name }}- ({{ $bank->account_type }})</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Bank Description (Optional)</label>
+                                <textarea class="form-control" name="bank_description" rows="3"></textarea>
                             </div>
                             
                         </div>
@@ -484,12 +525,11 @@
                             </div>
                             <div class="mb-3">
                                 <label for="income_date" class="form-label">Expense Date</label>
-                                <input type="date" class="form-control" id="date" name="date" value="{{ date('Y-m-d') }}" required>
+                                <input type="date" class="form-control myDate" id="date" name="date" value="{{ date('Y-m-d') }}" required>
                             </div>
                             <div class="mb-3">
                                 <label for="Description" class="form-label">Description</label>
                                 <textarea class="form-control" id="Description" name="description" rows="3"></textarea>
-                                
                             </div>
                             
                         </div>
@@ -530,8 +570,9 @@
 @if ($investments->isNotEmpty())
 <script>
     $('#myTable').DataTable({
-        pageLength: 20,
-        dom: 'Bfrtip',
+        pageLength: 25, // default rows per page
+        lengthMenu: [ [25, 50, 100], [25, 50, 100] ], // options in dropdown
+        dom: 'Blfrtip', // added 'l' so the length menu appears
         buttons: [
             {
                 extend: 'csv',
@@ -545,7 +586,7 @@
                 extend: 'print',
                 text: 'Print Table',
                 className: 'btn btn-sm my-custom-table-btn',
-                    exportOptions: {
+                exportOptions: {
                     columns: ':not(:last-child)' // exclude the last column
                 }
             }

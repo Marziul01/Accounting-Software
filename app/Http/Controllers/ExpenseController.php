@@ -3,9 +3,12 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\BankAccount;
+use App\Models\BankTransaction;
 use App\Models\Expense;
 use App\Models\ExpenseCategory;
 use App\Models\ExpenseSubCategory;
+use App\Models\Notification;
 use Illuminate\Support\Facades\Auth;
 use Yajra\DataTables\Facades\DataTables;
 
@@ -48,6 +51,8 @@ class ExpenseController extends Controller
             'expenses' => $expenses,
             'expenseCategories' => ExpenseCategory::where('status', 1)->where('id', '!=', 7)->get(),
             'expenseSubCategories' => ExpenseSubCategory::where('status', 1)->get(),
+            'banks' => BankAccount::all(),
+            'bankTransaction' => BankTransaction::where('from', 'Expense')->get(),
         ]);
     }
 
@@ -109,7 +114,29 @@ class ExpenseController extends Controller
         $data['slug'] = $slug;
         $request->merge(['slug' => $data['slug']]);
         // Create a new expense record
-        Expense::create($request->all());
+        $newepense = Expense::create($request->all());
+
+        if($request->has('bank_account_id') && $request->bank_account_id) {
+            $bankAccount = BankAccount::find($request->bank_account_id);
+            if ($bankAccount) {
+                $bankTransaction = new BankTransaction();
+                $bankTransaction->bank_account_id = $bankAccount->id;
+                $bankTransaction->transaction_date = $request->date;
+                $bankTransaction->amount = $request->amount;
+                $bankTransaction->transaction_type = 'debit';
+                $bankTransaction->description = $request->bank_description;
+                $bankTransaction->name = 'Expense: '.$newepense->name;
+                $bankTransaction->slug = 'Expense-' . $newepense->slug;
+                $bankTransaction->from = 'Expense';
+                $bankTransaction->from_id = $newepense->id;
+                $bankTransaction->save();
+            }
+        }
+
+        Notification::create([
+            'message' => Auth()->user()->name . ' created a new Expense: ' . $newepense->name .'('. $request->amount .' BDT)' .'.',
+            'sent_date' => now(),
+        ]);
 
         // Redirect back to the index with a success message
         return response()->json([
@@ -152,6 +179,21 @@ class ExpenseController extends Controller
             'slug' => 'required|string|max:255',
         ]);
 
+        if ($request->has('bank_account_id') && $request->bank_account_id) {
+                $bankAccount = BankAccount::find($request->bank_account_id);
+                $currentTransaction = BankTransaction::where('from', 'Expense')->where('from_id', $id)->first();
+                $balance = $bankAccount->transactions()->where('transaction_type', 'credit')->sum('amount')
+                        - $bankAccount->transactions()->where('transaction_type', 'debit')->sum('amount') + ($currentTransaction ? $currentTransaction->amount : 0);
+
+                if ($bankAccount && $request->amount > $balance) {
+                    return response()->json([
+                        'errors' => [
+                            'amount' => ['Expense amount cannot be greater than the bank balance.']
+                        ]
+                    ], 422);
+                }
+            }
+
         // Update the expense record
         $expense = Expense::findOrFail($id);
         $baseSlug = $request->slug;
@@ -164,6 +206,42 @@ class ExpenseController extends Controller
         $data['slug'] = $slug;
         $request->merge(['slug' => $data['slug']]);
         $expense->update($request->all());
+
+        if($request->has('bank_account_id') && $request->bank_account_id) {
+            $bankAccount = BankAccount::find($request->bank_account_id);
+            if ($bankAccount) {
+                $bankTransaction = BankTransaction::where('from', 'Expense')->where('from_id', $id)->first();
+                if (!$bankTransaction) {
+                    $bankTransaction = new BankTransaction();
+                    $bankTransaction->bank_account_id = $bankAccount->id;
+                    $bankTransaction->from = 'Expense';
+                    $bankTransaction->from_id = $bankTransaction->id;
+                    $bankTransaction->name = 'Expense: '.$expense->name; 
+                    $bankTransaction->slug = 'Expense-' . $expense->slug;
+                } else {
+                    // If bank account changed, update it
+                    if ($bankTransaction->bank_account_id != $bankAccount->id) {
+                        $bankTransaction->bank_account_id = $bankAccount->id;
+                    }
+                }
+                $bankTransaction->transaction_date = $request->date;
+                $bankTransaction->amount = $request->amount;
+                $bankTransaction->transaction_type = 'debit';
+                $bankTransaction->description = $request->bank_description;
+                $bankTransaction->save();
+            }
+        } else {
+            // If no bank account selected, delete existing bank transaction if any
+            $bankTransaction = BankTransaction::where('from', 'Expense')->where('from_id', $id)->first();
+            if ($bankTransaction) {
+                $bankTransaction->delete();
+            }
+        }
+
+        Notification::create([
+            'message' => Auth()->user()->name . ' updated a Expense: ' . $expense->name .'('. $request->amount .' BDT)' .'.',
+            'sent_date' => now(),
+        ]);
 
         // Redirect back to the index with a success message
         return response()->json([
@@ -183,11 +261,21 @@ class ExpenseController extends Controller
         // Find the expense record and delete it
         $expense = Expense::findOrFail($id);
 
+        $bankTransaction = BankTransaction::where('from', 'Expense')->where('from_id', $expense->id)->first();
+        if($bankTransaction) {
+            $bankTransaction->delete();
+        }
+
         if($expense->expense_category_id == 7) {
-            return back()->with('error', 'You cannot delete this income record.');
+            return back()->with('error', 'You cannot delete this expense record.');
         }
 
         $expense->delete();
+
+        Notification::create([
+            'message' => Auth()->user()->name . ' deleted a Expense: ' . $expense->name .'('. $expense->amount .' BDT)' .'.',
+            'sent_date' => now(),
+        ]);
 
         // Redirect back to the index with a success message
         return back()->with('success', 'Expense record deleted successfully!');

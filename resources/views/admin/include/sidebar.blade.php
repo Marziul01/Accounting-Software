@@ -1,6 +1,6 @@
 <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
     <div class="app-brand demo">
-        <a href="{{ route('admin.dashboard') }}" class="app-brand-link">
+        <a href="{{ route('admin.dashboard') }}" class="app-brand-link justify-content-center">
             <img src="{{ asset('admin-assets/img/logo.png') }}" alt="Logo" class="app-brand-logo demo" height="100%" width="40%" />
         </a>
 
@@ -23,9 +23,10 @@
         </li>
 
         @if(Auth::user()->access->admin_panel == '1' || Auth::user()->access->admin_panel == '2')
-        <li class="menu-item  {{ Route::currentRouteName() == 'admin.users' ? 'active open' : '' }}  ">
+        <li class="menu-item  {{ Route::currentRouteName() == 'admin.users' ? 'active open' : '' }} {{ Route::currentRouteName() == 'admin.categoryTableSettings' ? 'active open' : '' }} {{ Route::currentRouteName() == 'home.settings' ? 'active open' : '' }}  {{ Route::currentRouteName() == 'Export-Data' ? 'active open' : '' }}">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons bx bx-home-smile"></i>
+                {{-- <i class="menu-icon tf-icons bx bx-home-smile"></i> --}}
+                <i class="menu-icon1 tf-icons fa-solid fa-user-gear"></i>
                 <div class="text-truncate" data-i18n="Dashboards">Admin Panel</div>
             </a>
             <ul class="menu-sub">
@@ -41,9 +42,9 @@
                     </a>
                 </li>
 
-                <li class="menu-item ">
+                <li class="menu-item {{ Route::currentRouteName() == 'home.settings' ? 'active' : '' }}">
                     <a href="{{ route('home.settings') }}"
-                        class="menu-link">
+                        class="menu-link ">
                         <div class="text-truncate" data-i18n="CRM"> Landing Page Setting </div>
                     </a>
                 </li>
@@ -59,18 +60,19 @@
         @endif
 
         @if(Auth::user()->access->sms_and_email == '1' || Auth::user()->access->sms_and_email == '2')
-        <li class="menu-item   ">
+        <li class="menu-item  {{ Route::currentRouteName() == 'occassion' ? 'active open' : '' }} {{ Route::currentRouteName() == 'emailsmsTemplate' ? 'active open' : '' }} ">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons bx bx-home-smile"></i>
+                {{-- <i class="menu-icon tf-icons bx bx-home-smile"></i> --}}
+                <i class="menu-icon1 tf-icons fa-solid fa-message"></i>
                 <div class="text-truncate" data-i18n="Dashboards">SMS and Email</div>
             </a>
             <ul class="menu-sub">
-                <li class="menu-item ">
+                <li class="menu-item {{ Route::currentRouteName() == 'occassion' ? 'active' : '' }}">
                     <a href="{{ route('occassion') }}" class="menu-link">
                         <div class="text-truncate" data-i18n="Analytics"> Occasional SMS and Email</div>
                     </a>
                 </li>
-                <li class="menu-item ">
+                <li class="menu-item {{ Route::currentRouteName() == 'emailsmsTemplate' ? 'active' : '' }}">
                     <a href="{{ route('emailsmsTemplate') }}"
                         class="menu-link">
                         <div class="text-truncate" data-i18n="CRM"> SMS and Email Template </div>
@@ -85,7 +87,8 @@
         <li class="menu-item {{ Route::currentRouteName() == 'contact.index' ? 'active' : '' }}">
             <a href="{{ route('contact.index') }}"
                 class="menu-link">
-                <i class="menu-icon tf-icons bx bx-home-smile"></i>
+                
+                <i class="menu-icon1 tf-icons fa-solid fa-address-book"></i>
                 <div class="text-truncate" data-i18n="Email">Contact </div>
             </a>
         </li>
@@ -93,9 +96,9 @@
 
 
         @if(Auth::user()->access->investment == '1' || Auth::user()->access->investment == '2')
-        <li class="menu-item  {{ Route::currentRouteName() == 'investment.index' || Route::currentRouteName() == 'investmentcategory.index' || Route::currentRouteName() == 'investmentsubcategory.index' ? 'active open' : '' }}  ">
+        <li class="menu-item  {{ Route::currentRouteName() == 'investment.index' || Route::currentRouteName() == 'investmentcategory.index' || Route::currentRouteName() == 'investmentsubcategory.index' ? 'active open' : '' }} {{ Route::currentRouteName() == 'investment.report' ? 'active open' : '' }}  ">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons bx bx-home-smile"></i>
+                <i class="menu-icon1 tf-icons fa-solid fa-money-bill-trend-up"></i>
                 <div class="text-truncate" data-i18n="Dashboards">Investments Management</div>
             </a>
             <ul class="menu-sub">
@@ -128,9 +131,10 @@
         @endif
 
         @if(Auth::user()->access->income == '1' || Auth::user()->access->income == '2')
-        <li class="menu-item  {{ Route::currentRouteName() == 'income.index' || Route::currentRouteName() == 'incomecategory.index' || Route::currentRouteName() == 'incomesubcategory.index' ? 'active open' : '' }}  ">
+        <li class="menu-item  {{ Route::currentRouteName() == 'income.index' || Route::currentRouteName() == 'incomecategory.index' || Route::currentRouteName() == 'incomesubcategory.index' ? 'active open' : '' }}  {{ Route::currentRouteName() == 'income.report' ? 'active open' : '' }}">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons bx bx-home-smile"></i>
+                
+                <i class="menu-icon1 tf-icons fa-solid fa-circle-dollar-to-slot"></i>
                 <div class="text-truncate" data-i18n="Dashboards">Incomes Managment</div>
             </a>
             <ul class="menu-sub">
@@ -166,9 +170,10 @@
         @endif
 
         @if(Auth::user()->access->expense == '1' || Auth::user()->access->expense == '2')
-        <li class="menu-item  {{ Route::currentRouteName() == 'expense.index' || Route::currentRouteName() == 'expensecategory.index' || Route::currentRouteName() == 'expensesubcategory.index' ? 'active open' : '' }}  ">
+        <li class="menu-item  {{ Route::currentRouteName() == 'expense.index' || Route::currentRouteName() == 'expensecategory.index' || Route::currentRouteName() == 'expensesubcategory.index' ? 'active open' : '' }} {{ Route::currentRouteName() == 'expense.report' ? 'active open' : '' }} ">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons bx bx-home-smile"></i>
+                
+                <i class="menu-icon1 tf-icons fa-solid fa-money-bill-transfer"></i>
                 <div class="text-truncate" data-i18n="Dashboards">Expenses Managment</div>
             </a>
             <ul class="menu-sub">
@@ -206,9 +211,10 @@
         
 
         @if(Auth::user()->access->asset == '1' || Auth::user()->access->asset == '2')
-        <li class="menu-item  {{ Route::currentRouteName() == 'asset.index' || Route::currentRouteName() == 'assetFixed' || Route::currentRouteName() == 'assetcategory.index' || Route::currentRouteName() == 'assetsubcategory.index' || Route::currentRouteName() == 'assetsubsubcategory.index' ? 'active open' : '' }}  ">
+        <li class="menu-item  {{ Route::currentRouteName() == 'asset.index' || Route::currentRouteName() == 'assetFixed' || Route::currentRouteName() == 'assetcategory.index' || Route::currentRouteName() == 'assetsubcategory.index' || Route::currentRouteName() == 'assetsubsubcategory.index' ? 'active open' : '' }} {{ Route::currentRouteName() == 'assets.report' ? 'active open' : '' }} ">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons bx bx-home-smile"></i>
+                
+                <i class="menu-icon1 tf-icons fa-solid fa-hand-holding-dollar"></i>
                 <div class="text-truncate" data-i18n="Dashboards">Assets Management</div>
             </a>
             <ul class="menu-sub">
@@ -252,9 +258,10 @@
         @endif
 
         @if(Auth::user()->access->liability == '1' || Auth::user()->access->liability == '2')
-        <li class="menu-item  {{ Route::currentRouteName() == 'liability.index' || Route::currentRouteName() == 'liabilitycategory.index' || Route::currentRouteName() == 'liabilitysubcategory.index' || Route::currentRouteName() == 'liabilitysubsubcategory.index' || Route::currentRouteName() == 'liabilityFixed' ? 'active open' : '' }}  ">
+        <li class="menu-item  {{ Route::currentRouteName() == 'liability.index' || Route::currentRouteName() == 'liabilitycategory.index' || Route::currentRouteName() == 'liabilitysubcategory.index' || Route::currentRouteName() == 'liabilitysubsubcategory.index' || Route::currentRouteName() == 'liabilityFixed' ? 'active open' : '' }}  {{ Route::currentRouteName() == 'liability.report' ? 'active open' : '' }}">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons bx bx-home-smile"></i>
+                
+                <i class="menu-icon1 tf-icons fa-solid fa-money-bill-wheat"></i>
                 <div class="text-truncate" data-i18n="Dashboards">Liabilities Management</div>
             </a>
             <ul class="menu-sub">
@@ -298,9 +305,10 @@
         @endif
 
         @if(Auth::user()->access->bankbook == '1' || Auth::user()->access->bankbook == '2')
-        <li class="menu-item  {{ Route::currentRouteName() == 'bankbook.index' || Route::currentRouteName() == 'banktransaction.index' ? 'active open' : '' }}">
+        <li class="menu-item {{  in_array(Route::currentRouteName(), ['bankbook.index', 'banktransaction.index', 'bankschedule.index', 'bankbook.report'])  ? 'active open'  : '' }}">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons bx bx-home-smile"></i>
+                
+                <i class="menu-icon1 tf-icons fa-solid fa-wallet"></i>
                 <div class="text-truncate" data-i18n="Dashboards">BankBooks Management</div>
             </a>
             <ul class="menu-sub">
@@ -312,6 +320,11 @@
                 <li class="menu-item {{ Route::currentRouteName() == 'banktransaction.index' ? 'active' : '' }}">
                     <a href="{{ route('banktransaction.index') }}" class="menu-link">
                         <div class="text-truncate" data-i18n="CRM">Bank Transactions</div>
+                    </a>
+                </li>
+                <li class="menu-item {{ Route::currentRouteName() == 'bankschedule.index' ? 'active' : '' }}">
+                    <a href="{{ route('bankschedule.index') }}" class="menu-link">
+                        <div class="text-truncate" data-i18n="CRM">Schedule Transfer</div>
                     </a>
                 </li>
                 <li class="menu-item {{ Route::currentRouteName() == 'bankbook.report' ? 'active' : '' }}">
@@ -327,7 +340,8 @@
         @if(Auth::user()->access->accounts == '1' || Auth::user()->access->accounts == '2')
         <li class="menu-item   ">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons bx bx-home-smile"></i>
+                
+                <i class="menu-icon1 tf-icons fa-solid fa-file-invoice"></i>
                 <div class="text-truncate" data-i18n="Dashboards">Accounts</div>
             </a>
             <ul class="menu-sub">
@@ -359,4 +373,20 @@
         @endif
         
     </ul>
+
+
+    <div class="aside-last-bar">
+        <p class="text-center text-secondary mb-1" style="font-size: 10px; font-weight: 300">
+            @php
+                $user = auth()->user();
+            @endphp
+            @if(auth()->user()->last_login_at)
+                Last login : {{ \Carbon\Carbon::parse(auth()->user()->last_login_at)->format('d M Y, h:i A') }}
+            @else
+                First login: {{ \Carbon\Carbon::parse($user->created_at)->format('d M Y, h:i A') }}
+            @endif
+        </p>
+        <h6 class="text-center text-primary" style="font-size: 12px">Software Version 1.0</h6>
+    </div>
+
 </aside>

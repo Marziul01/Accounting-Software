@@ -75,8 +75,8 @@
                         <td>{!! bn_number(number_format($initialAmount, 2)) !!}</td>
                     </tr>
                     <tr>
-                        <td><strong>হিসাব নাম্বার</strong></td>
-                        <td>#{{ $asset->slug }}{{ $asset->id }}</td>
+                        <td></td>
+                        <td></td>
                         <td><strong>মোট প্রদানকৃত ঋণের পরিমান</strong></td>
                         <td>{!! bn_number(number_format($depositInRange, 2)) !!}</td>
                     </tr>

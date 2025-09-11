@@ -23,6 +23,7 @@ use App\Http\Controllers\LiabilitySubSubCategoryController;
 use App\Http\Controllers\AssetSubSubCategoryController;
 use App\Http\Controllers\AssetTransactionController;
 use App\Http\Controllers\BankAccountController;
+use App\Http\Controllers\BankScheduleControllerController;
 use App\Http\Controllers\BankTransactionController;
 use App\Http\Controllers\CategoryTableSettings;
 use App\Http\Controllers\DetailedFinancialStatement;
@@ -46,6 +47,7 @@ use App\Models\Investment;
 use App\Models\InvestmentTransaction;
 use Illuminate\Support\Facades\Mail;
 use PHPUnit\Util\Exporter;
+use App\Http\Controllers\NotificationController;
 
 Route::get('/', [Homecontroller::class, 'index'])->name('home');
 
@@ -66,6 +68,16 @@ Route::middleware(['auth', 'user.only'])->group(function () {
     Route::get('/dashboard', [Homecontroller::class, 'dashboard'])->name('user.dashboard');
 
 });
+
+Route::get('/get-time', function () {
+    return response()->json([
+        'time' => now()->setTimezone('Asia/Dhaka')->format('Y-m-d H:i:s')
+    ]);
+})->name('get.time');
+
+Route::get('/notifications/unread', [NotificationController::class, 'unread'])->name('notifications.unread');
+Route::post('/notifications/mark-read', [NotificationController::class, 'markAsRead'])->name('notifications.markRead');
+Route::get('/notifications/{id}', [NotificationController::class, 'show'])->name('notifications.show');
 
 // Admin-only area
 Route::prefix('admin')->middleware(['auth:admin', 'admin.only'])->group(function () {
@@ -221,6 +233,10 @@ Route::prefix('admin')->middleware(['auth:admin', 'admin.only'])->group(function
     Route::get('/admin/investment/income/modal', [DashboardController::class, 'investmentincome'])->name('admin.investmentincome.modal');
     Route::get('/admin/investment/expense/modal', [DashboardController::class, 'investmentexpense'])->name('admin.investmentloss.modal');
     Route::get('/admin/bank/modal', [DashboardController::class, 'bankbook'])->name('admin.bankbook.modal');
+
+    Route::get('/notifications/all', [NotificationController::class, 'all'])->name('notifications.all');
+    Route::resource('bankschedule', BankScheduleControllerController::class);
+
 
 });
 
