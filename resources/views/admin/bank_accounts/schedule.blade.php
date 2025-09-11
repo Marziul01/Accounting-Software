@@ -202,10 +202,11 @@
                                             value="{{ $schedule->end_date }}">
                                     </div>
                                     <div class="col-12 mb-3 form-check p-0">
-                                        <input type="checkbox" class="form-check-input" id="editinfinite"
+                                        <input type="hidden" name="infinite" value="0">
+                                        <input type="checkbox" class="form-check-input me-2" id="editinfinites{{ $schedule->id }}"
                                             name="infinite" value="1"
-                                            {{ $schedule->infinite == 1 ? 'checked' : '' }} style="    margin-left: 15px;margin-right: 5px;">
-                                        <label class="form-check-label" for="editinfinite">Continue Indefinitely</label>
+                                            {{ $schedule->infinite == 1 ? 'checked' : '' }}>
+                                        <label class="form-check-label" for="editinfinites{{ $schedule->id }}">Continue Indefinitely</label>
                                     </div>
                                     <div class="col-12 mb-3">
                                         <button type="submit" class="btn btn-primary">Submit</button>
