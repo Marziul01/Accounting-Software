@@ -861,7 +861,7 @@ div:where(.swal2-container) button:where(.swal2-styled):where(.swal2-confirm) {
         height: 100vh !important;
     }
     .menu-inner{
-      height: fit-content !important;
+      height: 75vh !important;
     }
     .menu-vertical .menu-inner {
     flex: none;
