@@ -315,7 +315,7 @@
                     </tr>
                     <tr class="grand-total">
                         <td><strong>বর্তমান দায়</strong></td>
-                        <td class="tiro"><strong>{{ number_format($currentAmount, 2) }} টাকা</strong></td>
+                        <td class="tiro"><strong>{!! bn_number (number_format($currentAmount, 2)) !!} টাকা</strong></td>
                     </tr>
                 </tbody>
             </table>
