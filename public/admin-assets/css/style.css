@@ -866,4 +866,10 @@ div:where(.swal2-container) button:where(.swal2-styled):where(.swal2-confirm) {
     .menu-vertical .menu-inner {
     flex: none;
     }
+    .dataTables_length {
+        position: relative !important;
+    }
+    .dataTables_filter{
+      margin-top: -30px !important;
+    }
 }

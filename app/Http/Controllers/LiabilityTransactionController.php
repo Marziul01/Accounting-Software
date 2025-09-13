@@ -114,6 +114,10 @@ class LiabilityTransactionController extends Controller
 
         $asset->save();
 
+        $message = '';
+        $smsSent = 0;
+        $emailSent = 0;
+
         if($asset->category_id == 3 ){
             if( $asset->send_sms == 1){
                 if($request->transaction_type === 'Deposit'){

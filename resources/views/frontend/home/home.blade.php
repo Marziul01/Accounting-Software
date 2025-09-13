@@ -167,17 +167,12 @@
 
 @section('scripts')
     <script>
-        // Custom JavaScript can go here
-        console.log("Home page loaded");
-    </script>
-    <script>
         new Swiper('.mySwiper', {
             loop: true,
             autoplay: {
                 delay: 5000,
                 disableOnInteraction: false,
             },
-            autoplay: false,
             pagination: {
                 el: '.swiper-pagination',
                 clickable: true,
@@ -185,8 +180,8 @@
             slidesPerView: 1,
             spaceBetween: 20,
             allowTouchMove: true,
-            speed: 1000, // Slower = smoother (default is 300ms)
-            effect: 'slide', // Keep it simple
+            speed: 1000,
+            effect: 'slide',
         });
     </script>
 @endsection

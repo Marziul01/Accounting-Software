@@ -47,10 +47,10 @@
                                         <span class="badge btn-secondary d-flex align-items-center">
                                             <strong class="me-1">{{ $event['title'] }}</strong> 
                                             - {{ \Carbon\Carbon::parse($event['date'])->format('d F Y') }}
+                                            
                                             @if (isset($event['type']))
                                                 <span class="ms-1">({{ $event['type'] }})</span>
                                             @endif
-                                            
                                         </span>
                                     @endforeach
                                 </div>

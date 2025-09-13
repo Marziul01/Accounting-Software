@@ -200,6 +200,10 @@ class LiabilityController extends Controller
         $firsttransaction->description = $request->description;
         $firsttransaction->save();
 
+        $message = '';
+        $emailSent = 0;
+        $smsSent = 0;
+
         if($request->category_id == 3){
 
             if ($request->send_sms == 1 && $request->mobile) {
@@ -237,10 +241,6 @@ $site_name->site_owner";
 
 
             if ($request->send_email == 1) {
-                
-            }
-
-            if ($request->send_email == 1) {
                 try {
                     Mail::to($request->email)->send(new LiabilityInvoiceMail($assetsfdf, $request));
                     $emailSent = 1;
@@ -274,7 +274,7 @@ $site_name->site_owner";
             Notification::create([
                 
                 'sender_name' => $contact->name,
-                'message' => $message,
+                'message' => $message ,
                 'sent_date' => now(),
                 'email_sent' => $emailSent,
                 'sms_sent' => $smsSent,

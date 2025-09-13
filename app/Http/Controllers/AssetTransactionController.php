@@ -113,6 +113,10 @@ class AssetTransactionController extends Controller
 
         $asset->save();
 
+        $message = '';
+        $smsSent = 0;
+        $emailSent = 0;
+
         if($asset->category_id == 4 ){
             if( $asset->send_sms == 1){
                 if($request->transaction_type === 'Deposit'){

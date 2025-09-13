@@ -129,8 +129,8 @@
                             <div class="col-12 mb-3">
                                 <label>Transation Type</label>
                                 <select name="transaction_type" id="" class="form-select">
-                                    <option value="Deposit">জমা </option>
-                                    <option value="Withdraw">উত্তোলন</option>
+                                    <option value="Deposit"> উত্তোলন</option>
+                                    <option value="Withdraw">জমা</option>
                                 </select>
                             </div>
                             <div class="col-12 mb-3">
@@ -197,10 +197,10 @@
                                         <select name="transaction_type" id="" class="form-select">
                                             <option value="Deposit"
                                                 {{ $liabilityTransaction->transaction_type == 'Deposit' ? 'Selected' : '' }}>
-                                                জমা </option>
+                                                 উত্তোলন</option>
                                             <option value="Withdraw"
                                                 {{ $liabilityTransaction->transaction_type == 'Withdraw' ? 'Selected' : '' }}>
-                                                উত্তোলন</option>
+                                                জমা</option>
                                         </select>
                                     </div>
                                     <div class="col-12 mb-3">

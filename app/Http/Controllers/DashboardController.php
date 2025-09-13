@@ -164,36 +164,56 @@ class DashboardController extends Controller
         }
 
 
+        
         $occasions = SMSEMAILTEMPLATE::get();
         $events = collect();
 
         foreach ($occasions as $occasion) {
             if (in_array($occasion->occassion, ['Birthday', 'Anniversary']) && $occasion->contact_ids) {
                 $contactIds = explode(',', $occasion->contact_ids);
-
                 $contacts = Contact::whereIn('id', $contactIds)->get();
 
                 foreach ($contacts as $contact) {
-                    $eventDate = $occasion->occassion === 'Birthday' 
+                    $originalDate = $occasion->occassion === 'Birthday' 
                         ? $contact->date_of_birth 
                         : $contact->marriage_date;
 
-                    $events->push([
-                        'title' => $contact->name,
-                        'date'  => $eventDate,
-                        'type'  => $occasion->occassion,
-                    ]);
+                    if ($originalDate) {
+                        $date = Carbon::parse($originalDate);
+
+                        // Build the event date for this year
+                        $eventDate = Carbon::createFromDate(now()->year, $date->month, $date->day);
+
+                        // If already passed this year, shift to next year
+                        if ($eventDate->isBefore(now()->startOfDay())) {
+                            $eventDate->addYear();
+                        }
+
+                        $events->push([
+                            'title' => $contact->name,
+                            'date'  => $eventDate,
+                            'type'  => $occasion->occassion,
+                        ]);
+                    }
                 }
             } else {
-                $events->push([
-                    'title' => $occasion->occassion,
-                    'date'  => $occasion->custom_date,
-                ]);
+                if ($occasion->custom_date) {
+                    $eventDate = Carbon::parse($occasion->custom_date);
+
+                    if ($eventDate->isBefore(now()->startOfDay())) {
+                        $eventDate->addYear();
+                    }
+
+                    $events->push([
+                        'title' => $occasion->occassion,
+                        'date'  => $eventDate,
+                    ]);
+                }
             }
         }
 
-        // Sort by date and take max 5
-        $finalOccasions = $events->sortByDesc('date')->take(5);
+        // Sort by upcoming date and take next 5
+        $finalOccasions = $events->sortBy('date')->take(5);
 
 
         $startOfMonth = Carbon::now()->startOfMonth();

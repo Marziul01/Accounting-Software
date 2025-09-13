@@ -375,7 +375,7 @@
     </ul>
 
 
-    <div class="aside-last-bar">
+    <div class="aside-last-bar py-2">
         <p class="text-center text-secondary mb-1" style="font-size: 10px; font-weight: 300">
             @php
                 $user = auth()->user();
@@ -386,7 +386,7 @@
                 First login: {{ \Carbon\Carbon::parse($user->created_at)->format('d M Y, h:i A') }}
             @endif
         </p>
-        <h6 class="text-center text-primary" style="font-size: 12px">Software Version 1.0</h6>
+        <h6 class="text-center text-primary mb-0" style="font-size: 12px ">Software Version 1.0</h6>
     </div>
 
 </aside>
