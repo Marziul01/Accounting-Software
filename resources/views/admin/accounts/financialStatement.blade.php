@@ -493,6 +493,7 @@
         flatpickr(el, {
             dateFormat: "Y-m-d",
             defaultDate: el.value || null, // Do not use placeholder as default date
+            disableMobile: true
         });
     });
 </script>

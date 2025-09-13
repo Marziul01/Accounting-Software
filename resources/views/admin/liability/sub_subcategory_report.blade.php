@@ -133,7 +133,7 @@
                                     <th class="text-end">প্রারম্ভিক জমা / পূর্বের ব্যালেন্স</th>
                                     <th class="text-end">মোট জমা</th>
                                     <th class="text-end">মোট উত্তোলন</th>
-                                    <th class="text-end">পরিমাণ</th>
+                                    <th class="text-end">বর্তমান ব্যালেন্স</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -194,7 +194,7 @@
                                                 <span class="text-danger">অতিরিক্ত প্রদান : {!! bn_number(number_format(abs($currentAmount)), 2) !!}
                                                     Tk</span>
                                             @elseif ($currentAmount > 0)
-                                                <span class="text-danger">দায়: {!! bn_number(number_format($currentAmount, 2)) !!} Tk</span>
+                                                <span class="text-danger">দায়: {!! bn_number(number_format($currentAmount, 2)) !!} টাকা</span>
                                             @else
                                                 <span class="text-warning">পরিশোধিত </span>
                                             @endif

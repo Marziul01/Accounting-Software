@@ -431,7 +431,7 @@
                                             @if ($investment->investIncome->count() > 0)
                                                 @php $LongTermInvestmentIncomestotal += $investment->investIncome->sum('amount'); @endphp
                                                 <tr>
-                                                    <td>
+                                                    <td class="p-0">
                                                         <table class="w-full table-fixed border-0">
                                                             <thead></thead>
                                                             <tbody class="">

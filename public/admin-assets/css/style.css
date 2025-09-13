@@ -855,4 +855,9 @@ div:where(.swal2-container) button:where(.swal2-styled):where(.swal2-confirm) {
         max-height: 300px;
         top: 75px;
       }
+
+          .layout-menu-100vh .layout-menu
+ {
+        height: 100vh !important;
+    }
 }

@@ -132,7 +132,7 @@
                                     <th class="text-end">প্রারম্ভিক জমা / পূর্বের ব্যালেন্স</th>
                                     <th class="text-end">মোট জমা</th>
                                     <th class="text-end">মোট উত্তোলন</th>
-                                    <th class="text-end">পরিমাণ</th>
+                                    <th class="text-end">বর্তমান ব্যালেন্স</th>
                                 </tr>
                             </thead>
                             <tbody>

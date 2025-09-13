@@ -171,7 +171,7 @@
             <img src="{{ asset($setting->site_logo) }}" height="100%" class="img" alt="">
             <h3>{{ $setting->site_name_bangla }}</h3>
                 
-                    <h6>{{ $liability->name }} দায়ের রিপোর্ট</h6>
+                    <h6>{{ $liability->name }} এর দায়ের রিপোর্ট</h6>
                         <p class=""> {!! bn_number($startDate ?? 'সর্বপ্রথম') !!} ইং থেকে {!! bn_number($endDate ?? now()->format('Y-m-d')) !!} ইং পর্যন্ত </p>
         </div>
 

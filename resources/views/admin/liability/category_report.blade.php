@@ -180,7 +180,7 @@
                                             <th class="text-end">প্রারম্ভিক জমা / পূর্বের ব্যালেন্স</th>
                                             <th class="text-end">মোট জমা</th>
                                             <th class="text-end">মোট উত্তোলন</th>
-                                            <th class="text-end">পরিমাণ</th>
+                                            <th class="text-end">বর্তমান ব্যালেন্স</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -230,7 +230,7 @@
                                                 <td class="text-end tiro">{!! bn_number(number_format($depositInRange, 2)) !!} টাকা</td>
                                                 <td class="text-end tiro">{!! bn_number(number_format($withdrawInRange, 2)) !!} টাকা</td>
                                                 <td class="text-end tiro">
-                                                    {!! bn_number(number_format($currentAmount, 2)) !!} Tk
+                                                    {!! bn_number(number_format($currentAmount, 2)) !!} টাকা
                                                 </td>
                                             </tr>
                                         @endforeach

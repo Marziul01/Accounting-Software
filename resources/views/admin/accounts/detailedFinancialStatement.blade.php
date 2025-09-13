@@ -297,8 +297,8 @@
                                                                 <td class="p-0">
                                                                     <table class="w-full table-fixed">
                                                                         <tr>
-                                                                            <td class="w-2/3" style="border-top: 0px; border-bottom: 0px; border-left: 0px;">{{ $asset->name }}</td>
-                                                                            <td class="w-1/3 text-end" style="border-top: 0px; border-bottom: 0px; border-left: 0px;">{!! bn_number(number_format($currentAmount, 2)) !!}</td>
+                                                                            <td class="w-1/2" style="border-top: 0px; border-bottom: 0px; border-left: 0px;">{{ $asset->name }}</td>
+                                                                            <td class="w-1/2 text-end" style="border-top: 0px; border-bottom: 0px; border-left: 0px;">{!! bn_number(number_format($currentAmount, 2)) !!}</td>
                                                                         </tr>
                                                                     </table>
                                                                 </td>
@@ -375,8 +375,8 @@
                                                                 <td class="p-0">
                                                                     <table class="w-full table-fixed">
                                                                         <tr>
-                                                                            <td class="w-2/3" style="border-top: 0px; border-bottom: 0px; border-left: 0px;">{{ $liability->name }}</td>
-                                                                            <td class="w-1/3 text-end" style="border-top: 0px; border-bottom: 0px; border-left: 0px;">{!! bn_number(number_format($currentAmount, 2)) !!}</td>
+                                                                            <td class="w-1/2" style="border-top: 0px; border-bottom: 0px; border-left: 0px;">{{ $liability->name }}</td>
+                                                                            <td class="w-1/2 text-end" style="border-top: 0px; border-bottom: 0px; border-left: 0px;">{!! bn_number(number_format($currentAmount, 2)) !!}</td>
                                                                         </tr>
                                                                     </table>
                                                                 </td>
@@ -464,8 +464,8 @@
                                                                 <td class="p-0">
                                                                     <table class="w-full table-fixed">
                                                                         <tr>
-                                                                            <td class="w-2/3" style="border-top: 0px; border-bottom: 0px; border-left: 0px;">{{ $asset->name }}</td>
-                                                                            <td class="w-1/3 text-end" style="border-top: 0px; border-bottom: 0px; border-left: 0px;">{!! bn_number(number_format($currentAmount, 2)) !!}</td>
+                                                                            <td class="w-1/2" style="border-top: 0px; border-bottom: 0px; border-left: 0px;">{{ $asset->name }}</td>
+                                                                            <td class="w-1/2 text-end" style="border-top: 0px; border-bottom: 0px; border-left: 0px;">{!! bn_number(number_format($currentAmount, 2)) !!}</td>
                                                                         </tr>
                                                                     </table>
                                                                 </td>
@@ -543,8 +543,8 @@
                                                                 <td class="p-0">
                                                                     <table class="w-full table-fixed">
                                                                         <tr>
-                                                                            <td class="w-2/3" style="border-top: 0px; border-bottom: 0px; border-left: 0px;">{{ $liability->name }}</td>
-                                                                            <td class="w-1/3 text-end" style="border-top: 0px; border-bottom: 0px; border-left: 0px;">{!! bn_number(number_format($currentAmount, 2)) !!}</td>
+                                                                            <td class="w-1/2" style="border-top: 0px; border-bottom: 0px; border-left: 0px;">{{ $liability->name }}</td>
+                                                                            <td class="w-1/2 text-end" style="border-top: 0px; border-bottom: 0px; border-left: 0px;">{!! bn_number(number_format($currentAmount, 2)) !!}</td>
                                                                         </tr>
                                                                     </table>
                                                                 </td>
@@ -633,8 +633,8 @@
                                                             <td class="p-0">
                                                                 <table class="w-full table-fixed">
                                                                     <tr>
-                                                                        <td class="w-2/3" style="border-top: 0px; border-bottom: 0px; border-left: 0px;">{{ $investment->name }}</td>
-                                                                        <td class="w-1/3 text-end" style="border-top: 0px; border-bottom: 0px; border-left: 0px;">{!! bn_number(number_format($investmentAmount, 2)) !!}</td>
+                                                                        <td class="w-1/2" style="border-top: 0px; border-bottom: 0px; border-left: 0px;">{{ $investment->name }}</td>
+                                                                        <td class="w-1/2 text-end" style="border-top: 0px; border-bottom: 0px; border-left: 0px;">{!! bn_number(number_format($investmentAmount, 2)) !!}</td>
                                                                     </tr>
                                                                 </table>
                                                             </td>
@@ -735,8 +735,8 @@
                                                             <td class="p-0">
                                                                 <table class="w-full table-fixed">
                                                                     <tr>
-                                                                        <td class="w-2/3" style="border-top: 0px; border-bottom: 0px; border-left: 0px;">{{ $investment->name }}</td>
-                                                                        <td class="w-1/3 text-end" style="border-top: 0px; border-bottom: 0px; border-left: 0px;">{!! bn_number(number_format($investmentAmount, 2)) !!}</td>
+                                                                        <td class="w-1/2" style="border-top: 0px; border-bottom: 0px; border-left: 0px;">{{ $investment->name }}</td>
+                                                                        <td class="w-1/2 text-end" style="border-top: 0px; border-bottom: 0px; border-left: 0px;">{!! bn_number(number_format($investmentAmount, 2)) !!}</td>
                                                                     </tr>
                                                                 </table>
                                                             </td>
@@ -973,6 +973,7 @@
             flatpickr(el, {
                 dateFormat: "Y-m-d",
                 defaultDate: el.value || null, // Do not use placeholder as default date
+                disableMobile: true
             });
         });
     </script>
