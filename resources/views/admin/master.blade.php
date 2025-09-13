@@ -146,6 +146,7 @@
             flatpickr(el, {
                 dateFormat: "Y-m-d",
                 defaultDate: el.value || "today"
+                disableMobile: true
             });
         });
     </script>
