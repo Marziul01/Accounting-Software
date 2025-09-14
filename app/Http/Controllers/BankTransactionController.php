@@ -132,7 +132,7 @@ class BankTransactionController extends Controller
 
             $transferFromAccount = BankAccount::find($request->transfer_from);
             $transferToAccount = BankAccount::find($request->transfer_to);
-            $mesgtoslug = $transferFromAccount->bank_name . '-to-' . $transferToAccount->bank_name;
+            $mesgtoslug = $transferFromAccount->bank_name .'(' . $transferFromAccount->account_type  .')' . '-to-' . $transferToAccount->bank_name .'(' . $transferToAccount->account_type  .')';
             $toBaseSlug = \Str::slug($mesgtoslug);
             $toSlug = $toBaseSlug;
             $toCounter = 1;
@@ -146,7 +146,7 @@ class BankTransactionController extends Controller
             $from_id = BankTransaction::create([
                 'transaction_date' => $request->transaction_date,
                 'amount' => $request->amount,
-                'description' => $request->description ? $request->description . ' (Transfer to ' . BankAccount::find($request->transfer_to)->bank_name . ')' : 'Transfer to ' . BankAccount::find($request->transfer_to)->bank_name,
+                'description' => $request->description ? $request->description . ' (' . BankAccount::find($request->transfer_to)->bank_name . '('. BankAccount::find($request->transfer_to)->account_type .')'. '- এ ট্রান্সফার করা হয়েছে ।'.  ')' : BankAccount::find($request->transfer_to)->bank_name . '('. BankAccount::find($request->transfer_to)->account_type .')'. '- এ ট্রান্সফার করা হয়েছে ।' ,
                 'bank_account_id' => $request->transfer_from,
                 'transaction_type' => 'debit',
                 'name' => $mesgtoslug,
@@ -158,7 +158,7 @@ class BankTransactionController extends Controller
             BankTransaction::create([
                 'transaction_date' => $request->transaction_date,
                 'amount' => $request->amount,
-                'description' => $request->description ? $request->description . ' (Transfer from ' . BankAccount::find($request->transfer_from)->bank_name . ')' : 'Transfer from ' . BankAccount::find($request->transfer_from)->bank_name,
+                'description' => $request->description ? $request->description . BankAccount::find($request->transfer_from)->bank_name . '(' . BankAccount::find($request->transfer_from)->account_type .')'. '- থেকে ট্রান্সফার করা হয়েছে ।' . ')' : BankAccount::find($request->transfer_from)->bank_name . '(' . BankAccount::find($request->transfer_from)->account_type .')'. '- থেকে ট্রান্সফার করা হয়েছে ।',
                 'bank_account_id' => $request->transfer_to,
                 'transaction_type' => 'credit',
                 'name' => $mesgtoslug,
@@ -304,7 +304,7 @@ class BankTransactionController extends Controller
 
             $transferFromAccount = BankAccount::find($request->transfer_from);
             $transferToAccount = BankAccount::find($request->transfer_to);
-            $mesgtoslug = $transferFromAccount->bank_name . '-to-' . $transferToAccount->bank_name;
+            $mesgtoslug = $transferFromAccount->bank_name . '('. $transferFromAccount->account_type .')'. '-to-' . $transferToAccount->bank_name .'('. $transferToAccount->account_type .')';
             $toBaseSlug = \Str::slug($mesgtoslug);
             $toSlug = $toBaseSlug;
             $toCounter = 1;
@@ -318,7 +318,7 @@ class BankTransactionController extends Controller
             $from_id = BankTransaction::create([
                 'transaction_date' => $request->transaction_date,
                 'amount' => $request->amount,
-                'description' => $request->description ? $request->description . ' (Transfer to ' . BankAccount::find($request->transfer_to)->bank_name . ')' : 'Transfer to ' . BankAccount::find($request->transfer_to)->bank_name,
+                'description' => $request->description ? $request->description . ' (' . BankAccount::find($request->transfer_to)->bank_name . '('. BankAccount::find($request->transfer_to)->account_type .')'. '- এ ট্রান্সফার করা হয়েছে ।'.  ')' : BankAccount::find($request->transfer_to)->bank_name . '('. BankAccount::find($request->transfer_to)->account_type .')'. '- এ ট্রান্সফার করা হয়েছে ।' ,
                 'bank_account_id' => $request->transfer_from,
                 'transaction_type' => 'debit',
                 'name' => $mesgtoslug,
@@ -330,7 +330,7 @@ class BankTransactionController extends Controller
             BankTransaction::create([
                 'transaction_date' => $request->transaction_date,
                 'amount' => $request->amount,
-                'description' => $request->description ? $request->description . ' (Transfer from ' . BankAccount::find($request->transfer_from)->bank_name . ')' : 'Transfer from ' . BankAccount::find($request->transfer_from)->bank_name,
+                'description' => $request->description ? $request->description . BankAccount::find($request->transfer_from)->bank_name . '(' . BankAccount::find($request->transfer_from)->account_type .')'. '- থেকে ট্রান্সফার করা হয়েছে ।' . ')' : BankAccount::find($request->transfer_from)->bank_name . '(' . BankAccount::find($request->transfer_from)->account_type .')'. '- থেকে ট্রান্সফার করা হয়েছে ।',
                 'bank_account_id' => $request->transfer_to,
                 'transaction_type' => 'credit',
                 'name' => $mesgtoslug,

@@ -91,7 +91,7 @@ class ScheduleTransfer extends Command
                         continue;
                     }
 
-                    $mesgtoslug = 'Scheduled Transfer' . $transferFromAccount->bank_name . '-to-' . $transferToAccount->bank_name;
+                    $mesgtoslug = 'Scheduled Transfer' . $transferFromAccount->bank_name. '('. $transferFromAccount->account_type .')'  . '-to-' . $transferToAccount->bank_name .'('. $transferToAccount->account_type .')';
                     $toBaseSlug = Str::slug($mesgtoslug);
                     $toSlug = $toBaseSlug;
                     $toCounter = 1;
@@ -107,8 +107,8 @@ class ScheduleTransfer extends Command
                         'transaction_date' => $today,
                         'amount' => $schedule->amount,
                         'description' => $schedule->description 
-                            ? $schedule->description . ' (Transfer to ' . $transferToAccount->bank_name . ')' 
-                            : 'Transfer to ' . $transferToAccount->bank_name,
+                            ? $schedule->description . $transferToAccount->bank_name .'('. $transferToAccount->account_type .')'. '- এ ট্রান্সফার করা হয়েছে ।'  . ')' 
+                            : $transferToAccount->bank_name .'('. $transferToAccount->account_type .')'. '- এ ট্রান্সফার করা হয়েছে ।',
                         'bank_account_id' => $schedule->from,
                         'transaction_type' => 'debit',
                         'name' => $mesgtoslug,
@@ -122,8 +122,8 @@ class ScheduleTransfer extends Command
                         'transaction_date' => $today,
                         'amount' => $schedule->amount,
                         'description' => $schedule->description 
-                            ? $schedule->description . ' (Transfer from ' . $transferFromAccount->bank_name . ')' 
-                            : 'Transfer from ' . $transferFromAccount->bank_name,
+                            ? $schedule->description . $transferFromAccount->bank_name . '(' . $transferFromAccount->account_type .')'. '- থেকে ট্রান্সফার করা হয়েছে ।' . ')'
+                            : $transferFromAccount->bank_name . '(' . $transferFromAccount->account_type .')'. '- থেকে ট্রান্সফার করা হয়েছে ।',
                         'bank_account_id' => $schedule->to,
                         'transaction_type' => 'credit',
                         'name' => $mesgtoslug,
