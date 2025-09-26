@@ -131,6 +131,22 @@
     --gradient-angle: 360deg;
   }
 }
+
+.loader-custom {
+  width: 28px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: #00a652 ;
+  animation: l2 1.5s infinite;
+}
+@keyframes l2 {
+  0%,
+  100%{transform:translate(-35px);box-shadow:  0     0 #f8a619, 0     0 #F10C49}
+  40% {transform:translate( 35px);box-shadow: -15px  0 #f8a619,-30px  0 #F10C49}
+  50% {transform:translate( 35px);box-shadow:  0     0 #f8a619, 0     0 #F10C49}
+  90% {transform:translate(-35px);box-shadow:  15px  0 #f8a619, 30px  0 #F10C49}
+}
+
 @media (max-width: 768px) {
     .flex-container {
         flex-direction: column;

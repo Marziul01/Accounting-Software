@@ -8,6 +8,13 @@
   --table-even-row: #fff3cd;
 }
 
+.aside-last-bar{
+      background: #c4e7d7 ;
+      width: 94%;
+    margin: auto;
+    border-radius: 5px;
+  }
+
 [data-theme="dark"] {
   --bg-color: #121212;
   --text-color: #e0e0e0;
@@ -17,6 +24,9 @@
 
   .bg-label-success {
     color: rgb(53, 53, 53) !important;
+  }
+  .aside-last-bar{
+      background: #183b2a ;
   }
 }
 
@@ -765,6 +775,19 @@ div:where(.swal2-container) button:where(.swal2-styled):where(.swal2-confirm) {
       border-top: 1px solid #8d8d8d;
       font-size: 11px;
     }
+    .aside-last-bar{
+      background: #c4e7d7 ;
+    }
+    div:where(.swal2-icon).swal2-warning {
+    border-color: #ff0000;
+    color: #ff0000;
+}
+div:where(.swal2-container).swal2-center>.swal2-popup {
+    background: var(--card-bg) !important;
+  }
+  div:where(.swal2-container) div:where(.swal2-html-container){
+    color: var(--text-color) !important;
+  }
 @media screen and (max-width: 768px) {
 
   .dt-buttons,
@@ -838,16 +861,31 @@ div:where(.swal2-container) button:where(.swal2-styled):where(.swal2-confirm) {
   }
 
   div:where(.swal2-container).swal2-center>.swal2-popup {
-    width: 80% !important;
+    width: 65% !important;
   }
 
   div:where(.swal2-icon) {
-    width: 4em;
-    height: 4em;
+    width: 3em;
+    height: 3em;
   }
-
+div:where(.swal2-icon) .swal2-icon-content{
+    font-size: 2.65em !important;
+}
+div:where(.swal2-container) h2:where(.swal2-title){
+    font-size: 18px !important;
+    line-height: 36px !important;
+}
   div:where(.swal2-container) h2:where(.swal2-title) {
     padding: 0;
+  }
+  div:where(.swal2-container) div:where(.swal2-html-container){
+    font-size: 12px !important;
+    padding: 0px 10px !important;
+    margin: 0px !important;
+  }
+  div:where(.swal2-container) button:where(.swal2-styled):not([disabled]){
+    font-size: 12px !important;
+    padding: 10px !important;
   }
    .notification-dropdown {
         position: fixed;
@@ -871,5 +909,20 @@ div:where(.swal2-container) button:where(.swal2-styled):where(.swal2-confirm) {
     }
     .dataTables_filter{
       margin-top: -30px !important;
+    }
+    .bank_card_icon{
+      display: none !important;
+    }
+    .bank_card_info{
+      width: 100% !important;
+      text-align: left !important;
+    }
+    .bank_card_info h4{
+      text-align: left !important;
+      font-size: 14px !important;
+    }
+    .bank_card_info .bank_type.float-right{
+      float: none !important;
+      margin-top: 5px !important;
     }
 }

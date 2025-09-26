@@ -17,7 +17,7 @@
                                 <th>Sl</th>
                                 <th>Bank Name</th>
                                 <th>Transaction Name</th>
-                                <th>Transaction Id</th>
+                               
                                 <th>Amount</th>
                                 <th>Transaction Date</th>
                                 <th>Transaction Type</th>
@@ -278,10 +278,6 @@
                         {
                             data: 'name',
                             name: 'name'
-                        },
-                        {
-                            data: 'transaction_id',
-                            name: 'transaction_id'
                         },
                         {
                             data: 'amount',

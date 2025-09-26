@@ -18,7 +18,6 @@
                         class="btn btn-primary {{ Auth::user()->access->sms_and_email == 1 ? 'disabled' : '' }}"
                         data-bs-toggle="modal" data-bs-target="#addmodals">Add New Occasion</button>
                 </div>
-
             </div>
             <div class="card-body m-0">
                 <div class="row g-2">

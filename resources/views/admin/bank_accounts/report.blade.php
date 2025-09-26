@@ -30,6 +30,8 @@
                 </div>
                 
             </div>
+        </div>
+        <div class="card-footer d-flex justify-content-start gap-2">
             <div class="mobile-reports-filter-btns">
                 <button id="filterButton" class="btn btn-primary"
                     data-url="{{ route('admin.filteredBankTransactions') }}">

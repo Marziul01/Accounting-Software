@@ -1,7 +1,7 @@
 <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
     <div class="app-brand demo">
         <a href="{{ route('admin.dashboard') }}" class="app-brand-link justify-content-center">
-            <img src="{{ asset('admin-assets/img/logo.png') }}" alt="Logo" class="app-brand-logo demo" height="100%" width="40%" />
+            <img src="{{ asset($setting->site_logo) }}" alt="Logo" class="app-brand-logo demo" height="100%" width="40%" />
         </a>
 
         <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto d-block d-xl-none">
@@ -67,6 +67,11 @@
                 <div class="text-truncate" data-i18n="Dashboards">SMS and Email</div>
             </a>
             <ul class="menu-sub">
+                <li class="menu-item {{ Route::currentRouteName() == 'sendSMSEmail' ? 'active' : '' }}">
+                    <a href="{{ route('sendSMSEmail') }}" class="menu-link">
+                        <div class="text-truncate" data-i18n="Analytics"> Send SMS and Email</div>
+                    </a>
+                </li>
                 <li class="menu-item {{ Route::currentRouteName() == 'occassion' ? 'active' : '' }}">
                     <a href="{{ route('occassion') }}" class="menu-link">
                         <div class="text-truncate" data-i18n="Analytics"> Occasional SMS and Email</div>
@@ -337,6 +342,16 @@
         </li>
         @endif
 
+        @if(Auth::user()->access->history_access == '1' || Auth::user()->access->history_access == '2')
+        <li class="menu-item {{ Route::currentRouteName() == 'transaction.history' ? 'active' : '' }}">
+            <a href="{{ route('transaction.history') }}"
+                class="menu-link">
+                <i class="menu-icon1 tf-icons fa-solid fa-clock-rotate-left"></i>
+                <div class="text-truncate" data-i18n="Email">Transactions History </div>
+            </a>
+        </li>
+        @endif
+
         @if(Auth::user()->access->accounts == '1' || Auth::user()->access->accounts == '2')
         <li class="menu-item   ">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
@@ -376,7 +391,7 @@
 
 
     <div class="aside-last-bar py-2">
-        <p class="text-center text-secondary mb-1" style="font-size: 10px; font-weight: 300">
+        <p class="text-center text-secondary mb-1" style="font-size: 10px; font-weight: 500">
             @php
                 $user = auth()->user();
             @endphp

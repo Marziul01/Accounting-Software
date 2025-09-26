@@ -40,8 +40,9 @@
     <!-- # preloader
     ================================================== -->
     <div id="preloader">
-        <div id="loader">
-        </div>
+        {{-- <div id="loader">
+        </div> --}}
+        <div class="loader-custom"></div>
     </div>
 
 

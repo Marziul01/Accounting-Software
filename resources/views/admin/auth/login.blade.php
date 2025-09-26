@@ -60,7 +60,7 @@
                         <!-- Logo -->
                         <div class="app-brand justify-content-center" style="overflow: visible">
                             <a href="index.html" class="login app-brand-link gap-2">
-                                <img src="{{ asset( 'admin-assets' )  }}/img/logo.png" alt="Logo" class="logo" width="75%" />
+                                <img src="{{ asset($setting->site_logo) }}" alt="Logo" class="logo" width="75%" />
                             </a>
                         </div>
 

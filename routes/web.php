@@ -48,6 +48,8 @@ use App\Models\InvestmentTransaction;
 use Illuminate\Support\Facades\Mail;
 use PHPUnit\Util\Exporter;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\SendSMSEmailController;
+use App\Http\Controllers\TransactionHistory;
 
 Route::get('/', [Homecontroller::class, 'index'])->name('home');
 
@@ -236,6 +238,18 @@ Route::prefix('admin')->middleware(['auth:admin', 'admin.only'])->group(function
 
     Route::get('/notifications/all', [NotificationController::class, 'all'])->name('notifications.all');
     Route::resource('bankschedule', BankScheduleControllerController::class);
+    Route::get('/all/transactions/history', [TransactionHistory::class, 'index'])->name('transaction.history');
+    Route::get('/send/SMS/Email', [SendSMSEmailController::class, 'sendSMSEmail'])->name('sendSMSEmail');
+
+    Route::get('/admin/edit/investment/transaction/modal/{id}', [TransactionHistory::class, 'editinvestmenttransaction'])->name('admin.editinvestmenttransaction.modal');
+    Route::get('/admin/edit/income/modal/{id}', [TransactionHistory::class, 'editincome'])->name('admin.editincome.modal');
+    Route::get('/admin/edit/expense/modal/{id}', [TransactionHistory::class, 'editexpense'])->name('admin.editexpense.modal');
+    Route::get('/admin/edit/asset/transaction/modal/{id}', [TransactionHistory::class, 'editassettransaction'])->name('admin.editassettransaction.modal');
+    Route::get('/admin/edit/liability/transaction/modal/{id}', [TransactionHistory::class, 'editliabilitytransaction'])->name('admin.editliabilitytransaction.modal');
+    Route::get('/admin/edit/bank/transaction/modal/{id}', [TransactionHistory::class, 'editbanktransaction'])->name('admin.editbanktransaction.modal');
+
+    Route::post('/send/SMS', [SendSMSEmailController::class, 'sendSMS'])->name('admin.send.sms');
+    Route::post('/send/Email', [SendSMSEmailController::class, 'sendEmail'])->name('admin.send.email');
 
 
 });

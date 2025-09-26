@@ -47,7 +47,9 @@
                                                 'asset' => 'Asset',
                                                 'liability' => 'Liability',
                                                 'bankbook' => 'Bankbook',
+                                                'history_access' => 'Transactions History',
                                                 'accounts' => 'Accounts',
+                                                
                                             ];
 
                                             foreach ($accessItems as $field => $label) {
@@ -226,6 +228,15 @@
                             </div>
 
                             <div class="col-6 mb-3">
+                                <label>Transactions History</label>
+                                <select name="history_access" id="" class="form-select">
+                                    <option value="1">View Only</option>
+                                    <option value="2">Full Access</option>
+                                    <option value="3">Hide Menu</option>
+                                </select>
+                            </div>
+
+                            <div class="col-6 mb-3">
                                 <label>Accounts</label>
                                 <select name="accounts" id="" class="form-select">
                                     <option value="1">View Only</option>
@@ -367,6 +378,15 @@
                                                 <option value="1" {{ $user->access->bankbook == 1 ? 'selected' : '' }}>View Only</option>
                                                 <option value="2" {{ $user->access->bankbook == 2 ? 'selected' : '' }}>Full Access</option>
                                                 <option value="3" {{ $user->access->bankbook == 3 ? 'selected' : '' }}>Hide Menu</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="col-6 mb-3">
+                                            <label>Transactions History</label>
+                                            <select name="history_access" id="" class="form-select">
+                                                <option value="1" {{ $user->access->history_access == 1 ? 'selected' : '' }}>View Only</option>
+                                                <option value="2" {{ $user->access->history_access == 2 ? 'selected' : '' }}>Full Access</option>
+                                                <option value="3" {{ $user->access->history_access == 3 ? 'selected' : '' }}>Hide Menu</option>
                                             </select>
                                         </div>
 

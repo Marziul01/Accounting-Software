@@ -58,6 +58,7 @@ class UserController extends Controller
             'asset' => $request->asset,
             'liability' => $request->liability,
             'bankbook' => $request->bankbook,
+            'history_access' => $request->history_access,
             'accounts' => $request->accounts,
         ]);
 
@@ -100,6 +101,7 @@ class UserController extends Controller
             'asset' => $request->asset,
             'liability' => $request->liability,
             'bankbook' => $request->bankbook,
+            'history_access' => $request->history_access,
             'accounts' => $request->accounts,
         ]);
         // Return success response

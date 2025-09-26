@@ -29,11 +29,11 @@
                             <div class="card-body">
                                 <p class="position-absolute badge bg-success" style="top: -10px; left: -5px;">{{ $loop->iteration }}</p>
                                 <div>
-                                    <div class="d-flex align-items-center justify-content-between gap-2 mb-3">
+                                    <div class="d-flex align-items-start justify-content-between gap-2 mb-3">
                                         <i class="bx bx-wallet bx-lg text-info bank_card_icon"></i>
                                         <div class="bank_card_info">
                                             <h4> {{ $bankbook->bank_name }}</h4>
-                                            <p class="mb-2"> Branch : {{ $bankbook->branch_name }} </p>
+                                            <p class="mb-2" style="font-size: 12px;"> Branch : {{ $bankbook->branch_name }} </p>
                                             <p class="bank_type float-right"> {{ $bankbook->account_type }} </p>
                                         </div>
                                     </div>

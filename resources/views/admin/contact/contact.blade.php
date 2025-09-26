@@ -290,7 +290,7 @@
                                         <!-- Image preview -->
                                         <div class="mb-2">
                                             <img class="preview-img"
-                                                src="{{ isset($contact->image) ? asset($contact->image) : '' }}"
+                                                src="{{ isset($contact->image) && \Illuminate\Support\Facades\File::exists(public_path($contact->image)) ? asset($contact->image) : asset('admin-assets/img/cropped_circle_image_(16).png') }}"
                                                 style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover;" />
                                             <button type="button" class="btn btn-sm btn-secondary crop-existing-btn mt-2"
                                                 {{ isset($contact->image) ? '' : 'style=display:none;' }}>Crop Existing

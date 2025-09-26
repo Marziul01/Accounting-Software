@@ -102,6 +102,21 @@ class ExpenseController extends Controller
             'slug' => 'required|string|max:255',
         ]);
 
+        if ($request->has('bank_account_id') && $request->bank_account_id) {
+                $bankAccount = BankAccount::find($request->bank_account_id);
+                
+                $balance = $bankAccount->transactions()->where('transaction_type', 'credit')->sum('amount')
+                        - $bankAccount->transactions()->where('transaction_type', 'debit')->sum('amount') ;
+
+                if ($bankAccount && $request->amount > $balance) {
+                    return response()->json([
+                        'errors' => [
+                            'amount' => ['Expense amount cannot be greater than the bank balance.']
+                        ]
+                    ], 422);
+                }
+            }
+
         $baseSlug = $request->slug;
         $slug = $baseSlug;
         $counter = 1;
