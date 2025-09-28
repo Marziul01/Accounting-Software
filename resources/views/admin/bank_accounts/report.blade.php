@@ -9,7 +9,7 @@
             <h5 class="mb-0">Bank Account Transactions Report</h5>
         </div>
         <div class="card-body d-flex flex-column justify-content-between flex-md-row gap-2 align-items-start align-items-md-end">
-            <div class="d-flex flex-column flex-md-row gap-2 align-items-start align-items-md-end mobile-reports-filter">
+            <div class="d-flex flex-column flex-md-row gap-2 align-items-end align-items-md-end mobile-reports-filter">
                 <div class="mobile-reports-filter-group">
                     <label for="start_date">Start Date:</label>
                     <input type="date" id="start_date" class="form-control myDate" value="{{ $startDate }}">
@@ -30,21 +30,22 @@
                 </div>
                 
             </div>
-        </div>
-        <div class="card-footer d-flex justify-content-start gap-2">
-            <div class="mobile-reports-filter-btns">
-                <button id="filterButton" class="btn btn-primary"
-                    data-url="{{ route('admin.filteredBankTransactions') }}">
-                    Filter Transactions
-                </button>
-                <button
-                    id="bankAccountReportBtn"
-                    data-base-url="{{ route('admin.report.bankaccount', ['id' => 'BANKACCOUNT_ID']) }}"
-                    class="btn btn-primary">
-                    Bank Account Report
-                </button>
+            <div class="card-footer d-flex justify-content-end gap-2 w-100 p-0 border-0">
+                <div class="mobile-reports-filter-btns">
+                    <button id="filterButton" class="btn btn-primary"
+                        data-url="{{ route('admin.filteredBankTransactions') }}">
+                        Filter Transactions
+                    </button>
+                    <button
+                        id="bankAccountReportBtn"
+                        data-base-url="{{ route('admin.report.bankaccount', ['id' => 'BANKACCOUNT_ID']) }}"
+                        class="btn btn-primary">
+                        Bank Account Report
+                    </button>
+                </div>
             </div>
         </div>
+        
         
     </div>
 

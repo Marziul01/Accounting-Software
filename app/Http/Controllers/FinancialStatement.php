@@ -506,7 +506,7 @@ class FinancialStatement extends Controller
             - ( $totalExpensesExcludingCat7 + $totalExpensesCat7 + $totalInvestDeposit+ $totalCurrentAssetDeposit + $totalLongLiabilityWithdraw + $totalShortLiabilityWithdraw + $totalBankDeposit + $totalFixedAsset ) + $totalpreviousBalance ;
 
         // $handCash = $currrentBalance - ($totalBankDeposit - $totalBankWithdraw);
-        $handCash = $currrentBalance;
+        $handCash = $currrentBalance - ($totalBankDeposit - $totalBankWithdraw); //updated
 
         return view('admin.accounts.financialStatement',[
             'totalInvestDeposit'  => $totalInvestDeposit,
@@ -540,4 +540,5 @@ class FinancialStatement extends Controller
             'totalInvestAmount' => $totalInvestAmount,
         ]);
     }
+
 }

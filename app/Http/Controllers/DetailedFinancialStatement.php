@@ -505,7 +505,7 @@ class DetailedFinancialStatement extends Controller
             - ( $totalExpensesExcludingCat7 + $totalExpensesCat7 + $totalInvestDeposit + $totalCurrentAssetDeposit + $totalLongLiabilityWithdraw + $totalShortLiabilityWithdraw + $totalBankDeposit + $totalFixedAsset ) + $totalpreviousBalance ;
 
         // $handCash = $currrentBalance - ($totalBankDeposit - $totalBankWithdraw);
-        $handCash = $currrentBalance;
+        $handCash = $currrentBalance - ($totalBankDeposit - $totalBankWithdraw); //updated
 
         return view('admin.accounts.detailedFinancialStatement',[
             'totalInvestDeposit'  => $totalInvestDeposit,

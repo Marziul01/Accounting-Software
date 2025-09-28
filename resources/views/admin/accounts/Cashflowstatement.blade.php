@@ -625,10 +625,10 @@
                         $bankBalance = $totalBankDeposit - $totalBankWithdraw;
 
                         // $handcash = $closingBalance - $bankBalance;
-                        $handcash = $closingBalance;
+                        $handcash = $closingBalance - $bankBalance;;
 
                         // Total cash (hand + bank)
-                        $totalCash = $handcash + $bankBalance;
+                        $totalCash = $closingBalance
                     @endphp
 
                     <tbody>

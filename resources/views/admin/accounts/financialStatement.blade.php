@@ -261,16 +261,22 @@
                                     )</span>
                             </td>
                             @php
-                                $totalEquity =
-                                    $totalBankDeposit -
-                                    $totalBankWithdraw +
-                                    $totalInvestAmount +
+                                $totalAssets =
+                                    ( $totalCurrentAssetDeposit -
+                                    $totalCurrentAssetWithdraw ) +
                                     $totalFixedAsset +
+                                    $totalInvestAmount +
                                     $handCash +
-                                    ($totalCurrentAssetDeposit - $totalCurrentAssetWithdraw) -
-                                    ($totalShortLiabilityDeposit -
-                                        $totalShortLiabilityWithdraw +
-                                        ($totalLongLiabilityDeposit - $totalLongLiabilityWithdraw));
+                                    ($totalBankDeposit - $totalBankWithdraw);
+                            @endphp
+                            @php
+                                $totalLiabilities =
+                                    ( $totalShortLiabilityDeposit -
+                                    $totalShortLiabilityWithdraw ) +
+                                    ($totalLongLiabilityDeposit - $totalLongLiabilityWithdraw);
+                            @endphp
+                            @php
+                                $totalEquity = $totalAssets - $totalLiabilities;
                             @endphp
                             <td class="text-end">{!! bn_number(number_format($totalEquity, 2)) !!}</td>
 
@@ -312,23 +318,11 @@
                         </tr>
                         <tr class="bg-gray-100">
                             <td class="font-semibold text-right">মোট সম্পদ সমূহ =</td>
-                            @php
-                                $totalAssets =
-                                    $totalCurrentAssetDeposit -
-                                    $totalCurrentAssetWithdraw +
-                                    $totalFixedAsset +
-                                    $totalInvestAmount +
-                                    $handCash +
-                                    ($totalBankDeposit - $totalBankWithdraw);
-                            @endphp
+                            
                             <td class="font-semibold text-end"> {!! bn_number(number_format($totalAssets, 2)) !!} </td>
                             <td class="font-semibold text-right">মোট দায় সমূহ ও মালিকানা সত্ত্ব =</td>
                             @php
-                                $totalLiabilitiesAndEquity =
-                                    $totalShortLiabilityDeposit -
-                                    $totalShortLiabilityWithdraw +
-                                    ($totalLongLiabilityDeposit - $totalLongLiabilityWithdraw) +
-                                    $totalEquity;
+                                $totalLiabilitiesAndEquity = $totalLiabilities + $totalEquity;
                             @endphp
                             <td class="font-semibold text-end">{!! bn_number(number_format($totalLiabilitiesAndEquity, 2)) !!}</td>
                         </tr>

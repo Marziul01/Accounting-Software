@@ -8,28 +8,36 @@
             </div>
             <div class="card-header d-flex flex-column justify-content-between align-items-start border-bottom-1 gap-2 ">
                 <!-- Date Range -->
-                <div class="d-flex align-items-start justify-content-start gap-2 flex-column flex-md-row align-items-md-end mobile-reports-filter">
-                    <div class="form-group mobile-reports-filter-group">
-                        <label class="form-label" for="start_date">Select Start Date:</label>
-                        <input type="date" id="startDate" class="form-control form-control-sm myDate">
-                    </div>
+                <div class="d-flex align-items-start justify-content-between gap-2 flex-column flex-md-row align-items-md-end mobile-reports-filter w-100">
+                    <div class="d-flex gap-2 align-items-md-end mobile-reports-filter ">
+                        <div class="form-group mobile-reports-filter-group">
+                            <label class="form-label" for="start_date">Select Start Date:</label>
+                            <input type="date" id="startDate" class="form-control form-control-sm myDate">
+                        </div>
 
-                    <div class="form-group mobile-reports-filter-group">
-                        <label class="form-label" for="end_date">Select End Date:</label>
-                        <input type="date" id="endDate" class="form-control form-control-sm myDate">
+                        <div class="form-group mobile-reports-filter-group">
+                            <label class="form-label" for="end_date">Select End Date:</label>
+                            <input type="date" id="endDate" class="form-control form-control-sm myDate">
+                        </div>
                     </div>
                     
+                    <div class="mobile-reports-filter-btns">
+                        <button class="btn btn-outline-success" id="dateFilterBtn">Filter by Date</button>
+                        <button class="btn btn-outline-secondary quick-filter" data-period="today">Today</button>
+                        <button class="btn btn-outline-secondary quick-filter" data-period="month">This Month</button>
+                        <button class="btn btn-outline-secondary quick-filter" data-period="year">This Year</button>
+                    </div>                    
                 </div>
 
                 <!-- Quick Filters -->
-                <div class="d-flex mt-2 gap-2 align-items-md-start justify-content-md-start form-group mobile-reports-filter-btns">
+                {{-- <div class="d-flex mt-2 gap-2 align-items-md-start justify-content-md-start form-group mobile-reports-filter-btns">
                     <button class="btn btn-outline-success" id="dateFilterBtn">Filter by Date</button>
                     <button class="btn btn-outline-secondary quick-filter" data-period="today">Today</button>
                     <button class="btn btn-outline-secondary quick-filter" data-period="month">This Month</button>
                     <button class="btn btn-outline-secondary quick-filter" data-period="year">This Year</button>
-                </div>
+                </div> --}}
 
-                <div id="transactionTypeFilters" class="d-flex mt-2 gap-2 align-items-md-start justify-content-md-start form-group mobile-reports-filter-btns">
+                <div id="transactionTypeFilters" class="d-flex mt-2 gap-2 align-items-md-start justify-content-md-between form-group mobile-reports-filter-btns">
                     <button class="btn btn-primary filter-btn" data-type="">All</button>
                     <button class="btn btn-outline-primary filter-btn" data-type="Investment">Investment Transaction</button>
                     <button class="btn btn-outline-primary filter-btn" data-type="Income">Income Transaction</button>
@@ -52,9 +60,10 @@
                                 <th>Sl</th>
                                 <th>Transaction of</th>
                                 <th>Name</th>
-                                <th>Transaction Type</th>
-                                <th>Date</th>
+                                <th>TRNS. TYPE</th>
+                                
                                 <th>Amount</th>
+                                <th>Date</th>
                                 <th>Description</th>
                                 <th>Actions</th>
                             </tr>
