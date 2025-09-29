@@ -140,9 +140,7 @@
 
     <div id="fullscreenLoader" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999;">
         <div style="display:flex; justify-content:center; align-items:center; width:100%; height:100%;">
-             <div class="spinner-border text-light" role="status" style="width: 4rem; height: 4rem;">
-                <span class="visually-hidden">Loading...</span>
-            </div>
+            <div class="loader-custom"></div>
         </div>
     </div>
 

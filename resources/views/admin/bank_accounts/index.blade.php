@@ -6,15 +6,21 @@
         <div class="card ">
             <div class="card-header d-flex justify-content-between align-items-center border-bottom-1"> 
                 <h5 class="mb-0">BankBooks</h5>
+                <div class=" d-flex gap-3 align-items-start flex-column flex-md-row justify-content-md-end">
+                <div class="">
+                        <input type="text" class="form-control" id="occasionSearch"
+                            placeholder="Search by Bank name...">
+                    </div>
                 <button type="button" class="btn btn-primary {{ Auth::user()->access->bankbook == 1 ? 'disabled' : '' }}" data-bs-toggle="modal" data-bs-target="#addmodals">Add New
                     BankBook</button>
+                </div>
             </div>
             <div class="card-body m-0">
                 <div class="row g-2">
                 @if ($bankbooks->isNotEmpty())
                     @foreach ($bankbooks as $bankbook)
                     <div class="col-12 col-sm-6 col-lg-4 col-xxl-3 mb-2">
-                        <div class="card contact-card h-100">
+                        <div class="card contact-card h-100 searchable-card" data-name="{{ strtolower($bankbook->bank_name ?? '') }}">
                             <div class="card-header d-flex justify-content-between">
                                 <a class=" btn btn-sm btn-outline-secondary {{ Auth::user()->access->bankbook == 1 ? 'disabled' : '' }}" href="" data-bs-toggle="modal"
                                     data-bs-target="#editModal{{ $bankbook->id }}"><i class="bx bx-edit-alt me-1"></i>
@@ -618,4 +624,29 @@
             });
         });
     </script>
+
+    <script>
+document.addEventListener('DOMContentLoaded', function () {
+  const input = document.getElementById('occasionSearch');
+  if (!input) return;
+
+  const cards = Array.from(document.querySelectorAll('.searchable-card')); 
+  // ✅ same class as before
+
+  const textNorm = s => (s || '').toString().toLowerCase().trim();
+
+  input.addEventListener('input', function (e) {
+    const q = textNorm(e.target.value);
+
+    cards.forEach(card => {
+      const name = textNorm(card.dataset.name);
+      const matches = q === '' || name.includes(q);
+
+      // hide/show the whole column (so layout doesn’t leave gaps)
+      const col = card.closest('.col-12, .col-sm-6, .col-lg-4, .col-xxl-3, .mb-2') || card;
+      col.style.display = matches ? '' : 'none';
+    });
+  });
+});
+</script>
 @endsection

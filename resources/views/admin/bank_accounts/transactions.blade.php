@@ -16,11 +16,10 @@
                             <tr>
                                 <th>Sl</th>
                                 <th>Bank Name</th>
-                                <th>Transaction Name</th>
-                               
+                                <th style="width: 200px !important;">TRANS. Name</th>
                                 <th>Amount</th>
-                                <th>Transaction Date</th>
-                                <th>Transaction Type</th>
+                                <th>TRANS. DATE</th>
+                                <th>TRANS. Type</th>
                                 <th>Description</th>
                                 <th>Actions</th>
                             </tr>
@@ -302,9 +301,20 @@
                             searchable: false
                         }
                     ],
-                    order: [
-                        [5, 'desc']
-                    ]
+                    columnDefs: [
+                        { 
+                            targets: 2, // 👈 "name" column (0-based index: 0=DT_RowIndex, 1=type, 2=name)
+                            createdCell: function (td) {
+                                $(td).css({
+                                    "white-space": "normal", // allows wrapping
+                                    "word-break": "break-word" // ensures long words also break
+                                });
+                            }
+                        }
+                    ],
+                    language: {
+                        processing: '<div class="loader-custom1"></div>'
+                    }
                 });
             });
         </script>

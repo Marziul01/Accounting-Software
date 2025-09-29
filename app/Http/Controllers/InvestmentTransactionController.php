@@ -57,11 +57,17 @@ class InvestmentTransactionController extends Controller
             'transaction_date' => 'required|date',
         ]);
 
-        // Create a new asset sub-subcategory
-        $investmentTransaction = InvestmentTransaction::create($request->all());
-
-        // Update the asset amount based on the transaction type
         $investment = Investment::findOrFail($request->investment_id);
+
+        $currentInvestAmount = $investment->transactions()->where('transaction_type', 'Deposit')->sum('amount')
+                                - $investment->transactions()->where('transaction_type', 'Withdraw')->sum('amount') - $investment->investExpense->sum('amount') ?? 0;
+        if ($request->transaction_type === 'Withdraw' && $request->amount > $currentInvestAmount) {
+            return response()->json([
+                'errors' => [
+                    'amount' => ['Withdraw amount cannot be greater than the current investment amount.']
+                ]
+            ], 422);
+        }
 
         if($request->transaction_type === 'Deposit'){
             if ($request->has('bank_account_id') && $request->bank_account_id) {
@@ -78,6 +84,14 @@ class InvestmentTransactionController extends Controller
                 }
             }
         }
+
+        // Create a new asset sub-subcategory
+        $investmentTransaction = InvestmentTransaction::create($request->all());
+
+        // Update the asset amount based on the transaction type
+        
+
+        
 
         if ($request->transaction_type === 'Deposit') {
             $investment->amount += $request->amount;
@@ -152,6 +166,24 @@ class InvestmentTransactionController extends Controller
             'transaction_type' => 'required|in:Deposit,Withdraw',
             'transaction_date' => 'required|date',
         ]);
+
+        $investment = Investment::findOrFail($request->investment_id);
+        $currentInvestAmount = $investment->transactions()->where('transaction_type', 'Deposit')->sum('amount')
+                                - $investment->transactions()->where('transaction_type', 'Withdraw')->sum('amount') - $investment->investExpense->sum('amount') ?? 0;
+        $existingTransaction = InvestmentTransaction::findOrFail($id);
+        $adjustedInvestAmount = $currentInvestAmount;
+        if ($existingTransaction->transaction_type === 'Deposit') {
+            $adjustedInvestAmount -= $existingTransaction->amount;
+        } elseif ($existingTransaction->transaction_type === 'Withdraw') {
+            $adjustedInvestAmount += $existingTransaction->amount;
+        }
+        if ($request->transaction_type === 'Withdraw' && $request->amount > $adjustedInvestAmount) {
+            return response()->json([
+                'errors' => [
+                    'amount' => ['Withdraw amount cannot be greater than the current investment amount.']
+                ]
+            ], 422);
+        }
 
         if($request->transaction_type === 'Deposit'){
             if ($request->has('bank_account_id') && $request->bank_account_id) {

@@ -266,7 +266,10 @@
                     ],
                     order: [
                         [5, 'desc']
-                    ]
+                    ],
+                    language: {
+                        processing: '<div class="loader-custom1"></div>'
+                    }
                 });
             });
         </script>

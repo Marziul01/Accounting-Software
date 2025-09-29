@@ -12,21 +12,22 @@
                     <div class="d-flex gap-2 align-items-md-end mobile-reports-filter ">
                         <div class="form-group mobile-reports-filter-group">
                             <label class="form-label" for="start_date">Select Start Date:</label>
-                            <input type="date" id="startDate" class="form-control form-control-sm myDate">
+                            <input type="date" id="startDate" class="form-control form-control-sm myDate" value="{{ $startDate }}">
                         </div>
 
                         <div class="form-group mobile-reports-filter-group">
                             <label class="form-label" for="end_date">Select End Date:</label>
-                            <input type="date" id="endDate" class="form-control form-control-sm myDate">
+                            <input type="date" id="endDate" class="form-control form-control-sm myDate" value="{{ $endDate }}">
                         </div>
                     </div>
                     
                     <div class="mobile-reports-filter-btns">
-                        <button class="btn btn-outline-success" id="dateFilterBtn">Filter by Date</button>
-                        <button class="btn btn-outline-secondary quick-filter" data-period="today">Today</button>
-                        <button class="btn btn-outline-secondary quick-filter" data-period="month">This Month</button>
-                        <button class="btn btn-outline-secondary quick-filter" data-period="year">This Year</button>
-                    </div>                    
+                        <button class="btn btn-outline-secondary" id="dateFilterBtn">Filter by Date</button>
+
+                        <button class="btn {{ $period === 'today' ? 'btn-secondary' : 'btn-outline-secondary' }} quick-filter" data-period="today">Today</button>
+                        <button class="btn {{ $period === 'month' ? 'btn-secondary' : 'btn-outline-secondary' }} quick-filter" data-period="month">This Month</button>
+                        <button class="btn {{ $period === 'year' ? 'btn-secondary' : 'btn-outline-secondary' }} quick-filter" data-period="year">This Year</button>
+                    </div>                  
                 </div>
 
                 <!-- Quick Filters -->
@@ -37,7 +38,7 @@
                     <button class="btn btn-outline-secondary quick-filter" data-period="year">This Year</button>
                 </div> --}}
 
-                <div id="transactionTypeFilters" class="d-flex mt-2 gap-2 align-items-md-start justify-content-md-between form-group mobile-reports-filter-btns">
+                <div id="transactionTypeFilters" class="d-flex mt-2 gap-2 align-items-md-strech justify-content-md-between form-group mobile-reports-filter-btns">
                     <button class="btn btn-primary filter-btn" data-type="">All</button>
                     <button class="btn btn-outline-primary filter-btn" data-type="Investment">Investment Transaction</button>
                     <button class="btn btn-outline-primary filter-btn" data-type="Income">Income Transaction</button>
@@ -59,9 +60,8 @@
                             <tr>
                                 <th>Sl</th>
                                 <th>Transaction of</th>
-                                <th>Name</th>
+                                <th style="width: 200px !important;">Name</th>
                                 <th>TRNS. TYPE</th>
-                                
                                 <th>Amount</th>
                                 <th>Date</th>
                                 <th>Description</th>
@@ -142,7 +142,21 @@
                         { data: 'date', name: 'date' },
                         { data: 'description', name: 'description' },
                         { data: 'action', name: 'action', orderable: false, searchable: false }
-                    ]
+                    ],
+                    columnDefs: [
+                        { 
+                            targets: 2, // 👈 "name" column (0-based index: 0=DT_RowIndex, 1=type, 2=name)
+                            createdCell: function (td) {
+                                $(td).css({
+                                    "white-space": "normal", // allows wrapping
+                                    "word-break": "break-word" // ensures long words also break
+                                });
+                            }
+                        }
+                    ],
+                    language: {
+                        processing: '<div class="loader-custom1"></div>'
+                    }
                 });
 
                 // Transaction Type filter

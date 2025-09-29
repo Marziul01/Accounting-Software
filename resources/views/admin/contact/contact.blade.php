@@ -25,7 +25,7 @@
                     @if ($contacts->isNotEmpty())
                         @foreach ($contacts as $contact)
                             <div class="col-12 col-sm-6 col-lg-4 col-xxl-3 mb-2">
-                                <div class="card contact-card h-100" data-name="{{ strtolower($contact->name) }}"
+                                <div class="card contact-card h-100 searchable-card" data-name="{{ strtolower($contact->name) }}"
                                     data-email="{{ strtolower($contact->email) }}"
                                     data-number="{{ strtolower($contact->mobile_number) }}">
                                     <div class="card-header d-flex justify-content-between">
@@ -767,19 +767,42 @@
     </script>
 
     <script>
-        document.getElementById('contactSearch').addEventListener('input', function() {
-            const query = this.value.toLowerCase().trim();
+        document.addEventListener('DOMContentLoaded', function () {
+            const input = document.getElementById('contactSearch');
+            if (!input) return; // no search input found
 
-            document.querySelectorAll('.contact-card').forEach(function(card) {
-                const name = card.getAttribute('data-name');
-                const email = card.getAttribute('data-email');
-                const number = card.getAttribute('data-number');
+            const cards = Array.from(document.querySelectorAll('.searchable-card'));
 
-                const isVisible = name.includes(query) || email.includes(query) || number.includes(query);
-                card.style.display = isVisible ? 'block' : 'none';
+            // helper normalizers
+            const textNorm = s => (s || '').toString().toLowerCase().trim();
+            const numberDigits = s => (s || '').toString().replace(/\D/g, '');
+
+            input.addEventListener('input', function (e) {
+                const qRaw = e.target.value || '';
+                const q = qRaw.toLowerCase().trim();
+                const qDigits = qRaw.replace(/\D/g, '');
+
+                cards.forEach(card => {
+                const name = textNorm(card.dataset.name);
+                const email = textNorm(card.dataset.email);
+                const number = textNorm(card.dataset.number);
+                const numberOnly = numberDigits(number);
+
+                const matches =
+                    q === '' || // empty query -> show all
+                    name.includes(q) ||
+                    email.includes(q) ||
+                    number.includes(q) ||
+                    (qDigits && numberOnly.includes(qDigits)); // numeric search matches digits-only
+
+                // hide/show the whole column wrapper so layout collapses
+                const col = card.closest('.col-12, .col-sm-6, .col-lg-4, .col-xxl-3, .mb-2') || card;
+                col.style.display = matches ? '' : 'none';
+                });
             });
         });
     </script>
+
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {

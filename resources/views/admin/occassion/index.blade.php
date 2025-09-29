@@ -11,8 +11,8 @@
                 </div>
                 <div class=" d-flex gap-3 align-items-start flex-column flex-md-row justify-content-md-end">
                     <div class="">
-                        <input type="text" class="form-control" id="contactSearch"
-                            placeholder="Search by name, email, or number...">
+                        <input type="text" class="form-control" id="occasionSearch"
+                            placeholder="Search by occasion name...">
                     </div>
                     <button type="button"
                         class="btn btn-primary {{ Auth::user()->access->sms_and_email == 1 ? 'disabled' : '' }}"
@@ -24,7 +24,7 @@
                     @if ($occassions->isNotEmpty())
                         @foreach ($occassions as $occasion)
                             <div class="col-12 col-sm-6 col-lg-4 col-xxl-3 mb-2">
-                                <div class="card contact-card h-100" data-name="{{ strtolower($occasion->occassion) }}">
+                                <div class="card contact-card h-100 searchable-card" data-name="{{ strtolower($occasion->occassion ?? '') }}">
                                     <div class="card-header d-flex justify-content-between">
                                         <a class=" btn btn-sm btn-outline-secondary {{ Auth::user()->access->sms_and_email == 1 ? 'disabled' : '' }} "
                                             href="" data-bs-toggle="modal"
@@ -50,7 +50,7 @@
 
                                             <p>Date : {{ $occasion->custom_date ?? 'Auto Selected' }} </p>
                                             @if ($occasion->next_send)
-                                                <p class="text-success justified-text"> "Message has been sented this year. Next will be sented on {{ $occasion->next_send }} " </p>
+                                                <p class="text-success justified-text"> "Message has been sent  this year. Next will be sent  on {{ $occasion->next_send }} " </p>
                                                 @if ($occasion->occassion != 'Birhthday' && $occasion->occassion != 'Anniversary')
                                                     <p class="text-warning justified-text"> "Update the date for next year , if not updated yet . Thank You!" </p>
                                                 @endif
@@ -579,17 +579,29 @@
     </script>
 
     <script>
-        document.getElementById('contactSearch').addEventListener('input', function() {
-            const query = this.value.toLowerCase().trim();
+document.addEventListener('DOMContentLoaded', function () {
+  const input = document.getElementById('occasionSearch');
+  if (!input) return;
 
-            document.querySelectorAll('.contact-card').forEach(function(card) {
-                const name = card.getAttribute('data-name');
+  const cards = Array.from(document.querySelectorAll('.searchable-card')); 
+  // ✅ same class as before
 
-                const isVisible = name.includes(query);
-                card.style.display = isVisible ? 'block' : 'none';
-            });
-        });
-    </script>
+  const textNorm = s => (s || '').toString().toLowerCase().trim();
+
+  input.addEventListener('input', function (e) {
+    const q = textNorm(e.target.value);
+
+    cards.forEach(card => {
+      const name = textNorm(card.dataset.name);
+      const matches = q === '' || name.includes(q);
+
+      // hide/show the whole column (so layout doesn’t leave gaps)
+      const col = card.closest('.col-12, .col-sm-6, .col-lg-4, .col-xxl-3, .mb-2') || card;
+      col.style.display = matches ? '' : 'none';
+    });
+  });
+});
+</script>
 
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 

@@ -23,6 +23,9 @@ use App\Models\InvestmentCategory;
 use App\Models\InvestmentSubCategory;
 use App\Models\Contact;
 use App\Models\BankAccount;
+use Mpdf\Mpdf;
+use Mpdf\Config\ConfigVariables;
+use Mpdf\Config\FontVariables;
 
 
 
@@ -31,9 +34,17 @@ class TransactionHistory extends Controller
     public function index( Request $request)
     {
 
-        $incomes = Income::select('id', 'amount', 'date', 'description', 'name')
+        $incomes = Income::select('id', 'amount', 'date', 'description', 'name', 'created_at','updated_at')
             ->get()
             ->map(function ($item) {
+                // ✅ choose updated_at if present, otherwise created_at
+                $timeSource = $item->updated_at ?? $item->created_at;
+
+                // ✅ build full datetime using "date" for the day and time part from updated_at/created_at
+                $datePart = \Carbon\Carbon::parse($item->date)->toDateString();
+                $timePart = \Carbon\Carbon::parse($timeSource)->toTimeString();
+
+                $sortDatetime = \Carbon\Carbon::parse("$datePart $timePart");
                 return (object)[
                     'type' => 'Income',
                     'name' => $item->name ?? 'N/A',
@@ -41,14 +52,23 @@ class TransactionHistory extends Controller
                     'date' => $item->date,
                     'description' => $item->description,
                     'transaction_type' => null,
-                    'other' => $item
+                    'other' => $item,
+                    'sortDatetime' => $sortDatetime,
                 ];
             });
 
 
-        $expenses = Expense::select('id', 'amount', 'date', 'description', 'name')
+        $expenses = Expense::select('id', 'amount', 'date', 'description', 'name', 'created_at','updated_at')
             ->get()
             ->map(function ($item) {
+                // ✅ choose updated_at if present, otherwise created_at
+                $timeSource = $item->updated_at ?? $item->created_at;
+
+                // ✅ build full datetime using "date" for the day and time part from updated_at/created_at
+                $datePart = \Carbon\Carbon::parse($item->date)->toDateString();
+                $timePart = \Carbon\Carbon::parse($timeSource)->toTimeString();
+
+                $sortDatetime = \Carbon\Carbon::parse("$datePart $timePart");
                 return (object)[
                     'type' => 'Expense',
                     'name' => $item->name ?? 'N/A',
@@ -56,14 +76,23 @@ class TransactionHistory extends Controller
                     'date' => $item->date,
                     'description' => $item->description,
                     'transaction_type' => null,
-                    'other' => $item
+                    'other' => $item,
+                    'sortDatetime' => $sortDatetime,
                 ];
             });
 
         $assets = AssetTransaction::with('asset')
-            ->select('id', 'amount', 'transaction_date as date', 'description', 'transaction_type', 'asset_id')
+            ->select('id', 'amount', 'transaction_date as date', 'description', 'transaction_type', 'asset_id', 'created_at','updated_at')
             ->get()
             ->map(function ($item) {
+                // ✅ choose updated_at if present, otherwise created_at
+                $timeSource = $item->updated_at ?? $item->created_at;
+
+                // ✅ build full datetime using "date" for the day and time part from updated_at/created_at
+                $datePart = \Carbon\Carbon::parse($item->date)->toDateString();
+                $timePart = \Carbon\Carbon::parse($timeSource)->toTimeString();
+
+                $sortDatetime = \Carbon\Carbon::parse("$datePart $timePart");
                 return (object)[
                     'type' => 'Asset',
                     'amount' => $item->amount,
@@ -71,15 +100,24 @@ class TransactionHistory extends Controller
                     'transaction_type' => $item->transaction_type,
                     'date' => $item->date,
                     'description' => $item->description,
-                    'other' => $item
+                    'other' => $item,
+                    'sortDatetime' => $sortDatetime,
                 ];
             });
 
 
         $liabilities = LiabilityTransaction::with('liability')
-            ->select('id', 'amount', 'transaction_date as date', 'description', 'transaction_type', 'liability_id')
+            ->select('id', 'amount', 'transaction_date as date', 'description', 'transaction_type', 'liability_id', 'created_at','updated_at')
             ->get()
             ->map(function ($item) {
+                // ✅ choose updated_at if present, otherwise created_at
+                $timeSource = $item->updated_at ?? $item->created_at;
+
+                // ✅ build full datetime using "date" for the day and time part from updated_at/created_at
+                $datePart = \Carbon\Carbon::parse($item->date)->toDateString();
+                $timePart = \Carbon\Carbon::parse($timeSource)->toTimeString();
+
+                $sortDatetime = \Carbon\Carbon::parse("$datePart $timePart");
                 return (object)[
                     'type' => 'Liability',
                     'amount' => $item->amount,
@@ -87,14 +125,23 @@ class TransactionHistory extends Controller
                     'transaction_type' => $item->transaction_type,
                     'date' => $item->date,
                     'description' => $item->description,
-                    'other' => $item
+                    'other' => $item,
+                    'sortDatetime' => $sortDatetime,
                 ];
             });
 
         $investments = InvestmentTransaction::with('investment')
-            ->select('id', 'amount', 'transaction_date as date', 'description', 'transaction_type', 'investment_id')
+            ->select('id', 'amount', 'transaction_date as date', 'description', 'transaction_type', 'investment_id', 'created_at','updated_at')
             ->get()
             ->map(function ($item) {
+                // ✅ choose updated_at if present, otherwise created_at
+                $timeSource = $item->updated_at ?? $item->created_at;
+
+                // ✅ build full datetime using "date" for the day and time part from updated_at/created_at
+                $datePart = \Carbon\Carbon::parse($item->date)->toDateString();
+                $timePart = \Carbon\Carbon::parse($timeSource)->toTimeString();
+
+                $sortDatetime = \Carbon\Carbon::parse("$datePart $timePart");
                 return (object)[
                     'type' => 'Investment',
                     'amount' => $item->amount,
@@ -102,15 +149,24 @@ class TransactionHistory extends Controller
                     'transaction_type' => $item->transaction_type,
                     'date' => $item->date,
                     'description' => $item->description,
-                    'other' => $item
+                    'other' => $item,
+                    'sortDatetime' => $sortDatetime,
                 ];
             });
 
         $bankTransactions = BankTransaction::with('bankAccount')
-            ->select('id', 'amount', 'transaction_date as date', 'description', 'transaction_type', 'bank_account_id' ,'name', 'from', 'from_id','transfer_from')
+            ->select('id', 'amount', 'transaction_date as date', 'description', 'transaction_type', 'bank_account_id' ,'name', 'from', 'from_id','transfer_from', 'created_at','updated_at')
             ->get()
             ->whereNull('transfer_from')
             ->map(function ($item) {
+                // ✅ choose updated_at if present, otherwise created_at
+                $timeSource = $item->updated_at ?? $item->created_at;
+
+                // ✅ build full datetime using "date" for the day and time part from updated_at/created_at
+                $datePart = \Carbon\Carbon::parse($item->date)->toDateString();
+                $timePart = \Carbon\Carbon::parse($timeSource)->toTimeString();
+
+                $sortDatetime = \Carbon\Carbon::parse("$datePart $timePart");
                 return (object)[
                     'type' => 'BankTransaction',
                     'amount' => $item->amount,
@@ -121,6 +177,7 @@ class TransactionHistory extends Controller
                     'other' => $item,
                     'from' => $item->from,
                     'from_id' => $item->from_id,
+                    'sortDatetime' => $sortDatetime,
                 ];
             });
         // Merge all collections
@@ -131,7 +188,14 @@ class TransactionHistory extends Controller
             ->merge($liabilities)
             ->merge($investments)
             ->merge($bankTransactions)
-            ->sortByDesc('date')
+            ->sortByDesc(function ($item) {
+                // Use updated_at if available, else created_at
+                $time = $item->other->updated_at ?? $item->other->created_at;
+
+                // Build a datetime: date (Y-m-d) + time (H:i:s)
+                return \Carbon\Carbon::parse($item->date)->format('Y-m-d') . ' ' .
+                    \Carbon\Carbon::parse($time)->format('H:i:s');
+            })
             ->values();
 
         if ($request->ajax()) {
@@ -154,22 +218,21 @@ class TransactionHistory extends Controller
             }
 
             // 3. Quick filters (today, month, year)
-            if ($request->filled('period')) {
-                $now = \Carbon\Carbon::now();
+            $period = $request->filled('period') ? $request->period : 'month'; // ✅ default to month
+            $now = \Carbon\Carbon::now();
 
-                $trsn = $trsn->filter(function ($row) use ($request, $now) {
-                    $date = \Carbon\Carbon::parse($row->date);
+            $trsn = $trsn->filter(function ($row) use ($period, $now) {
+                $date = \Carbon\Carbon::parse($row->date);
 
-                    if ($request->period === 'today') {
-                        return $date->isSameDay($now);
-                    } elseif ($request->period === 'month') {
-                        return $date->isSameMonth($now);
-                    } elseif ($request->period === 'year') {
-                        return $date->isSameYear($now);
-                    }
-                    return true;
-                });
-            }
+                if ($period === 'today') {
+                    return $date->isSameDay($now);
+                } elseif ($period === 'month') {
+                    return $date->isSameMonth($now);
+                } elseif ($period === 'year') {
+                    return $date->isSameYear($now);
+                }
+                return true;
+            });
 
             return DataTables::of($trsn)
                 ->addIndexColumn()
@@ -184,9 +247,18 @@ class TransactionHistory extends Controller
                 ->make(true);
         }
 
+        // Determine the current period
+        $period = $request->filled('period') ? $request->period : 'month'; // default to month
+
+        // Optional: pass start and end dates if provided
+        $startDate = $request->startDate ?? null;
+        $endDate   = $request->endDate ?? null;
 
         return view('admin.transaction.history',[
-            'transactions' => $merged
+            'transactions' => $merged,
+            'period' => $period,
+            'startDate' => $startDate,
+            'endDate' => $endDate,
         ]);
     }
 
@@ -279,5 +351,103 @@ class TransactionHistory extends Controller
             'bankaccounts' => BankAccount::all(),
             'banks' => BankAccount::all(),
         ]);
+    }
+
+    public function assetinvoice($id)
+    {
+        // Fetch the transaction
+        $transaction = AssetTransaction::with('asset')->findOrFail($id);
+        $asset = $transaction->asset;
+
+        // Example calculation (adjust with your logic)
+        $totalAmountBn = $transaction->amount;
+        $previousAmountBn = 0;
+        $requestASmount = $transaction->amount;
+
+        // Render Blade view into HTML
+        $html = view('pdf.asset_deposit_invoice', [
+            'asset' => $transaction->asset,
+            'request' => $transaction,
+            'totalAmount' => $totalAmountBn,
+            'previousAmount' => $previousAmountBn,
+            'requestASmount' => $requestASmount,
+        ])->render();
+
+        // mPDF config
+        $defaultConfig = (new ConfigVariables())->getDefaults();
+        $fontDirs = $defaultConfig['fontDir'];
+        $defaultFontConfig = (new FontVariables())->getDefaults();
+        $fontData = $defaultFontConfig['fontdata'];
+        $customFontDir = storage_path('fonts');
+
+        $mpdf = new Mpdf([
+            'mode' => 'utf-8',
+            'format' => 'A4',
+            'fontDir' => array_merge($fontDirs, [$customFontDir]),
+            'fontdata' => $fontData + [
+                'solaimanlipi' => [
+                    'R' => 'SolaimanLipi.ttf',
+                    'useOTL' => 0xFF,
+                    'useKashida' => 75,
+                ],
+            ],
+            'default_font' => 'solaimanlipi',
+            'tempDir' => storage_path('app/tmp'),
+        ]);
+
+        $mpdf->WriteHTML($html);
+
+        // Open directly in new tab
+        return response($mpdf->Output('', 'I'))
+            ->header('Content-Type', 'application/pdf');
+    }
+
+    public function liabilityinvoice($id)
+    {
+        // Fetch the transaction
+        $transaction = LiabilityTransaction::with('liability')->findOrFail($id);
+        $liability = $transaction->liability;
+
+        // Example calculation (adjust with your logic)
+        $totalAmountBn = $transaction->amount;
+        $previousAmountBn = 0;
+        $requestASmount = $transaction->amount;
+
+        // Render Blade view into HTML
+        $html = view('pdf.liability_deposit_invoice', [
+            'liability' => $transaction->liability,
+            'request' => $transaction,
+            'totalAmount' => $totalAmountBn,
+            'previousAmount' => $previousAmountBn,
+            'requestASmount' => $requestASmount,
+        ])->render();
+
+        // mPDF config
+        $defaultConfig = (new ConfigVariables())->getDefaults();
+        $fontDirs = $defaultConfig['fontDir'];
+        $defaultFontConfig = (new FontVariables())->getDefaults();
+        $fontData = $defaultFontConfig['fontdata'];
+        $customFontDir = storage_path('fonts');
+
+        $mpdf = new Mpdf([
+            'mode' => 'utf-8',
+            'format' => 'A4',
+            'fontDir' => array_merge($fontDirs, [$customFontDir]),
+            'fontdata' => $fontData + [
+                'solaimanlipi' => [
+                    'R' => 'SolaimanLipi.ttf',
+                    'useOTL' => 0xFF,
+                    'useKashida' => 75,
+                ],
+            ],
+            'default_font' => 'solaimanlipi',
+            'tempDir' => storage_path('app/tmp'),
+        ]);
+
+        $mpdf->WriteHTML($html);
+
+        // Open directly in new tab
+        return response($mpdf->Output('', 'I'))
+            ->header('Content-Type', 'application/pdf');
     }
 }

@@ -63,7 +63,11 @@
         {{ Auth::user()->access->asset == 1 ? 'disabled' : '' }}>
         <i class="bx bx-edit-alt me-1"></i> Edit
     </button>
-
+    <a href="{{ route('asset.invoice', $row->other->id) }}" 
+        target="_blank" 
+        class="btn btn-sm btn-outline-secondary">
+        <i class="fa-solid fa-download me-1"></i> Invoice
+    </a>
     <form action="{{ route('assettransaction.destroy', $row->other->id) }}" method="POST" class="d-inline">
         @csrf
         @method('DELETE')
@@ -81,7 +85,11 @@
         {{ Auth::user()->access->liability == 1 ? 'disabled' : '' }}>
         <i class="bx bx-edit-alt me-1"></i> Edit
     </button>
-
+    <a href="{{ route('liability.invoice', $row->other->id) }}" 
+        target="_blank" 
+        class="btn btn-sm btn-outline-secondary">
+        <i class="fa-solid fa-download  me-1"></i> Invoice
+    </a>
     <form action="{{ route('liabilitytransaction.destroy', $row->other->id) }}" method="POST" class="d-inline">
         @csrf
         @method('DELETE')

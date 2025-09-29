@@ -23,7 +23,18 @@ class BankTransactionController extends Controller
         $bankTransactions = BankTransaction::all();
 
         if ($request->ajax()) {
-            $transactions = BankTransaction::with('bankAccount')->orderByDesc('transaction_date')->whereNull('transfer_from')->get();
+            $transactions = BankTransaction::with('bankAccount')
+                ->whereNull('transfer_from')
+                ->get()
+                ->sortByDesc(function ($item) {
+                    // Use updated_at if available, else created_at
+                    $time = $item->updated_at ?? $item->created_at;
+
+                    // Combine transaction_date + time part
+                    return \Carbon\Carbon::parse($item->transaction_date)->format('Y-m-d') . ' ' .
+                        \Carbon\Carbon::parse($time)->format('H:i:s');
+                })
+                ->values(); // reindex
 
             return DataTables::of($transactions)
                 ->addIndexColumn()
@@ -39,8 +50,8 @@ class BankTransactionController extends Controller
                     return '<span class="badge bg-label-secondary">N/A</span>';
                 })
                 ->addColumn('action', function ($row) {
-                        return view('admin.bank_accounts._actions', compact('row'))->render();
-                    })
+                    return view('admin.bank_accounts._actions', compact('row'))->render();
+                })
                 ->rawColumns(['transaction_type', 'action'])
                 ->make(true);
         }
@@ -86,7 +97,7 @@ class BankTransactionController extends Controller
         if (!($request->transfer_from && $request->transfer_to)) {
             $rules['bank_account_id'] = 'required|exists:bank_accounts,id';
             $rules['transaction_type'] = 'required|in:credit,debit';
-            $rules['description'] = 'nullable|string|max:255';
+            $rules['description'] = 'required|string|max:255';
             $rules['name'] = 'required|string|max:255';
             $rules['slug'] = 'required|string|max:255';
         }
@@ -237,6 +248,7 @@ class BankTransactionController extends Controller
         if (!($request->transfer_from && $request->transfer_to)) {
             $rules['bank_account_id'] = 'required|exists:bank_accounts,id';
             $rules['transaction_type'] = 'required|in:credit,debit';
+            $rules['description'] = 'required|string|max:255';
         }
 
         $request->validate($rules);

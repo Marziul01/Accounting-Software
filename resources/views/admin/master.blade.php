@@ -100,6 +100,13 @@
 
         <!-- Overlay -->
         <div class="layout-overlay layout-menu-toggle"></div>
+
+        <div id="loader-custom-table" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999;">
+            <div style="display:flex; justify-content:center; align-items:center; width:100%; height:100%;">
+                <div class="loader-custom"></div>
+            </div>
+        </div>
+        
     </div>
     <!-- / Layout wrapper -->
 

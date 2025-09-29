@@ -251,6 +251,8 @@ Route::prefix('admin')->middleware(['auth:admin', 'admin.only'])->group(function
     Route::post('/send/SMS', [SendSMSEmailController::class, 'sendSMS'])->name('admin.send.sms');
     Route::post('/send/Email', [SendSMSEmailController::class, 'sendEmail'])->name('admin.send.email');
 
+    Route::get('/asset/invoice/{id}', [TransactionHistory::class, 'assetinvoice'])->name('asset.invoice');
+    Route::get('/liability/invoice/{id}', [TransactionHistory::class, 'liabilityinvoice'])->name('liability.invoice');
 
 });
 

@@ -356,32 +356,34 @@
                         </div>
                     </div>
                     <div class="card-body">
-                        <ul class="p-0 m-0">
-                            @if ($merged->isNotEmpty())
-                                @foreach ($merged as $trx)
-                                    <li class="d-flex align-items-center mb-5 gap-2">
-                                        <div class="avatar flex-shrink-0">
-                                            <img src="{{ asset('admin-assets') }}/assets/img/icons/unicons/chart-success.png"
-                                                alt="chart success" class="rounded" />
-                                        </div>
-                                        <div
-                                            class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
-                                            <div class="me-2">
-                                                <h6 class="mb-0">{{ $trx->type }}</h6>
-                                                <small>{{ $trx->name }}
-                                                    {{ $trx->transaction_type ? '- (' . $trx->transaction_type . ')' : '' }}
-                                                </small>
-                                            </div>
-                                            <div class="user-progress">
-                                                <h6 class="mb-0">{{ number_format($trx->amount, 2) }} BDT</h6>
-                                            </div>
-                                        </div>
-                                    </li>
-                                @endforeach
-                            @endif
-
-
-                        </ul>
+                        <table class="table table-borderless mb-0 no-colors"> 
+                            <tbody>
+                                @if ($merged->isNotEmpty())
+                                    @foreach ($merged as $trx)
+                                        <tr class="p-0">
+                                            <td style="width:60%; padding-left: 0px !important ; padding-right: 0px !important " class="p-0">
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <div class="avatar flex-shrink-0">
+                                                        <img src="{{ asset('admin-assets') }}/assets/img/icons/unicons/chart-success.png"
+                                                            alt="chart success" class="rounded" />
+                                                    </div>
+                                                    <div>
+                                                        <h6 class="mb-0">{{ $trx->type }}</h6>
+                                                        <small>
+                                                            {{ $trx->name }}
+                                                            {{ $trx->transaction_type ? '- (' . $trx->transaction_type . ')' : '' }}
+                                                        </small>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td  style="width:40%; padding-left: 0px !important ; padding-right: 0px !important" class="text-end align-middle p-0">
+                                                <small class="mb-0">{{ number_format($trx->amount, 2) }} BDT</small>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                @endif
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -541,32 +543,37 @@
                         </div> --}}
                     </div>
                     <div class="card-body pt-4">
-                        <ul class="p-0 m-0">
-                            @if ($latestBankTransactions->isNotEmpty())
-                                @foreach ($latestBankTransactions as $latestBankTransaction)
-                                    <li class="d-flex align-items-center mb-6">
-                                        <div class="avatar flex-shrink-0 me-3">
-                                            <img src="{{ asset('admin-assets') }}/assets/img/icons/unicons/wallet.png"
-                                                alt="User" class="rounded" />
-                                        </div>
-                                        <div
-                                            class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
-                                            <div class="me-2">
-                                                <small
-                                                    class="d-block">{{ $latestBankTransaction->bankAccount->bank_name }} -
-                                                    {{ $latestBankTransaction->bankAccount->account_type }} </small>
-                                                <h6 class="fw-normal mb-0">{{ $latestBankTransaction->transaction_type }}
-                                                </h6>
-                                            </div>
-                                            <div class="user-progress d-flex align-items-center gap-2">
-                                                <h6 class="fw-normal mb-0">{{ $latestBankTransaction->amount }}</h6>
-                                                <span class="text-muted">BDT</span>
-                                            </div>
-                                        </div>
-                                    </li>
-                                @endforeach
-                            @endif
-                        </ul>
+                        <table class="table table-borderless mb-0 no-colors">
+                            <tbody>
+                                @if ($latestBankTransactions->isNotEmpty())
+                                    @foreach ($latestBankTransactions as $latestBankTransaction)
+                                        <tr class="p-0">
+                                            <td style="width:60%; padding-left: 0px !important ; padding-right: 0px !important" class="p-0">
+                                                <div class="d-flex align-items-center gap-1">
+                                                    <div class="avatar flex-shrink-0 me-1">
+                                                        <img src="{{ asset('admin-assets') }}/assets/img/icons/unicons/wallet.png"
+                                                            alt="User" class="rounded" />
+                                                    </div>
+                                                    <div>
+                                                        <small class="d-block">
+                                                            {{ $latestBankTransaction->bankAccount->bank_name }} -
+                                                            {{ $latestBankTransaction->bankAccount->account_type }}
+                                                        </small>
+                                                        <small class="fw-normal mb-0">{{ $latestBankTransaction->transaction_type }}</small>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td style="width:40%; padding-left: 0px !important ; padding-right: 0px !important" class="text-end align-middle p-0">
+                                                <div class="user-progress d-flex align-items-center gap-1 justify-content-end">
+                                                    <small class="fw-normal mb-0">{{ $latestBankTransaction->amount }}</small>
+                                                    <span class="text-muted">BDT</span>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                @endif
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -590,9 +597,7 @@
 
     <div id="fullscreenLoader" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999;">
         <div style="display:flex; justify-content:center; align-items:center; width:100%; height:100%;">
-             <div class="spinner-border text-light" role="status" style="width: 4rem; height: 4rem;">
-                <span class="visually-hidden">Loading...</span>
-            </div>
+            <div class="loader-custom"></div>
         </div>
     </div>
 @endsection

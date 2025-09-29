@@ -61,10 +61,17 @@ class InvestmentExpenseController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        try {
-            DB::transaction(function () use ($request) {
+        $investment = Investment::findOrFail($request->investment_id);
+                $currentInvestAmount = $investment->transactions()->where('transaction_type', 'Deposit')->sum('amount')
+                                - $investment->transactions()->where('transaction_type', 'Withdraw')->sum('amount') - $investment->investExpense->sum('amount') ?? 0;
+                if ($request->amount > $currentInvestAmount) {
+                    return response()->json(['message' => 'Loss amount exceeds current investment amount. Current investment amount is ' . $currentInvestAmount . ' BDT.'], 422);
+                }
 
-                $investment = Investment::findOrFail($request->investment_id);
+        try {
+            DB::transaction(function () use ($request ,$investment) {
+
+                
                 $name = $investment->name;
                 // generate slug from name (supports Bangla and Unicode)
                 $slug = Str::slug($name, '-', null);
@@ -154,6 +161,14 @@ class InvestmentExpenseController extends Controller
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);
         }
+
+        $investment = Investment::findOrFail($request->investment_id);
+                $currentInvestAmount = $investment->transactions()->where('transaction_type', 'Deposit')->sum('amount')
+                                - $investment->transactions()->where('transaction_type', 'Withdraw')->sum('amount') - $investment->investExpense->where('id', '!=', $id)->sum('amount') ?? 0;
+                if ($request->amount > $currentInvestAmount) {
+                    return response()->json(['message' => 'Loss amount exceeds current investment amount. Current investment amount is ' . $currentInvestAmount . ' BDT.'], 422);
+                }
+
 
         try {
             DB::transaction(function () use ($request, $id) {
