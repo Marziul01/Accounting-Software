@@ -15,13 +15,13 @@
                         <thead>
                             <tr>
                                 <th>Sl</th>
-                                <th>Bank Name</th>
-                                <th style="width: 200px !important;">TRANS. Name</th>
+                                <th style="width: 150px !important; text-wrap: nowrap;">Bank Name</th>
+                                <th style="width: 200px !important; text-wrap: nowrap;">TRANS. Name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
                                 <th>Amount</th>
-                                <th>TRANS. DATE</th>
-                                <th>TRANS. Type</th>
-                                <th>Description</th>
-                                <th>Actions</th>
+                                <th style="text-wrap: nowrap;">TRANS. DATE</th>
+                                <th style="text-wrap: nowrap;">TRANS.Type</th>
+                                <th style="width: 200px !important;text-wrap: nowrap;">Description &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
+                                <th style="text-wrap: nowrap;">Actions</th>
                             </tr>
                         </thead>
                     </table>
@@ -236,6 +236,22 @@
 @section('scripts')
     @if ($banktransactions->isNotEmpty())
         <script>
+            let columnDefsConfig = [];
+
+            // Apply only on desktop (for example, width > 768px)
+            if (window.innerWidth > 768) {
+                columnDefsConfig.push({
+                    targets: 2, // "name" column
+                    createdCell: function (td) {
+                        $(td).css({
+                            "white-space": "normal", // allows wrapping
+                            "word-break": "break-word" // ensures long words also break
+                        });
+                    }
+                });
+            }
+        </script>
+        <script>
             $(document).ready(function() {
                 $('#myTable').DataTable({
                     processing: true,
@@ -301,17 +317,7 @@
                             searchable: false
                         }
                     ],
-                    columnDefs: [
-                        { 
-                            targets: 2, // 👈 "name" column (0-based index: 0=DT_RowIndex, 1=type, 2=name)
-                            createdCell: function (td) {
-                                $(td).css({
-                                    "white-space": "normal", // allows wrapping
-                                    "word-break": "break-word" // ensures long words also break
-                                });
-                            }
-                        }
-                    ],
+                    columnDefs: columnDefsConfig,
                     language: {
                         processing: '<div class="loader-custom1"></div>'
                     }

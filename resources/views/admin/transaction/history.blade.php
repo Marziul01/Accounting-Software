@@ -58,14 +58,14 @@
                     <table class="table" id="myTable">
                         <thead>
                             <tr>
-                                <th>Sl</th>
+                                <th style="text-wrap: nowrap;">Sl</th>
                                 <th>Transaction of</th>
-                                <th style="width: 200px !important;">Name</th>
-                                <th>TRNS. TYPE</th>
-                                <th>Amount</th>
-                                <th>Date</th>
-                                <th>Description</th>
-                                <th>Actions</th>
+                                <th style="width: 200px !important; text-wrap: nowrap;">Name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
+                                <th style="text-wrap: nowrap;">TRNS. TYPE</th>
+                                <th style="text-wrap: nowrap;">Amount</th>
+                                <th style="text-wrap: nowrap;">Date</th>
+                                <th style="text-wrap: nowrap;">Description &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
+                                <th style="width: 200px !important; text-wrap: nowrap;">Actions</th>
                             </tr>
                         </thead>
                     </table>
@@ -97,6 +97,7 @@
 
 @section('scripts')
     @if ($transactions->isNotEmpty())
+    
         <script>
             $(document).ready(function() {
                 let selectedType = "";
@@ -145,11 +146,11 @@
                     ],
                     columnDefs: [
                         { 
-                            targets: 2, // 👈 "name" column (0-based index: 0=DT_RowIndex, 1=type, 2=name)
+                            targets: [2,6], // 👈 "name" column (0-based index: 0=DT_RowIndex, 1=type, 2=name)
                             createdCell: function (td) {
                                 $(td).css({
                                     "white-space": "normal", // allows wrapping
-                                    "word-break": "break-word" // ensures long words also break
+                                     // ensures long words also break
                                 });
                             }
                         }
