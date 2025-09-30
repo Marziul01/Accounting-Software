@@ -44,7 +44,7 @@
 
                                 <div class="d-flex flex-wrap gap-2">
                                     @foreach($finalOccasions as $event)
-                                        <span class="badge btn-secondary d-flex align-items-center">
+                                        <span class="badge btn-secondary d-flex align-items-center flex-wrap gap-1">
                                             <strong class="me-1">{{ $event['title'] }}</strong> 
                                             - {{ \Carbon\Carbon::parse($event['date'])->format('d F Y') }}
                                             
