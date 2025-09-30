@@ -194,14 +194,14 @@
                                     <div class="col-12 mb-3">
                                         <label for="start_date" class="form-label">Start Date</label>
                                         <input type="date" class="form-control myDate" id="start_date"
-                                            name="start_date" value="{{ $schedule->start_date }}" required>
+                                            name="start_date" value="{{ \Carbon\Carbon::parse($schedule->start_date)->format('Y-m-d') }}" required>
                                     </div>
                                     <div class="col-12 mb-3">
                                         <label for="end_date" class="form-label">End Date</label>
                                         <input type="date" class="form-control myDate" id="end_date" name="end_date"
-                                            value="{{ $schedule->end_date }}">
+                                            value="{{ \Carbon\Carbon::parse($schedule->end_date)->format('Y-m-d') }}">
                                     </div>
-                                    <div class="col-12 mb-3 form-check p-0">
+                                    <div class="col-12 mb-3 ">
                                         <input type="hidden" name="infinite" value="0">
                                         <input type="checkbox" class="form-check-input me-2" id="editinfinites{{ $schedule->id }}"
                                             name="infinite" value="1"

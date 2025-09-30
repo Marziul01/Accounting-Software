@@ -319,7 +319,7 @@
                     ],
                     columnDefs: columnDefsConfig,
                     language: {
-                        processing: '<div class="loader-custom1"></div>'
+                        processing: '<div class="loader-custom-wrapper"><div class="loader-custom1"></div></div>'
                     }
                 });
             });

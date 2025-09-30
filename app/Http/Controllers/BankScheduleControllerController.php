@@ -39,15 +39,22 @@ class BankScheduleControllerController extends Controller
         if (auth()->user()->access->bankbook != 2) {
             return redirect()->route('admin.dashboard')->with('error', 'You do not have permission to create bank schdules.');
         }
-        // Validate the request data
-        $request->validate([
+        $rules = [
             'from' => 'required|exists:bank_accounts,id',
             'to' => 'required|exists:bank_accounts,id',
             'amount' => 'required|numeric',
             'start_date' => 'required|date',
-            'end_date' => 'nullable|date|after_or_equal:start_date',
             'description' => 'nullable',
-        ]);
+        ];
+
+        // Conditional rule for end_date
+        if ($request->input('infinite') == 1) {
+            $rules['end_date'] = 'nullable|date';
+        } else {
+            $rules['end_date'] = 'nullable|date|after_or_equal:start_date';
+        }
+
+        $request->validate($rules);
 
         // Create a new bank account
         BankSchedule::create($request->all());
@@ -81,15 +88,23 @@ class BankScheduleControllerController extends Controller
         if (auth()->user()->access->bankbook != 2) {
             return redirect()->route('admin.dashboard')->with('error', 'You do not have permission to update bank Schedule.');
         }
-        // Validate the request data
-        $request->validate([
+
+        $rules = [
             'from' => 'required|exists:bank_accounts,id',
             'to' => 'required|exists:bank_accounts,id',
             'amount' => 'required|numeric',
             'start_date' => 'required|date',
-            'end_date' => 'nullable|date|after_or_equal:start_date',
             'description' => 'nullable',
-        ]);
+        ];
+
+        // Conditional rule for end_date
+        if ($request->input('infinite') == 1) {
+            $rules['end_date'] = 'nullable|date';
+        } else {
+            $rules['end_date'] = 'nullable|date|after_or_equal:start_date';
+        }
+
+        $request->validate($rules);
 
         // Find the bank account by ID and update it
         $Schedule = BankSchedule::findOrFail($id);

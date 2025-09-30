@@ -30,14 +30,6 @@
                     </div>                  
                 </div>
 
-                <!-- Quick Filters -->
-                {{-- <div class="d-flex mt-2 gap-2 align-items-md-start justify-content-md-start form-group mobile-reports-filter-btns">
-                    <button class="btn btn-outline-success" id="dateFilterBtn">Filter by Date</button>
-                    <button class="btn btn-outline-secondary quick-filter" data-period="today">Today</button>
-                    <button class="btn btn-outline-secondary quick-filter" data-period="month">This Month</button>
-                    <button class="btn btn-outline-secondary quick-filter" data-period="year">This Year</button>
-                </div> --}}
-
                 <div id="transactionTypeFilters" class="d-flex mt-2 gap-2 align-items-md-strech justify-content-md-between form-group mobile-reports-filter-btns">
                     <button class="btn btn-primary filter-btn" data-type="">All</button>
                     <button class="btn btn-outline-primary filter-btn" data-type="Investment">Investment Transaction</button>
@@ -156,7 +148,7 @@
                         }
                     ],
                     language: {
-                        processing: '<div class="loader-custom1"></div>'
+                        processing: '<div class="loader-custom-wrapper"><div class="loader-custom1"></div></div>'
                     }
                 });
 

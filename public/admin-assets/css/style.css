@@ -795,12 +795,20 @@ div:where(.swal2-container).swal2-center>.swal2-popup {
   background: #00a652 ;
   animation: l2 1.5s infinite;
 }
+.loader-custom-wrapper{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100% !important;
+}
 .loader-custom1{
   width: 15px;
   aspect-ratio: 1;
   border-radius: 50%;
   background: #00a652 ;
   animation: l2 1.5s infinite;
+  text-align: center;
+    align-self: center;
 }
 @keyframes l2 {
   0%,
@@ -820,6 +828,49 @@ div:where(.swal2-container).swal2-center>.swal2-popup {
 .dataTables_processing div:last-child {
     display: none !important;
 }
+.dataTables_processing .loader-custom-wrapper  .loader-custom1{
+    display: block !important;
+}
+.dataTables_processing{
+      background-color: transparent !important;
+      box-shadow: none !important;
+}
+.theme-switch-wrapper .checkbox {
+                opacity: 0;
+                position: absolute;
+                }
+
+                .theme-switch-wrapper .checkbox-label {
+                background-color: var(--card-bg);
+                width: 50px;
+                height: 26px;
+                border-radius: 50px;
+                position: relative;
+                padding: 5px;
+                cursor: pointer;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                border: 1px solid var(--secondary-color);
+                }
+
+                .theme-switch-wrapper .fa-moon { color: var(--secondary-color); }
+                .theme-switch-wrapper .fa-sun { color: var(--secondary-color); }
+
+                .theme-switch-wrapper .checkbox-label .ball {
+                background-color: var(--primary-color);
+                width: 20px;
+                height: 20px;
+                position: absolute;
+                left: 2px;
+                top: 2px;
+                border-radius: 50%;
+                transition: transform 0.2s linear;
+                }
+
+                .theme-switch-wrapper .checkbox:checked + .checkbox-label .ball {
+                transform: translateX(24px);
+                }
 @media screen and (max-width: 768px) {
 
   .dt-buttons,
@@ -956,5 +1007,14 @@ div:where(.swal2-container) h2:where(.swal2-title){
     .bank_card_info .bank_type.float-right{
       float: none !important;
       margin-top: 5px !important;
+    }
+    .navbar-nav .nav-item.me-2{
+      margin-right: 5px !important;
+    }
+    .themecolor{
+      width: 28px;
+      height: 28px;
+      font-size: 13px;
+      padding-left: 12px;
     }
 }

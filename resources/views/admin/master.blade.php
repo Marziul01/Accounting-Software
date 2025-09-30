@@ -157,7 +157,7 @@
         });
     </script>
 
-    <script>
+    {{-- <script>
         const toggleBtn = document.getElementById('themeToggle');
         const root = document.documentElement;
 
@@ -178,7 +178,32 @@
                 toggleBtn.innerHTML = '☀️<span>Light Mode</span> ';
             }
         });
-    </script>
+    </script> --}}
+
+    <script>
+  const toggleCheckbox = document.getElementById('themeToggle');
+  const root = document.documentElement;
+
+  // Load theme from localStorage
+  if (localStorage.getItem('theme') === 'dark') {
+      root.setAttribute('data-theme', 'dark');
+      toggleCheckbox.checked = true; // show ball on right side
+  } else {
+      toggleCheckbox.checked = false;
+  }
+
+  // Toggle theme on change
+  toggleCheckbox.addEventListener('change', () => {
+      if (toggleCheckbox.checked) {
+          root.setAttribute('data-theme', 'dark');
+          localStorage.setItem('theme', 'dark');
+      } else {
+          root.removeAttribute('data-theme');
+          localStorage.setItem('theme', 'light');
+      }
+  });
+</script>
+
 
     <script>
         @if (session('success'))

@@ -65,8 +65,12 @@ class InvestmentExpenseController extends Controller
                 $currentInvestAmount = $investment->transactions()->where('transaction_type', 'Deposit')->sum('amount')
                                 - $investment->transactions()->where('transaction_type', 'Withdraw')->sum('amount') - $investment->investExpense->sum('amount') ?? 0;
                 if ($request->amount > $currentInvestAmount) {
-                    return response()->json(['message' => 'Loss amount exceeds current investment amount. Current investment amount is ' . $currentInvestAmount . ' BDT.'], 422);
-                }
+    return response()->json([
+        'errors' => [
+            'amount' => ['Loss amount cannot be grater than the current investment amount.']
+        ]
+    ], 422);
+}
 
         try {
             DB::transaction(function () use ($request ,$investment) {
@@ -166,8 +170,13 @@ class InvestmentExpenseController extends Controller
                 $currentInvestAmount = $investment->transactions()->where('transaction_type', 'Deposit')->sum('amount')
                                 - $investment->transactions()->where('transaction_type', 'Withdraw')->sum('amount') - $investment->investExpense->where('id', '!=', $id)->sum('amount') ?? 0;
                 if ($request->amount > $currentInvestAmount) {
-                    return response()->json(['message' => 'Loss amount exceeds current investment amount. Current investment amount is ' . $currentInvestAmount . ' BDT.'], 422);
-                }
+    return response()->json([
+        'errors' => [
+            'amount' => ['Loss amount cannot be grater than the current investment amount.']
+        ]
+    ], 422);
+}
+
 
 
         try {

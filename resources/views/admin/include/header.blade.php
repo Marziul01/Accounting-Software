@@ -30,9 +30,22 @@
                     <div id="notificationDropdown" class="notification-dropdown bg-menu-theme"></div>
                 </div>
             </li>
-            <li class="nav-item lh-1 me-2">
+            {{-- <li class="nav-item lh-1 me-2">
                 <button id="themeToggle" class="btn btn-sm btn-outline-secondary themecolor">🌙<span>Dark Mode</span></button>
+            </li> --}}
+
+            <li class="nav-item lh-1 me-2">
+                <div class="theme-switch-wrapper">
+                    <input type="checkbox" class="checkbox" id="themeToggle">
+                    <label for="themeToggle" class="checkbox-label">
+                    <i class="fas fa-moon"></i>
+                    <i class="fas fa-sun"></i>
+                    <span class="ball"></span>
+                    </label>
+                </div>
             </li>
+            
+
 
             <!-- User -->
             <li class="nav-item navbar-dropdown dropdown-user dropdown">
