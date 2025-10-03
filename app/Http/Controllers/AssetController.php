@@ -19,42 +19,171 @@ use App\Models\SiteSetting;
 use App\Models\SMSTemplate;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Mail;
+use Yajra\DataTables\Facades\DataTables;
 
 class AssetController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
-    {
-        if (auth()->user()->access->asset == 3) {
-            return redirect()->route('admin.dashboard')->with('error', 'You do not have permission to access this page.');
-        }
-        $assets = Asset::where('category_id', 4)->get();
-        return view('admin.asset.index',[
-            'assets' => $assets,
-            'assetCategories' => AssetSubCategory::where('asset_category_id', 4)->where('status', 1)->get(),
-            'assetTransactions' => AssetTransaction::all(),
-            'users' => Contact::all(),
-            'banks' => BankAccount::all(),
-        ]);
+    // public function index()
+    // {
+    //     if (auth()->user()->access->asset == 3) {
+    //         return redirect()->route('admin.dashboard')->with('error', 'You do not have permission to access this page.');
+    //     }
+    //     $assets = Asset::where('category_id', 4)->get();
+    //     return view('admin.asset.index',[
+    //         'assets' => $assets,
+    //         'assetCategories' => AssetSubCategory::where('asset_category_id', 4)->where('status', 1)->get(),
+    //         'assetTransactions' => AssetTransaction::all(),
+    //         'users' => Contact::all(),
+    //         'banks' => BankAccount::all(),
+    //     ]);
+    // }
+
+public function index(Request $request)
+{
+    if (auth()->user()->access->asset == 3) {
+        return redirect()->route('admin.dashboard')
+            ->with('error', 'You do not have permission to access this page.');
     }
 
-    public function fixed(){
+    if ($request->ajax()) {
+        $assets = Asset::with(['category', 'subcategory', 'transactions'])
+            ->where('category_id', 4)
+            ->latest();
 
-        if (auth()->user()->access->asset == 3) {
-            return redirect()->route('admin.dashboard')->with('error', 'You do not have permission to access this page.');
-        }
+        return DataTables::of($assets)
+            ->addIndexColumn()
 
-        $assets = Asset::where('category_id', 5)->get();
-        return view('admin.asset.fixed',[
-            'assets' => $assets,
-            'assetCategories' => AssetSubCategory::where('asset_category_id', 5)->where('status', 1)->get(),
-            'assetTransactions' => AssetTransaction::all(),
-            'users' => Contact::all(),
-            'banks' => BankAccount::all(),
-        ]);
+            // Asset Category
+            ->editColumn('asset_category', function ($row) {
+                return ($row->category->name ?? 'Not Assigned') . 
+                       ' - (' . ($row->subcategory->name ?? 'Not Assigned') . ')';
+            })
+
+            // Asset Name
+            ->editColumn('asset_name', function ($row) {
+                return $row->name ?? 'N/A';
+            })
+
+            // Issued Name
+            ->editColumn('user_name', function ($row) {
+                return $row->user_name ?? 'N/A';
+            })
+
+            // Amount (Deposits - Withdrawals)
+            ->editColumn('amount', function ($row) {
+                $totalDeposits = $row->transactions->where('transaction_type', 'Deposit')->sum('amount');
+                $totalWithdrawals = $row->transactions->where('transaction_type', 'Withdraw')->sum('amount');
+                $currentAmount = $totalDeposits - $totalWithdrawals;
+
+                return number_format($currentAmount, 2) . ' Tk';
+            })
+
+            // Description
+            ->editColumn('description', function ($row) {
+                return $row->description ?? 'N/A';
+            })
+
+            // Action Buttons (separate blade partial recommended)
+            ->addColumn('action', function ($row) {
+                return view('admin.asset._actions', compact('row'))->render();
+            })
+
+            ->rawColumns(['action']) // Prevent escaping HTML
+            ->make(true);
     }
+
+    return view('admin.asset.index', [
+        'assetCategories'   => AssetSubCategory::where('asset_category_id', 4)->where('status', 1)->get(),
+        'assetTransactions' => AssetTransaction::all(),
+        'users'             => Contact::all(),
+        'banks'             => BankAccount::all(),
+        'assets' => Asset::with(['category', 'subcategory', 'transactions'])
+                    ->where('category_id', 4)
+                    ->latest()
+                    ->get(),
+    ]);
+}
+
+public function fixed(Request $request)
+{
+    if (auth()->user()->access->asset == 3) {
+        return redirect()->route('admin.dashboard')
+            ->with('error', 'You do not have permission to access this page.');
+    }
+
+    if ($request->ajax()) {
+        $assets = Asset::with(['category', 'subcategory', 'transactions'])
+            ->where('category_id', 5)
+            ->latest();
+
+        return DataTables::of($assets)
+            ->addIndexColumn()
+
+            // Asset Category
+            ->editColumn('asset_category', function ($row) {
+                return ($row->category->name ?? 'Not Assigned') . 
+                       ' - (' . ($row->subcategory->name ?? 'Not Assigned') . ')';
+            })
+
+            // Asset Name
+            ->editColumn('asset_name', function ($row) {
+                return $row->name ?? 'N/A';
+            })
+
+            // Amount (Deposits - Withdrawals)
+            ->editColumn('amount', function ($row) {
+                $totalDeposits = $row->transactions->where('transaction_type', 'Deposit')->sum('amount');
+                $totalWithdrawals = $row->transactions->where('transaction_type', 'Withdraw')->sum('amount');
+                $currentAmount = $totalDeposits - $totalWithdrawals;
+
+                return number_format($currentAmount, 2) . ' Tk';
+            })
+
+            // Description
+            ->editColumn('description', function ($row) {
+                return $row->description ?? 'N/A';
+            })
+
+            // Action Buttons (separate blade partial recommended)
+            ->addColumn('action', function ($row) {
+                return view('admin.asset._fixed_actions', compact('row'))->render();
+            })
+
+            ->rawColumns(['action']) // Prevent escaping HTML
+            ->make(true);
+    }
+
+    return view('admin.asset.fixed', [
+        'assetCategories'   => AssetSubCategory::where('asset_category_id', 5)->where('status', 1)->get(),
+        'assetTransactions' => AssetTransaction::all(),
+        'users'             => Contact::all(),
+        'banks'             => BankAccount::all(),
+        'assets' => Asset::with(['category', 'subcategory', 'transactions'])
+                    ->where('category_id', 5)
+                    ->latest()
+                    ->get(),
+    ]);
+}
+
+
+    // public function fixed(){
+
+    //     if (auth()->user()->access->asset == 3) {
+    //         return redirect()->route('admin.dashboard')->with('error', 'You do not have permission to access this page.');
+    //     }
+
+    //     $assets = Asset::where('category_id', 5)->get();
+    //     return view('admin.asset.fixed',[
+    //         'assets' => $assets,
+    //         'assetCategories' => AssetSubCategory::where('asset_category_id', 5)->where('status', 1)->get(),
+    //         'assetTransactions' => AssetTransaction::all(),
+    //         'users' => Contact::all(),
+    //         'banks' => BankAccount::all(),
+    //     ]);
+    // }
     /**
      * Show the form for creating a new resource.
      */
@@ -336,7 +465,8 @@ $site_name->site_owner";
      */
     public function edit(string $id)
     {
-        //
+        $asset = Asset::with(['category','subcategory','transactions'])->findOrFail($id);
+        return response()->json($asset);
     }
 
     /**
@@ -811,6 +941,48 @@ $site_name->site_owner";
 
         return view('admin.asset.asset_report', compact('asset', 'startDate', 'endDate', 'transactions' ));
     }
+
+    public function view($id)
+{
+    $asset = Asset::with('category','subcategory')->findOrFail($id);
+
+    return response()->json([
+        'photo' => $asset->photo ? asset($asset->photo) : asset('admin-assets/img/nophoto.jpg'),
+        'fields' => [
+            'user_name' => $asset->user_name,
+            'national_id' => $asset->national_id,
+            'mobile' => $asset->mobile,
+            'email' => $asset->email,
+            'father_name' => $asset->father_name,
+            'father_mobile' => $asset->father_mobile,
+            'mother_name' => $asset->mother_name,
+            'mother_mobile' => $asset->mother_mobile,
+            'spouse_name' => $asset->spouse_name,
+            'spouse_mobile' => $asset->spouse_mobile,
+            'present_address' => $asset->present_address,
+            'permanent_address' => $asset->permanent_address,
+        ]
+    ]);
+}
+
+public function updateForm($id)
+{
+    $asset = Asset::findOrFail($id);
+    $banks = BankAccount::all(); // Send bank list as well
+
+    // Return JSON
+    return response()->json([
+        'asset_id' => $asset->id,
+    
+        'banks' => $banks->map(function($bank) {
+            return [
+                'id' => $bank->id,
+                'name' => $bank->bank_name,
+                'type' => $bank->account_type
+            ];
+        })
+    ]);
+}
 
 
 }

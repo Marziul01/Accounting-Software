@@ -82,7 +82,7 @@ Route::post('/notifications/mark-read', [NotificationController::class, 'markAsR
 Route::get('/notifications/{id}', [NotificationController::class, 'show'])->name('notifications.show');
 
 // Admin-only area
-Route::prefix('admin')->middleware(['auth:admin', 'admin.only'])->group(function () {
+Route::prefix('admin')->middleware(['auth:admin', 'admin.only','session.timeout'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
     Route::resource('contact', ContactController::class);
     Route::get('/logout', [AdminAuthController::class, 'logout'])->name('admin.logout');
@@ -253,6 +253,19 @@ Route::prefix('admin')->middleware(['auth:admin', 'admin.only'])->group(function
 
     Route::get('/asset/invoice/{id}', [TransactionHistory::class, 'assetinvoice'])->name('asset.invoice');
     Route::get('/liability/invoice/{id}', [TransactionHistory::class, 'liabilityinvoice'])->name('liability.invoice');
+    Route::get('/assets/edit/{id}', [AssetController::class, 'edit'])->name('assets.edits');
+    Route::get('/assets/{id}/view', [AssetController::class, 'view'])->name('assets.view');
+    Route::get('/assets/{id}/update', [AssetController::class, 'updateForm'])->name('assets.updateForm');
+
+    Route::get('/liabilities/edit/{id}', [LiabilityController::class, 'edit'])->name('liabilities.edit');
+    Route::get('/liabilities/{id}/view', [LiabilityController::class, 'view'])->name('liabilities.view');
+    Route::get('/liabilities/{id}/update', [LiabilityController::class, 'updateForm'])->name('liabilities.updateForm');
+
+    Route::get('investments/{id}/edit-data', [InvestmentController::class, 'edit'])->name('investments.editData');
+
+
+
+
 
 });
 

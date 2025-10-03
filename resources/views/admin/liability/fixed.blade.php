@@ -11,7 +11,7 @@
             </div>
             <div class="card-body  text-nowrap">
                 <div class="table-responsive">
-                    <table class="table" id="myTable">
+                    {{-- <table class="table" id="myTable">
                         <thead>
                             <tr>
                                 <th>Sl</th>
@@ -60,7 +60,7 @@
                                 <td>{{ $liability->description ?? 'N/A' }}</td>
                                 
                                 <td>
-                                    <div class="dropdown" data-bs-boundary="viewport">  <!-- 👈  only this line added -->
+                                    <div class="dropdown" data-bs-boundary="viewport"> 
                                         <button class="btn p-0 btn-outline-secondary" data-bs-toggle="dropdown" aria-expanded="false" style=" padding: 0px 5px !important ;">
                                             Actions <i class="bx bx-dots-vertical-rounded" style="font-size: 20px !important;"></i> 
                                         </button>
@@ -71,9 +71,7 @@
                                                         class="bx bx-wallet me-1"></i> Update Liability Transaction</a>
                                                         <a class=" btn btn-sm btn-outline-primary" href="{{ route('seeLiabilityTrans', $liability->slug) }}" ><i
                                                         class="bx bx-wallet me-1"></i> See All Liability Transactions</a>
-                                                {{-- <a class=" btn btn-sm btn-outline-secondary" href="" data-bs-toggle="modal"
-                                                data-bs-target="#viewModal{{ $liability->id }}"><i
-                                                        class="bx bx-show me-1"></i> See Details</a> --}}
+                                                
                                                     <a class=" btn btn-sm btn-outline-secondary {{ Auth::user()->access->liability == 1 ? 'disabled' : '' }}" href="" data-bs-toggle="modal"
                                                     data-bs-target="#editModal{{ $liability->id }}"><i
                                                             class="bx bx-edit-alt me-1"></i> Edit</a>
@@ -95,6 +93,27 @@
                             </tr>
                             @endif
                         </tbody>
+                    </table> --}}
+                    <table class="table" id="myTable">
+                        <thead>
+                            <tr>
+                                <th>Sl</th>
+
+                                @if($categorysettings->liability_category_table == 2)
+                                <th>Liability Category</th>
+                                @endif
+
+                                @if($categorysettings->liability_name_table == 2)
+                                <th>Liability Name</th>
+                                @endif
+
+                                
+                                <th>Amount</th>
+                                <th>Description</th>
+                                
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
                     </table>
                 </div>
                 
@@ -187,7 +206,7 @@
     <!-- / Modal -->
       
 
-    @if($liabilities->isNotEmpty())
+    {{-- @if($liabilities->isNotEmpty())
         @foreach ($liabilities as $liability )
 
         <div class="modal fade" id="editModal{{ $liability->id }}">
@@ -261,10 +280,67 @@
             </div>
         </div>
         @endforeach
-    @endif
+    @endif --}}
+    <div class="modal fade" id="editLiabilityModal">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Edit Liability</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <form id="editLiabilityForm" method="POST">
+        @csrf
+        @method('PUT')
+        <div class="modal-body">
+          <div class="row">
+            <h4>Liability Details</h4>
+
+            <div class="col-6 mb-3">
+              <label>Name</label>
+              <input type="text" name="name" class="form-control" id="liabilityName" required>
+            </div>
+
+            <div class="col-6 mb-3 d-none">
+              <label>Slug</label>
+              <input type="text" name="slug" class="form-control" id="liabilitySlug">
+            </div>
+
+            <div class="col-6 mb-3">
+              <label>Entry Date</label>
+              <input type="date" name="entry_date" class="form-control myDate" id="liabilityEntryDate" required>
+            </div>
+
+            <input type="hidden" name="category_id" id="liabilityCategoryId">
+
+            <div class="col-12 mb-3">
+              <label class="form-label">Category</label>
+              <select class="form-select" id="liabilitySubcategory" name="subcategory_id" required>
+                <option value="">Select Category</option>
+                @foreach ($liabilityCategories as $category)
+                  <option value="{{ $category->id }}">{{ $category->name }}</option>
+                @endforeach
+              </select>
+            </div>
+
+            <div class="col-12 mb-3">
+              <label>Description</label>
+              <textarea name="description" class="form-control" id="liabilityDescription"></textarea>
+            </div>
+
+            <div class="col-12">
+              <button type="submit" class="btn btn-primary">Submit</button>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
     <!-- / Modal -->
 
-    @if($liabilities->isNotEmpty())
+    {{-- @if($liabilities->isNotEmpty())
         @foreach ($liabilities as $liability )
 
         <div class="modal fade" id="updateModal{{ $liability->id }}">
@@ -327,7 +403,69 @@
             </div>
         </div>
         @endforeach
-    @endif
+    @endif --}}
+    <div class="modal fade" id="updateLiabilityModal">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Update Your Liability Transaction</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <form id="updateLiabilityForm">
+                    @csrf
+                    <div class="row">
+                        <input type="hidden" name="liability_id" id="liabilityId">
+
+                        <div class="col-12 mb-3">
+                            <label>Transaction Type</label>
+                            <select name="transaction_type" class="form-select" id="transactionType">
+                                <option value="Deposit">উত্তোলন</option>
+                                <option value="Withdraw">জমা</option>
+                            </select>
+                        </div>
+
+                        <div class="col-12 mb-3">
+                            <label>Amount</label>
+                            <input type="number" name="amount" class="form-control" id="transactionAmount" required>
+                        </div>
+
+                        <div class="col-12 mb-3">
+                            <label>Transaction Date</label>
+                            <input type="date" name="transaction_date" class="form-control myDate" id="transactionDate" value="{{ date('Y-m-d') }}" required>
+                        </div>
+
+                        <div class="col-12 mb-3">
+                            <label>Description</label>
+                            <textarea name="description" class="form-control" id="transactionDescription"></textarea>
+                        </div>
+
+                        <div class="col-12 mb-3">
+                            <label for="bank_account_id" class="form-label">Select Bank Account (Optional)</label>
+                            <select class="form-select" id="bankAccount" name="bank_account_id">
+                                <option value="">Select Bank</option>
+                                @foreach ($banks as $bank)
+                                    <option value="{{ $bank->id }}">{{ $bank->bank_name }}- ({{ $bank->account_type }})</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="col-12 mb-3">
+                            <label class="form-label">Bank Description (Optional)</label>
+                            <textarea class="form-control" name="bank_description" id="bankDescription" rows="3"></textarea>
+                        </div>
+
+                        <div class="col-12 mb-3">
+                            <button type="submit" class="btn btn-primary">Submit</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>  
+    </div>
+</div>
+
 
     <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
@@ -349,7 +487,7 @@
 
 @section('scripts')
 
-@if ($liabilities->isNotEmpty())
+{{-- @if ($liabilities->isNotEmpty())
 <script>
     $('#myTable').DataTable({
         pageLength: 25, // default rows per page
@@ -376,7 +514,57 @@
     });
 </script>
     
-@endif
+@endif --}}
+<script>
+$(document).ready(function() {
+    $('#myTable').DataTable({
+        processing: true,
+        serverSide: true,
+        ajax: "{{ route('liabilityFixed') }}",
+        pageLength: 25,
+                    lengthMenu: [
+                        [25, 50, 100],
+                        [25, 50, 100]
+                    ],
+                    dom: 'Blfrtip',
+                    buttons: [{
+                            extend: 'csv',
+                            text: 'Export CSV',
+                            className: 'btn btn-sm my-custom-table-btn',
+                            exportOptions: {
+                                columns: ':not(:last-child)'
+                            }
+                        },
+                        {
+                            extend: 'print',
+                            text: 'Print Table',
+                            className: 'btn btn-sm my-custom-table-btn',
+                            exportOptions: {
+                                columns: ':not(:last-child)'
+                            }
+                        }
+                    ],
+        columns: [
+            { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
+            @if($categorysettings->liability_category_table == 2)
+            { data: 'liability_category', name: 'category.name' ,orderable: false, searchable: false},
+            @endif
+            @if($categorysettings->liability_name_table == 2)
+            { data: 'liability_name', name: 'name' },
+            @endif
+            
+            { data: 'amount', name: 'amount', orderable: false, searchable: false },
+            { data: 'description', name: 'description' },
+            { data: 'action', name: 'action', orderable: false, searchable: false },
+        ],
+        order: [[0, 'desc']],
+        language: {
+                        processing: '<div class="loader-custom1"></div>'
+                    }
+    });
+});
+</script>
+
 <script>
     const banglaToEnglishMap = {
         'অ': 'a', 'আ': 'aa', 'ই': 'i', 'ঈ': 'ii', 'উ': 'u', 'ঊ': 'uu',
@@ -482,7 +670,7 @@
 </script>
 
 
-<script>
+{{-- <script>
     $(document).ready(function () {
         $('form[id^="editIncomeCategoryForms"] button[type="submit"]').on('click', function (e) {
             e.preventDefault();
@@ -531,7 +719,78 @@
         });
     });
 
+</script> --}}
+
+<script>
+$(document).ready(function () {
+
+    // Click Edit button → Fetch details
+    $(document).on('click', '#editLiabilityBtn', function () {
+        let id = $(this).data('id');
+
+        $.ajax({
+            url: "{{ route('liabilities.edit', ':id') }}".replace(':id', id),
+            type: "GET",
+            success: function (res) {
+                // fill modal fields
+                $('#liabilityName').val(res.name);
+                $('#liabilitySlug').val(res.slug);
+                $('#liabilityEntryDate').val(res.entry_date);
+                $('#liabilityCategoryId').val(res.category_id);
+                $('#liabilityDescription').val(res.description);
+                
+                $('#liabilitySubcategory').val(res.subcategory_id).trigger('change');
+
+                // set form action dynamically
+                $('#editLiabilityForm').attr('action', "{{ route('liability.update', ':id') }}".replace(':id', res.id));
+
+                // open modal
+                $('#editLiabilityModal').modal('show');
+            },
+            error: function (xhr) {
+                toastr.error("Failed to fetch liability details.");
+            }
+        });
+    });
+
+    // Submit Form via AJAX
+    $('#editLiabilityForm').on('submit', function (e) {
+        e.preventDefault();
+        toastr.clear();
+
+        let form = this;
+        let formData = new FormData(form);
+
+        $.ajax({
+            url: form.action,
+            method: "POST",
+            data: formData,
+            headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+            processData: false,
+            contentType: false,
+            success: function (response) {
+                $('#successMessage').text(response.message);
+                $('#successModal').modal('show');
+                form.reset();
+                $('#editLiabilityModal').modal('hide');
+
+                setTimeout(function () { window.location.reload(); }, 2000);
+            },
+            error: function (xhr) {
+                if (xhr.status === 422) {
+                    let errors = xhr.responseJSON.errors;
+                    for (let key in errors) {
+                        toastr.error(errors[key][0]);
+                    }
+                } else {
+                    toastr.error("An error occurred. Please try again.");
+                }
+            }
+        });
+    });
+});
 </script>
+
 
 <script>
     $(document).on('click', '.delete-confirm', function (e) {
@@ -695,7 +954,7 @@
 
 </script>
 
-<script>
+{{-- <script>
     $(document).ready(function () {
 
         
@@ -747,7 +1006,69 @@
             });
         });
     });
+</script> --}}
+<script>
+$(document).ready(function () {
+
+    // Open Modal & Prefill Hidden Field
+    $(document).on('click', '#updateLiabilityBtn', function () {
+        let id = $(this).data('id');
+
+        // set hidden input for liability id
+        $('#liabilityId').val(id);
+
+        // reset fields
+        $('#updateLiabilityForm')[0].reset();
+        $('#bankAccount').val('').trigger('change');
+
+        // open modal
+        $('#updateLiabilityModal').modal('show');
+    });
+
+    // Submit Form via AJAX
+    $('#updateLiabilityForm').on('submit', function (e) {
+        e.preventDefault();
+        toastr.clear();
+
+        let form = this;
+        let formData = new FormData(form);
+
+        $.ajax({
+            url: "{{ route('liabilitytransaction.store') }}",
+            method: "POST",
+            data: formData,
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
+            processData: false,
+            contentType: false,
+            success: function (response) {
+                $('#successMessage').text(response.message);
+                $('#successModal').modal('show');
+
+                form.reset();
+                $('#updateLiabilityModal').modal('hide');
+
+                setTimeout(function () {
+                    window.location.reload();
+                }, 2000);
+            },
+            error: function (xhr) {
+                console.log('Error:', xhr);
+                if (xhr.status === 422) {
+                    let errors = xhr.responseJSON.errors;
+                    for (let key in errors) {
+                        toastr.error(errors[key][0]);
+                    }
+                } else {
+                    toastr.error("An error occurred. Please try again.");
+                }
+            }
+        });
+    });
+});
 </script>
+
 
 <script>
     document.querySelectorAll('.contact-select').forEach(function(select) {

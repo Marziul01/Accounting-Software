@@ -38,6 +38,9 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
     <script src="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css"
+        integrity="sha512-DxV+EoADOkOygM4IR9yXP8Sb2qwgidEmeqAEmDKIOfPRQZOWbXCzLC6vjbZyy0vPisbH2SyW27+ddLVCN+OMzQ=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
 
     <!-- Helpers -->
     <script src="{{ asset( 'admin-assets' )  }}/assets/vendor/js/helpers.js"></script>
@@ -53,7 +56,15 @@
     <div class="container-xxl">
         <div class="authentication-wrapper authentication-basic container-p-y">
             <div class="authentication-inner">
-                <button id="themeToggle" class="btn btn-sm btn-outline-secondary login-darkMOde">🌙 Dark Mode</button>
+                {{-- <button id="themeToggle" class="btn btn-sm btn-outline-secondary login-darkMOde">🌙 Dark Mode</button> --}}
+                <div class="theme-switch-wrapper" style="position: fixed; top: 20px; right: 20px;">
+                    <input type="checkbox" class="checkbox" id="themeToggle">
+                    <label for="themeToggle" class="checkbox-label">
+                    <i class="fas fa-moon"></i>
+                    <i class="fas fa-sun"></i>
+                    <span class="ball"></span>
+                    </label>
+                </div>
                 <!-- Register -->
                 <div class="card px-sm-6 px-0">
                     <div class="card-body">
@@ -216,27 +227,28 @@
         });
     </script>
     <script>
-        const toggleBtn = document.getElementById('themeToggle');
-        const root = document.documentElement;
-      
-        // Load theme from localStorage
-        if (localStorage.getItem('theme') === 'dark') {
+  const toggleCheckbox = document.getElementById('themeToggle');
+  const root = document.documentElement;
+
+  // Load theme from localStorage
+  if (localStorage.getItem('theme') === 'dark') {
+      root.setAttribute('data-theme', 'dark');
+      toggleCheckbox.checked = true; // show ball on right side
+  } else {
+      toggleCheckbox.checked = false;
+  }
+
+  // Toggle theme on change
+  toggleCheckbox.addEventListener('change', () => {
+      if (toggleCheckbox.checked) {
           root.setAttribute('data-theme', 'dark');
-          toggleBtn.textContent = '☀️ Light Mode';
-        }
-      
-        toggleBtn.addEventListener('click', () => {
-          if (root.getAttribute('data-theme') === 'dark') {
-            root.removeAttribute('data-theme');
-            localStorage.setItem('theme', 'light');
-            toggleBtn.textContent = '🌙 Dark Mode';
-          } else {
-            root.setAttribute('data-theme', 'dark');
-            localStorage.setItem('theme', 'dark');
-            toggleBtn.textContent = '☀️ Light Mode';
-          }
-        });
-      </script>
+          localStorage.setItem('theme', 'dark');
+      } else {
+          root.removeAttribute('data-theme');
+          localStorage.setItem('theme', 'light');
+      }
+  });
+</script>
 
       <script>
         @if(session('success'))

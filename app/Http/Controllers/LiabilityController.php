@@ -19,41 +19,160 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Mail;
+use Yajra\DataTables\Facades\DataTables;
 
 class LiabilityController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
-    {
-        if (Auth::user()->access->liability == 3) {
-            return redirect()->route('admin.dashboard')->with('error', 'You do not have permission to access this page.');
-        }
-        $Liabilities = Liability::where('category_id', 3)->get();
-        return view('admin.liability.index',[
-            'liabilities' => $Liabilities,
-            'liabilityCategories' => LiabilitySubCategory::where('liability_category_id', 3)->where('status', 1)->get(),
-            'liabilityTransactions' => LiabilityTransaction::all(),
-            'users' => Contact::all(),
-            'banks' => BankAccount::all(),
-        ]);
+    // public function index()
+    // {
+    //     if (Auth::user()->access->liability == 3) {
+    //         return redirect()->route('admin.dashboard')->with('error', 'You do not have permission to access this page.');
+    //     }
+    //     $Liabilities = Liability::where('category_id', 3)->get();
+    //     return view('admin.liability.index',[
+    //         'liabilities' => $Liabilities,
+    //         'liabilityCategories' => LiabilitySubCategory::where('liability_category_id', 3)->where('status', 1)->get(),
+    //         'liabilityTransactions' => LiabilityTransaction::all(),
+    //         'users' => Contact::all(),
+    //         'banks' => BankAccount::all(),
+    //     ]);
+    // }
+
+    public function index(Request $request)
+{
+    if (auth()->user()->access->liability == 3) {
+        return redirect()->route('admin.dashboard')
+            ->with('error', 'You do not have permission to access this page.');
     }
 
-    public function fixed(){
-        if (Auth::user()->access->liability == 3) {
-            return redirect()->route('admin.dashboard')->with('error', 'You do not have permission to access this page.');
-        }
+    if ($request->ajax()) {
+        $liabilities = Liability::with(['category', 'subcategory', 'transactions'])->where('category_id', 3)->latest();
 
-        $Liabilities = Liability::where('category_id', 4)->get();
-        return view('admin.liability.fixed',[
-            'liabilities' => $Liabilities,
-            'liabilityCategories' => LiabilitySubCategory::where('liability_category_id', 4)->where('status', 1)->get(),
-            'liabilityTransactions' => LiabilityTransaction::all(),
-            'users' => Contact::all(),
-            'banks' => BankAccount::all(),
-        ]);
+        return DataTables::of($liabilities)
+            ->addIndexColumn() // Sl
+
+            // Liability Category + Subcategory
+            ->editColumn('liability_category', function ($row) {
+                return ($row->category->name ?? 'Not Assigned') . 
+                       ' - (' . ($row->subcategory->name ?? 'Not Assigned') . ')';
+            })
+
+            // Liability Name
+            ->editColumn('liability_name', function ($row) {
+                return $row->name ?? 'N/A';
+            })
+
+            // Issued Name
+            ->editColumn('user_name', function ($row) {
+                return $row->user_name ?? 'N/A';
+            })
+
+            // Current Amount (Deposit - Withdraw)
+            ->editColumn('amount', function ($row) {
+                $totalDeposits = $row->transactions->where('transaction_type', 'Deposit')->sum('amount');
+                $totalWithdrawals = $row->transactions->where('transaction_type', 'Withdraw')->sum('amount');
+                $currentAmount = $totalDeposits - $totalWithdrawals;
+
+                return number_format($currentAmount, 2) . ' Tk';
+            })
+
+            // Description
+            ->editColumn('description', function ($row) {
+                return $row->description ?? 'N/A';
+            })
+
+            // Actions
+            ->addColumn('action', function ($row) {
+                return view('admin.liability._actions', compact('row'))->render();
+            })
+            ->rawColumns(['action'])
+            ->make(true);
     }
+
+    return view('admin.liability.index', [
+        'liabilities' => Liability::with(['category', 'subcategory', 'transactions'])->where('category_id', 3)->latest()->get(),
+        'liabilityCategories' => LiabilitySubCategory::where('liability_category_id', 3)->where('status', 1)->get(),
+           'liabilityTransactions' => LiabilityTransaction::all(),
+           'users' => Contact::all(),
+       'banks' => BankAccount::all(),
+        
+    ]);
+}
+
+
+    // public function fixed(){
+    //     if (Auth::user()->access->liability == 3) {
+    //         return redirect()->route('admin.dashboard')->with('error', 'You do not have permission to access this page.');
+    //     }
+
+    //     $Liabilities = Liability::where('category_id', 4)->get();
+    //     return view('admin.liability.fixed',[
+    //         'liabilities' => $Liabilities,
+    //         'liabilityCategories' => LiabilitySubCategory::where('liability_category_id', 4)->where('status', 1)->get(),
+    //         'liabilityTransactions' => LiabilityTransaction::all(),
+    //         'users' => Contact::all(),
+    //         'banks' => BankAccount::all(),
+    //     ]);
+    // }
+
+    public function fixed(Request $request)
+{
+    if (auth()->user()->access->liability == 3) {
+        return redirect()->route('admin.dashboard')
+            ->with('error', 'You do not have permission to access this page.');
+    }
+
+    if ($request->ajax()) {
+        $liabilities = Liability::with(['category', 'subcategory', 'transactions'])->where('category_id', 4)->latest();
+
+        return DataTables::of($liabilities)
+            ->addIndexColumn() // Sl
+
+            // Liability Category + Subcategory
+            ->editColumn('liability_category', function ($row) {
+                return ($row->category->name ?? 'Not Assigned') . 
+                       ' - (' . ($row->subcategory->name ?? 'Not Assigned') . ')';
+            })
+
+            // Liability Name
+            ->editColumn('liability_name', function ($row) {
+                return $row->name ?? 'N/A';
+            })
+
+            // Current Amount (Deposit - Withdraw)
+            ->editColumn('amount', function ($row) {
+                $totalDeposits = $row->transactions->where('transaction_type', 'Deposit')->sum('amount');
+                $totalWithdrawals = $row->transactions->where('transaction_type', 'Withdraw')->sum('amount');
+                $currentAmount = $totalDeposits - $totalWithdrawals;
+
+                return number_format($currentAmount, 2) . ' Tk';
+            })
+
+            // Description
+            ->editColumn('description', function ($row) {
+                return $row->description ?? 'N/A';
+            })
+
+            // Actions
+            ->addColumn('action', function ($row) {
+                return view('admin.liability._fixed_actions', compact('row'))->render();
+            })
+            ->rawColumns(['action'])
+            ->make(true);
+    }
+
+    return view('admin.liability.fixed', [
+        'liabilities' => Liability::with(['category', 'subcategory', 'transactions'])->where('category_id', 3)->latest()->get(),
+        'liabilityCategories' => LiabilitySubCategory::where('liability_category_id', 3)->where('status', 1)->get(),
+        'liabilityTransactions' => LiabilityTransaction::all(),
+        'users' => Contact::all(),
+       'banks' => BankAccount::all(),
+        
+    ]);
+}
 
     /**
      * Show the form for creating a new resource.
@@ -314,7 +433,8 @@ $site_name->site_owner";
      */
     public function edit(string $id)
     {
-        //
+        $liability = Liability::with(['category','subcategory','transactions'])->findOrFail($id);
+        return response()->json($liability);
     }
 
     /**
@@ -779,4 +899,25 @@ $site_name->site_owner";
 
         return view('admin.liability.liability_report', compact('liability', 'startDate', 'endDate', 'transactions'));
     }
+
+    public function view($id)
+{
+    $liability = Liability::with('transactions')->findOrFail($id);
+    return response()->json($liability);
+}
+
+public function updateForm($id)
+{
+    $liability = Liability::findOrFail($id);
+    $banks = BankAccount::all();
+
+    return response()->json([
+        'liability_id' => $liability->id,
+        'amount' => $liability->amount,
+        'transaction_date' => $liability->transaction_date,
+        'description' => $liability->description,
+        'bank_description' => $liability->bank_description,
+        'banks' => $banks
+    ]);
+}
 }

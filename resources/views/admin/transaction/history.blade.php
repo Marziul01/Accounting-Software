@@ -22,11 +22,10 @@
                     </div>
                     
                     <div class="mobile-reports-filter-btns">
-                        <button class="btn btn-outline-secondary" id="dateFilterBtn">Filter by Date</button>
-
-                        <button class="btn {{ $period === 'today' ? 'btn-secondary' : 'btn-outline-secondary' }} quick-filter" data-period="today">Today</button>
-                        <button class="btn {{ $period === 'month' ? 'btn-secondary' : 'btn-outline-secondary' }} quick-filter" data-period="month">This Month</button>
-                        <button class="btn {{ $period === 'year' ? 'btn-secondary' : 'btn-outline-secondary' }} quick-filter" data-period="year">This Year</button>
+                        <button class="btn {{ $activeFilter === 'date' ? 'btn-secondary' : 'btn-outline-secondary' }}" id="dateFilterBtn">Filter by Date</button>
+                        <button class="btn {{ $activeFilter === 'today' ? 'btn-secondary' : 'btn-outline-secondary' }} quick-filter" data-period="today">Today</button>
+                        <button class="btn {{ $activeFilter === 'month' ? 'btn-secondary' : 'btn-outline-secondary' }} quick-filter" data-period="month">This Month</button>
+                        <button class="btn {{ $activeFilter === 'year' ? 'btn-secondary' : 'btn-outline-secondary' }} quick-filter" data-period="year">This Year</button>
                     </div>                  
                 </div>
 
@@ -93,9 +92,9 @@
         <script>
             $(document).ready(function() {
                 let selectedType = "";
-                let startDate = "";
-                let endDate = "";
-                let period = "";
+                let startDate = "{{ $startDate ?? '' }}";
+                let endDate   = "{{ $endDate ?? '' }}";
+                let period    = "{{ $activeFilter !== 'date' ? $activeFilter : '' }}";
 
                 var table = $('#myTable').DataTable({
                     processing: true,
@@ -160,22 +159,58 @@
                     table.ajax.reload();
                 });
 
-                // Date Range filter
-                $('#dateFilterBtn').on('click', function () {
+// Quick filter buttons (today, month, year)
+    $('.quick-filter').on('click', function() {
+        period = $(this).data('period'); // set the period
+        startDate = "";
+        endDate = "";
+
+        // Activate this button
+        $('.quick-filter').removeClass('btn-secondary').addClass('btn-outline-secondary');
+        $(this).removeClass('btn-outline-secondary').addClass('btn-secondary');
+
+        // Deactivate date filter button
+        $('#dateFilterBtn').removeClass('btn-secondary').addClass('btn-outline-secondary');
+
+        table.ajax.reload();
+    });
+
+    // Filter by Date button
+    $('#dateFilterBtn').on('click', function() {
+        startDate = $('#startDate').val();
+        endDate   = $('#endDate').val();
+        period    = ""; // deactivate quick filter period
+
+        // Determine if date range matches today, month, year
+        let today = new Date().toISOString().slice(0,10);
+        let firstDayOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().slice(0,10);
+        let lastDayOfMonth  = new Date(new Date().getFullYear(), new Date().getMonth()+1, 0).toISOString().slice(0,10);
+        let firstDayOfYear  = new Date(new Date().getFullYear(), 0, 1).toISOString().slice(0,10);
+        let lastDayOfYear   = new Date(new Date().getFullYear(), 11, 31).toISOString().slice(0,10);
+
+        $('.quick-filter').removeClass('btn-secondary').addClass('btn-outline-secondary');
+
+        if(startDate === today && endDate === today) {
+            period = "today";
+            $('.quick-filter[data-period="today"]').removeClass('btn-outline-secondary').addClass('btn-secondary');
+        } else if(startDate === firstDayOfMonth && endDate === lastDayOfMonth) {
+            period = "month";
+            $('.quick-filter[data-period="month"]').removeClass('btn-outline-secondary').addClass('btn-secondary');
+        } else if(startDate === firstDayOfYear && endDate === lastDayOfYear) {
+            period = "year";
+            $('.quick-filter[data-period="year"]').removeClass('btn-outline-secondary').addClass('btn-secondary');
+        } else {
+            // Keep Filter by Date button active
+            $('#dateFilterBtn').removeClass('btn-outline-secondary').addClass('btn-secondary');
+        }
+
+        table.ajax.reload();
+    });
+
+                // Date inputs change handler
+                $('#startDate, #endDate').on('change', function() {
                     startDate = $('#startDate').val();
                     endDate = $('#endDate').val();
-                    period = ""; // reset quick filter
-                    table.ajax.reload();
-                });
-
-                // Quick Period filters
-                $('.quick-filter').on('click', function () {
-                    period = $(this).data('period'); // today | month | year
-                    startDate = "";
-                    endDate = "";
-                    $('.quick-filter').removeClass('btn-secondary').addClass('btn-outline-secondary');
-                    $(this).removeClass('btn-outline-secondary').addClass('btn-secondary');
-                    table.ajax.reload();
                 });
             });
         </script>

@@ -15,29 +15,101 @@ use App\Models\Notification;
 use Carbon\Carbon;
 use Illuminate\Container\Attributes\Auth;
 use Illuminate\Support\Facades\Validator;
+use Yajra\DataTables\Facades\DataTables;
 
 class InvestmentController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
-    {
-        // Check if the user has permission to access this page
-        if (auth()->user()->access->investment == 3) {
-            return redirect()->route('admin.dashboard')->with('error', 'You do not have permission to access this page.');
-        }
-        // Fetch all investment categories from the database
-        $investmentCategories = InvestmentCategory::where('status', 1)->get();
+    // public function index()
+    // {
+    //     // Check if the user has permission to access this page
+    //     if (auth()->user()->access->investment == 3) {
+    //         return redirect()->route('admin.dashboard')->with('error', 'You do not have permission to access this page.');
+    //     }
+    //     // Fetch all investment categories from the database
+    //     $investmentCategories = InvestmentCategory::where('status', 1)->get();
 
-        return view('admin.investment.investment', [
-            'investmentCategories' => $investmentCategories,
-            'investmentSubCategories' => InvestmentSubCategory::where('status', 1)->get(),
-            'investments' => Investment::all(),
-            'investmentTransactions' => InvestmentTransaction::all(),
-            'banks' => BankAccount::all(),
-        ]);
+    //     return view('admin.investment.investment', [
+    //         'investmentCategories' => $investmentCategories,
+    //         'investmentSubCategories' => InvestmentSubCategory::where('status', 1)->get(),
+    //         'investments' => Investment::all(),
+    //         'investmentTransactions' => InvestmentTransaction::all(),
+    //         'banks' => BankAccount::all(),
+    //     ]);
+    // }
+
+    public function index(Request $request)
+{
+    if (auth()->user()->access->investment == 3) {
+        return redirect()->route('admin.dashboard')->with('error', 'You do not have permission to access this page.');
     }
+
+    if ($request->ajax()) {
+        $investments = Investment::with([
+            'investmentCategory',
+            'investmentSubCategory',
+            'investIncome',
+            'investExpense',
+            'transactions' // 👈 added
+        ])->orderByDesc('date');
+
+        return DataTables::of($investments)
+            ->addIndexColumn()
+
+            ->editColumn('investment_category', function ($row) {
+                return ($row->investmentCategory->name ?? 'Investment Category Not Assigned') .
+                    ' - ( ' . ($row->investmentSubCategory->name ?? 'Investment Sub Category Not Assigned') . ' )';
+            })
+
+            ->editColumn('description', function ($row) {
+                return $row->description ?? 'N/A';
+            })
+
+            ->addColumn('initial_investment', function ($row) {
+                $transactions = $row->transactions;
+                $initialAmount = $transactions->first()->amount ?? 0;
+                return number_format($initialAmount, 2) . ' Tk';
+            })
+
+            ->addColumn('investment_condition', function ($row) {
+                $transactions = $row->transactions;
+                $totalDeposits = $transactions->where('transaction_type', 'Deposit')->sum('amount');
+                $totalWithdrawals = $transactions->where('transaction_type', 'Withdraw')->sum('amount');
+                $investExpense = $row->investExpense->sum('amount');
+                $currentAmount = $totalDeposits - $totalWithdrawals - $investExpense;
+                return number_format($currentAmount, 2) . ' Tk';
+            })
+
+            ->editColumn('date', function ($row) {
+                return $row->date ? \Carbon\Carbon::parse($row->date)->format('d M, Y') : 'N/A';
+            })
+
+            ->addColumn('action', function ($row) {
+                return view('admin.investment._actions', compact('row'))->render();
+            })
+
+            ->rawColumns(['action'])
+            ->make(true);
+    }
+
+    $investments = Investment::all();
+    $firstDate = $investments->min('date');
+    $lastDate = $investments->max('date');
+
+    return view('admin.investment.investment', [
+        'investments' => $investments,
+        'investmentCategories' => InvestmentCategory::where('status', 1)->get(),
+        'investmentSubCategories' => InvestmentSubCategory::where('status', 1)->get(),
+        'firstDate' => $firstDate,
+        'lastDate' => $lastDate,
+        'banks' => BankAccount::all(),
+        'investmentTransactions' => InvestmentTransaction::all(),
+    ]);
+}
+
+
 
     /**
      * Show the form for creating a new resource.
@@ -142,7 +214,8 @@ class InvestmentController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        $investment = Investment::with(['investmentCategory', 'investmentSubCategory'])->findOrFail($id);
+        return response()->json($investment);
     }
 
     /**

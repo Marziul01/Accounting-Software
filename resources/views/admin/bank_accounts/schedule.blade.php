@@ -35,8 +35,8 @@
                                             ({{ $schedule->toBankAccount->account_type ?? 'N/A' }})</td>
                                         <td>{{ number_format($schedule->amount, 2) }}</td>
                                         <td>{{ $schedule->description }}</td>
-                                        <td>{{ $schedule->start_date }}</td>
-                                        <td>{{ $schedule->end_date ?? 'Continue' }}</td>
+                                        <td>{{ $schedule->start_date }} {{ $schedule->infinite == 1 ? '(C)' : '(E)' }}</td>
+                                        <td>{{ $schedule->infinite == 0 ? $schedule->end_date.' (E)' : 'Continue' }}</td>
                                         <td>
                                             <a class=" btn btn-sm btn-outline-secondary {{ Auth::user()->access->bankbook == 1 ? 'disabled' : '' }}"
                                                 href="" data-bs-toggle="modal"

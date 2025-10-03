@@ -26,7 +26,7 @@ use App\Models\BankAccount;
 use Mpdf\Mpdf;
 use Mpdf\Config\ConfigVariables;
 use Mpdf\Config\FontVariables;
-
+use Carbon\Carbon;
 
 
 class TransactionHistory extends Controller
@@ -198,31 +198,32 @@ class TransactionHistory extends Controller
             })
             ->values();
 
-        if ($request->ajax()) {
-            $trsn = $merged;
+        $trsn = $merged; // your merged transaction collection
 
-            // 1. Filter by transaction type
-            if ($request->filled('type')) {
-                $trsn = $trsn->where('type', $request->type);
-            }
+        // 1. Filter by transaction type if provided
+        if ($request->filled('type')) {
+            $trsn = $trsn->where('type', $request->type);
+        }
 
-            // 2. Filter by date range
-            if ($request->filled('startDate') && $request->filled('endDate')) {
-                $start = \Carbon\Carbon::parse($request->startDate)->startOfDay();
-                $end   = \Carbon\Carbon::parse($request->endDate)->endOfDay();
+        // 2. Date filtering
+        $startDate = $request->filled('startDate') ? Carbon::parse($request->startDate)->startOfDay() : null;
+        $endDate   = $request->filled('endDate') ? Carbon::parse($request->endDate)->endOfDay() : null;
 
-                $trsn = $trsn->filter(function ($row) use ($start, $end) {
-                    $date = \Carbon\Carbon::parse($row->date);
-                    return $date->between($start, $end);
-                });
-            }
+        $period = $request->filled('period') ? $request->period : null;
 
-            // 3. Quick filters (today, month, year)
-            $period = $request->filled('period') ? $request->period : 'month'; // ✅ default to month
-            $now = \Carbon\Carbon::now();
+        if ($startDate && $endDate) {
+            // Priority: filter by date range
+            $trsn = $trsn->filter(function($row) use ($startDate, $endDate) {
+                $date = Carbon::parse($row->date);
+                return $date->between($startDate, $endDate);
+            });
+        } else {
+            // Use quick period filter, default to current month
+            $period = $period ?? 'month';
+            $now = Carbon::now();
 
-            $trsn = $trsn->filter(function ($row) use ($period, $now) {
-                $date = \Carbon\Carbon::parse($row->date);
+            $trsn = $trsn->filter(function($row) use ($period, $now) {
+                $date = Carbon::parse($row->date);
 
                 if ($period === 'today') {
                     return $date->isSameDay($now);
@@ -233,33 +234,55 @@ class TransactionHistory extends Controller
                 }
                 return true;
             });
+        }
 
+        // Return DataTables for AJAX requests
+        if ($request->ajax()) {
             return DataTables::of($trsn)
                 ->addIndexColumn()
                 ->editColumn('type', fn($row) => $row->type ?? 'Not Assigned')
                 ->editColumn('name', fn($row) => $row->name ?? 'Not Assigned')
                 ->editColumn('transaction_type', fn($row) => $row->transaction_type ?? 'Not Assigned')
                 ->editColumn('amount', fn($row) => $row->amount ?? 'Not Assigned')
-                ->editColumn('date', fn($row) => \Carbon\Carbon::parse($row->date)->format('d M, Y'))
+                ->editColumn('date', fn($row) => Carbon::parse($row->date)->format('d M, Y'))
                 ->editColumn('description', fn($row) => $row->description ?? 'Not Assigned')
                 ->addColumn('action', fn($row) => view('admin.transaction._actions', compact('row'))->render())
                 ->rawColumns(['action'])
                 ->make(true);
         }
 
-        // Determine the current period
-        $period = $request->filled('period') ? $request->period : 'month'; // default to month
+        // Determine active filter button for front-end
+        $today = Carbon::now()->format('Y-m-d');
+        $firstDayOfMonth = Carbon::now()->startOfMonth()->format('Y-m-d');
+        $lastDayOfMonth = Carbon::now()->endOfMonth()->format('Y-m-d');
+        $firstDayOfYear = Carbon::now()->startOfYear()->format('Y-m-d');
+        $lastDayOfYear = Carbon::now()->endOfYear()->format('Y-m-d');
 
-        // Optional: pass start and end dates if provided
-        $startDate = $request->startDate ?? null;
-        $endDate   = $request->endDate ?? null;
+        $activeFilter = 'month'; // default to month
+        $startDateVal = $request->startDate ?? null;
+        $endDateVal = $request->endDate ?? null;
 
-        return view('admin.transaction.history',[
+        if ($startDateVal && $endDateVal) {
+            if ($startDateVal === $today && $endDateVal === $today) {
+                $activeFilter = 'today';
+            } elseif ($startDateVal === $firstDayOfMonth && $endDateVal === $lastDayOfMonth) {
+                $activeFilter = 'month';
+            } elseif ($startDateVal === $firstDayOfYear && $endDateVal === $lastDayOfYear) {
+                $activeFilter = 'year';
+            } else {
+                $activeFilter = 'date';
+            }
+        } elseif ($period) {
+            $activeFilter = $period;
+        }
+
+        return view('admin.transaction.history', [
             'transactions' => $merged,
-            'period' => $period,
-            'startDate' => $startDate,
-            'endDate' => $endDate,
+            'activeFilter' => $activeFilter,
+            'startDate' => $startDateVal,
+            'endDate' => $endDateVal,
         ]);
+
     }
 
     public function editincome($id)

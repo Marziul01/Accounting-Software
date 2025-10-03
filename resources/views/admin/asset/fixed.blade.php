@@ -11,7 +11,7 @@
             </div>
             <div class="card-body  text-nowrap">
                 <div class="table-responsive">
-                    <table class="table" id="myTable">
+                    {{-- <table class="table" id="myTable">
                         <thead>
                             <tr>
                                 <th>Sl</th>
@@ -60,7 +60,7 @@
                                 <td>{{ $asset->description ?? 'N/A' }}</td>
                                 
                                 <td>
-                                    <div class="dropdown" data-bs-boundary="viewport">  <!-- 👈  only this line added -->
+                                    <div class="dropdown" data-bs-boundary="viewport">
                                         <button class="btn p-0 btn-outline-secondary" data-bs-toggle="dropdown" aria-expanded="false" style=" padding: 0px 5px !important ;">
                                             Actions <i class="bx bx-dots-vertical-rounded" style="font-size: 20px !important;"></i> 
                                         </button>
@@ -73,10 +73,7 @@
                                                 <a class=" btn btn-sm btn-outline-primary d-block" href="{{ route('seeAssetTrans', $asset->slug) }}" ><i
                                                     class="bx bx-wallet me-1"></i> See All Asset Transactions
                                                 </a>
-                                                {{-- <a class=" btn btn-sm btn-outline-secondary d-block" href="" data-bs-toggle="modal"
-                                                    data-bs-target="#viewModal{{ $asset->id }}"><i
-                                                    class="bx bx-show me-1"></i> See Details
-                                                </a> --}}
+                                                
                                                 <a class=" btn btn-sm btn-outline-secondary d-block {{ Auth::user()->access->asset == 1 ? 'disabled' : '' }}" href="" data-bs-toggle="modal"
                                                         data-bs-target="#editModal{{ $asset->id }}"><i
                                                         class="bx bx-edit-alt me-1"></i> Edit
@@ -99,6 +96,23 @@
                             </tr>
                             @endif
                         </tbody>
+                    </table> --}}
+                    <table class="table" id="myTable">
+                        <thead>
+                            <tr>
+                                <th>Sl</th>
+                                @if ($categorysettings->asset_category_table == 2)
+                                    <th>Asset Category</th>
+                                @endif
+                                @if ($categorysettings->asset_name_table == 2)
+                                    <th>Asset Name</th>
+                                @endif
+                           
+                                <th>Amount</th>
+                                <th>Description</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
                     </table>
                 </div>
                 
@@ -195,7 +209,7 @@
     <!-- / Modal -->
       
 
-    @if($assets->isNotEmpty())
+    {{-- @if($assets->isNotEmpty())
         @foreach ($assets as $asset )
 
         <div class="modal fade" id="editModal{{ $asset->id }}">
@@ -272,10 +286,71 @@
             </div>
         </div>
         @endforeach
-    @endif
+    @endif --}}
+    <div class="modal fade" id="editAssetModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Asset</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            
+            <form id="editAssetForm">
+                @csrf
+                @method('PUT')
+                <div class="modal-body">
+                    <input type="hidden" name="id" id="asset_id">
+
+                    <div class="row">
+                        <h4>Asset Details</h4>
+
+                        <div class="col-6 mb-3">
+                            <label>Name</label>
+                            <input type="text" name="name" id="asset_name" class="form-control" required>
+                        </div>
+
+                        <div class="col-6 mb-3 d-none">
+                            <label>Slug</label>
+                            <input type="text" name="slug" id="asset_slug" class="form-control">
+                        </div>
+
+                        <div class="col-6 mb-3">
+                            <label>Entry Date</label>
+                            <input type="date" name="entry_date" id="asset_entry_date" class="form-control myDate" required>
+                        </div>
+
+                        <input type="hidden" name="category_id" id="asset_category_id">
+
+                        <div class="col-12 mb-3">
+                            <label for="asset_subcategory_id" class="form-label">Category</label>
+                            <select class="form-select" name="subcategory_id" id="asset_subcategory_id" required>
+                                <option value="">Select Category</option>
+                                @foreach ($assetCategories as $category)
+                                    <option value="{{ $category->id }}">{{ $category->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="col-12 mb-3">
+                            <label>Description</label>
+                            <textarea name="description" id="asset_description" class="form-control"></textarea>
+                        </div>
+
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-primary">Submit</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+            
+        </div>
+    </div>
+</div>
+
     <!-- / Modal -->
 
-    @if($assets->isNotEmpty())
+    {{-- @if($assets->isNotEmpty())
         @foreach ($assets as $asset )
 
         <div class="modal fade" id="updateModal{{ $asset->id }}">
@@ -339,7 +414,68 @@
             </div>
         </div>
         @endforeach
-    @endif
+    @endif --}}
+    <div class="modal fade" id="updateAssetModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Update Your Asset Transaction</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="updateAssetForm">
+                    @csrf
+                    <input type="hidden" name="asset_id" id="tran_asset_id">
+
+                    <div class="row">
+                        <div class="col-12 mb-3">
+                            <label>Transaction Type</label>
+                            <select name="transaction_type" class="form-select" id="transaction_type">
+                                <option value="Deposit">জমা</option>
+                                <option value="Withdraw">উত্তোলন</option>
+                            </select>
+                        </div>
+
+                        <div class="col-12 mb-3">
+                            <label>Amount</label>
+                            <input type="number" name="amount" id="amount" class="form-control" required>
+                        </div>
+
+                        <div class="col-12 mb-3">
+                            <label>Transaction Date</label>
+                            <input type="date" name="transaction_date" id="transaction_date" class="form-control myDate" value="{{ date('Y-m-d') }}" required>
+                        </div>
+
+                        <div class="col-12 mb-3">
+                            <label>Description</label>
+                            <textarea name="description" id="description" class="form-control"></textarea>
+                        </div>
+
+                        <div class="col-12 mb-3">
+                            <label for="bank_account_id" class="form-label">Select Bank Account (Optional)</label>
+                            <select class="form-select" name="bank_account_id" id="bank_account_id">
+                                <option value="">Select Bank</option>
+                                @foreach ($banks as $bank)
+                                    <option value="{{ $bank->id }}">{{ $bank->bank_name }} - ({{ $bank->account_type }})</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="col-12 mb-3">
+                            <label class="form-label">Bank Description (Optional)</label>
+                            <textarea class="form-control" name="bank_description" id="bank_description" rows="3"></textarea>
+                        </div>
+
+                        <div class="col-12 mb-3">
+                            <button type="submit" class="btn btn-primary">Submit</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 
     <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
@@ -361,7 +497,7 @@
 
 @section('scripts')
 
-@if ($assets->isNotEmpty())
+{{-- @if ($assets->isNotEmpty())
 <script>
     $('#myTable').DataTable({
         pageLength: 25, // default rows per page
@@ -388,7 +524,82 @@
     });
 </script>
     
-@endif
+@endif --}}
+
+<script>
+            $(function() {
+                $('#myTable').DataTable({
+                    processing: true,
+                    serverSide: true,
+                    ajax: "{{ route('assetFixed') }}", // your index route
+                    pageLength: 25,
+                    lengthMenu: [
+                        [25, 50, 100],
+                        [25, 50, 100]
+                    ],
+                    dom: 'Blfrtip',
+                    buttons: [{
+                            extend: 'csv',
+                            text: 'Export CSV',
+                            className: 'btn btn-sm my-custom-table-btn',
+                            exportOptions: {
+                                columns: ':not(:last-child)'
+                            }
+                        },
+                        {
+                            extend: 'print',
+                            text: 'Print Table',
+                            className: 'btn btn-sm my-custom-table-btn',
+                            exportOptions: {
+                                columns: ':not(:last-child)'
+                            }
+                        }
+                    ],
+                    columns: [{
+                            data: 'DT_RowIndex',
+                            name: 'DT_RowIndex',
+                            orderable: false,
+                            searchable: false
+                        },
+                        @if ($categorysettings->asset_category_table == 2)
+                            {
+                                data: 'asset_category',
+                                name: 'asset_category',
+                                orderable: false,
+                                searchable: false
+                            },
+                        @endif
+                        @if ($categorysettings->asset_name_table == 2)
+                            {
+                                data: 'asset_name',
+                                name: 'asset_name',
+                                orderable: false,
+                                searchable: false
+                            },
+                        @endif 
+                        {
+                            data: 'amount',
+                            name: 'amount',
+                            orderable: false,
+                            searchable: false
+                        },
+                        {
+                            data: 'description',
+                            name: 'description'
+                        },
+                        {
+                            data: 'action',
+                            name: 'action',
+                            orderable: false,
+                            searchable: false
+                        }
+                    ],
+                    language: {
+                        processing: '<div class="loader-custom1"></div>'
+                    }
+                });
+            });
+        </script>
 <script>
     const banglaToEnglishMap = {
         'অ': 'a', 'আ': 'aa', 'ই': 'i', 'ঈ': 'ii', 'উ': 'u', 'ঊ': 'uu',
@@ -494,7 +705,7 @@
 </script>
 
 
-<script>
+{{-- <script>
     $(document).ready(function () {
         $('form[id^="editIncomeCategoryForms"] button[type="submit"]').on('click', function (e) {
             e.preventDefault();
@@ -543,7 +754,67 @@
         });
     });
 
+</script> --}}
+<script>
+$(function () {
+    // CSRF setup
+    $.ajaxSetup({
+        headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
+    });
+
+    // When clicking "Edit" button
+    $(document).on('click', '#editAssetBtn', function () {
+        const assetId = $(this).data('id');
+
+        // Fetch asset details
+        $.get("{{ route('assets.edits', ':id') }}".replace(':id', assetId), function (res) {
+            // Fill form fields
+            $('#asset_id').val(res.id);
+            $('#asset_name').val(res.name);
+            $('#asset_slug').val(res.slug);
+            $('#asset_entry_date').val(res.entry_date);
+            $('#asset_category_id').val(res.category_id);
+            $('#asset_subcategory_id').val(res.subcategory_id);
+            $('#asset_description').val(res.description);
+
+            // Show modal
+            $('#editAssetModal').modal('show');
+        });
+    });
+
+    // Submit edited form
+    $('#editAssetForm').on('submit', function (e) {
+        e.preventDefault();
+
+        const id = $('#asset_id').val();
+        const data = $(this).serialize();
+
+        $.ajax({
+            url: "{{ url('admin/asset') }}/" + id,
+            method: "POST", // because we added @method('PUT')
+            
+            data: data,
+            data: data + "&_method=PUT", // but override as PUT
+            success: function (response) {
+                $('#successMessage').text(response.message);
+                $('#successModal').modal('show');
+                $('#editAssetModal').modal('hide');
+                setTimeout(() => location.reload(), 1000);
+            },
+            error: function (xhr) {
+                if (xhr.status === 422) {
+                    $.each(xhr.responseJSON.errors, function (key, msgs) {
+                        toastr.error(msgs[0]);
+                    });
+                } else {
+                    toastr.error(xhr.responseJSON?.message || 'Server error');
+                }
+            }
+        });
+    });
+});
 </script>
+
 
 <script>
     $(document).on('click', '.delete-confirm', function (e) {
@@ -707,7 +978,7 @@
 
 </script>
 
-<script>
+{{-- <script>
     $(document).ready(function () {
 
         
@@ -759,7 +1030,51 @@
             });
         });
     });
+</script> --}}
+<script>
+$(document).ready(function () {
+
+    // When clicking update button
+    $(document).on('click', '[data-bs-target="#updateAssetModal"]', function () {
+        let assetId = $(this).data('id');
+        $('#tran_asset_id').val(assetId);
+    });
+
+    // Submit form
+    $('#updateAssetForm').on('submit', function (e) {
+        e.preventDefault();
+
+        let formData = new FormData(this);
+
+        $.ajax({
+            url: "{{ route('assettransaction.store') }}",
+            method: "POST",
+            data: formData,
+            headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+            processData: false,
+            contentType: false,
+            success: function (response) {
+                $('#successMessage').text(response.message);
+                $('#successModal').modal('show');
+                $('#updateAssetForm')[0].reset();
+                $('#updateAssetModal').modal('hide');
+
+                setTimeout(() => window.location.reload(), 2000);
+            },
+            error: function (xhr) {
+                if (xhr.status === 422) {
+                    $.each(xhr.responseJSON.errors, function (key, msgs) {
+                        toastr.error(msgs[0]);
+                    });
+                } else {
+                    toastr.error("An error occurred. Please try again.");
+                }
+            }
+        });
+    });
+});
 </script>
+
 
 <script>
     document.querySelectorAll('.contact-select').forEach(function(select) {
@@ -898,7 +1213,7 @@
             }
         });
     });
-    </script>
+</script>
     
 {{-- <script>
     $(document).on('change', '.contact-select', function () {

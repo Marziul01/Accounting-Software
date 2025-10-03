@@ -11,7 +11,7 @@
             </div>
             <div class="card-body  text-nowrap">
                 <div class="table-responsive">
-                    <table class="table" id="myTable">
+                    {{-- <table class="table" id="myTable">
                         <thead>
                             <tr>
                                 <th>Sl</th>
@@ -96,7 +96,25 @@
                             </tr>
                             @endif
                         </tbody>
-                    </table>
+                    </table> --}}
+
+                    <table class="table table-striped" id="myTable">
+    <thead>
+        <tr>
+            <th>Sl</th>
+            @if($categorysettings->liability_category_table == 2)
+                <th>Liability Category</th>
+            @endif
+            @if($categorysettings->liability_name_table == 2)
+                <th>Liability Name</th>
+            @endif
+            <th>Liability Issued Name</th>
+            <th>Amount</th>
+            <th>Description</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+</table>
                 </div>
                 
             </div>
@@ -267,7 +285,7 @@
     <!-- / Modal -->
       
 
-    @if($liabilities->isNotEmpty())
+    {{-- @if($liabilities->isNotEmpty())
         @foreach ($liabilities as $liability )
 
         <div class="modal fade" id="editModal{{ $liability->id }}">
@@ -424,10 +442,143 @@
             </div>
         </div>
         @endforeach
-    @endif
+    @endif --}}
+    <!-- Dynamic Edit Liability Modal -->
+<!-- Dynamic Edit Liability Modal -->
+<div class="modal fade" id="editLiabilityModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Liability</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="editLiabilityForm">
+                @csrf
+                @method('PUT')
+                <div class="modal-body">
+                    <!-- Step 1 -->
+                    <div id="editLiabilityStep1">
+                        <div class="row">
+                            <h4>Step 1: Liability Details</h4>
+
+                            <div class="col-6 mb-3 d-none">
+                                <label>Name</label>
+                                <input type="text" id="liability_name" name="name" class="form-control name-input" required>
+                            </div>
+
+                            <div class="col-6 mb-3">
+                                <label>Select Person From Contacts</label>
+                                <select name="contact_id" class="form-select contact-select" id="liability_contact_select">
+                                    <option value="">Select an User</option>
+                                    @foreach ($users as $user)
+                                        <option 
+                                            value="{{ $user->id }}"
+                                            data-name="{{ $user->name }}"
+                                            data-mobile="{{ $user->mobile_number }}"
+                                            data-email="{{ $user->email }}"
+                                            data-national_id="{{ $user->national_id ?? '' }}"
+                                            data-father_name="{{ $user->father_name ?? '' }}"
+                                            data-father_mobile="{{ $user->father_mobile ?? '' }}"
+                                            data-mother_name="{{ $user->mother_name ?? '' }}"
+                                            data-mother_mobile="{{ $user->mother_mobile ?? '' }}"
+                                            data-spouse_name="{{ $user->spouse_name ?? '' }}"
+                                            data-spouse_mobile="{{ $user->spouse_mobile ?? '' }}"
+                                            data-present_address="{{ $user->present_address ?? '' }}"
+                                            data-permanent_address="{{ $user->permanent_address ?? '' }}"
+                                            data-sms_option="{{ $user->sms_option ?? 0 }}"
+                                            data-send_email="{{ $user->send_email ?? 0 }}"
+                                        >
+                                            {{ $user->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div class="col-6 mb-3 d-none">
+                                <label>Slug</label>
+                                <input type="text" id="liability_slug" name="slug" class="form-control slug-output" required>
+                            </div>
+
+                            <div class="col-6 mb-3">
+                                <label>Entry Date</label>
+                                <input type="date" id="liability_entry_date" name="entry_date" class="form-control myDate" required>
+                            </div>
+
+                            <div class="col-12 mb-3">
+                                <label>Category</label>
+                                <select class="form-select" id="liability_category_select" name="subcategory_id" required>
+                                    <option value="">Select Category</option>
+                                    @foreach ($liabilityCategories as $category)
+                                        <option value="{{ $category->id }}">{{ $category->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div class="col-12 mb-3">
+                                <label>Description</label>
+                                <textarea name="description" id="liability_description" class="form-control"></textarea>
+                            </div>
+
+                            <div class="col-12">
+                                <button type="button" class="btn btn-primary" id="toLiabilityStep2">Next</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 2 -->
+                    <div id="editLiabilityStep2" style="display:none;">
+                        <div class="row">
+                            <h4>Step 2: User Details</h4>
+
+                            <div class="col-6 mb-3">
+                                <label>Photo</label>
+                                <input type="file" id="liability_photo" name="photo" class="form-control">
+                                <p class="my-2">Previous Image</p>
+                                <img id="liabilityPhotoPreview" src="{{ asset('admin-assets/img/nophoto.jpg') }}" width="100px" height="100px" style="object-fit: fill">
+                            </div>
+
+                            @php
+                                $fields = [
+                                    'user_name','national_id','mobile','email','father_name','father_mobile',
+                                    'mother_name','mother_mobile','spouse_name','spouse_mobile','present_address','permanent_address'
+                                ];
+                            @endphp
+
+                            @foreach($fields as $field)
+                                <div class="col-6 mb-3">
+                                    <label>{{ ucwords(str_replace('_',' ',$field)) }}</label>
+                                    <input type="text" class="form-control" id="liability_{{ $field }}" name="{{ $field }}">
+                                </div>
+                            @endforeach
+
+                            <div class="col-12 row mx-0 mb-3">
+                                <div class="col-6 form-check">
+                                    <input type="checkbox" class="form-check-input" id="liability_send_sms" name="send_sms">
+                                    <label class="form-check-label">SMS Enabled</label>
+                                </div>
+                                <div class="col-6 form-check">
+                                    <input type="checkbox" class="form-check-input" id="liability_send_email" name="send_email">
+                                    <label class="form-check-label">Email Enabled</label>
+                                </div>
+                            </div>
+
+                            <div class="col-12 mb-3">
+                                <button type="button" class="btn btn-secondary" id="backToLiabilityStep1">Back</button>
+                                <button type="submit" class="btn btn-primary">Submit</button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
     <!-- / Modal -->
 
-    @if($liabilities->isNotEmpty())
+    {{-- @if($liabilities->isNotEmpty())
         @foreach ($liabilities as $liability )
 
         <div class="modal fade" id="viewModal{{ $liability->id }}">
@@ -472,9 +623,26 @@
             </div>
         </div>
         @endforeach
-    @endif
+    @endif --}}
 
-    @if($liabilities->isNotEmpty())
+    <div class="modal fade" id="viewLiabilityModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Liability Assigned User Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row" id="viewLiabilityBody">
+                        <!-- Dynamic content will be loaded here -->
+                    </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+    {{-- @if($liabilities->isNotEmpty())
         @foreach ($liabilities as $liability )
 
         <div class="modal fade" id="updateModal{{ $liability->id }}">
@@ -538,7 +706,24 @@
             </div>
         </div>
         @endforeach
-    @endif
+    @endif --}}
+
+    <div class="modal fade" id="updateLiabilityModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Update Your Liability Transaction</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="updateLiabilityBody">
+                <div class="text-center">
+                    <div class="spinner-border text-primary" role="status"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 
     <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
@@ -568,7 +753,7 @@
 @section('scripts')
 
 @if ($liabilities->isNotEmpty())
-<script>
+{{-- <script>
     $('#myTable').DataTable({
         pageLength: 25, // default rows per page
         lengthMenu: [ [25, 50, 100], [25, 50, 100] ], // options in dropdown
@@ -592,6 +777,55 @@
             }
         ]
     });
+</script> --}}
+<script>
+$(document).ready(function() {
+    $('#myTable').DataTable({
+        processing: true,
+        serverSide: true,
+        ajax: "{{ route('liability.index') }}",
+        pageLength: 25,
+                    lengthMenu: [
+                        [25, 50, 100],
+                        [25, 50, 100]
+                    ],
+                    dom: 'Blfrtip',
+                    buttons: [{
+                            extend: 'csv',
+                            text: 'Export CSV',
+                            className: 'btn btn-sm my-custom-table-btn',
+                            exportOptions: {
+                                columns: ':not(:last-child)'
+                            }
+                        },
+                        {
+                            extend: 'print',
+                            text: 'Print Table',
+                            className: 'btn btn-sm my-custom-table-btn',
+                            exportOptions: {
+                                columns: ':not(:last-child)'
+                            }
+                        }
+                    ],
+        columns: [
+            { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
+            @if($categorysettings->liability_category_table == 2)
+            { data: 'liability_category', name: 'category.name' ,orderable: false, searchable: false},
+            @endif
+            @if($categorysettings->liability_name_table == 2)
+            { data: 'liability_name', name: 'name' },
+            @endif
+            { data: 'user_name', name: 'user_name' },
+            { data: 'amount', name: 'amount', orderable: false, searchable: false },
+            { data: 'description', name: 'description' },
+            { data: 'action', name: 'action', orderable: false, searchable: false },
+        ],
+        order: [[0, 'desc']],
+        language: {
+                        processing: '<div class="loader-custom1"></div>'
+                    }
+    });
+});
 </script>
     
 @endif
@@ -640,10 +874,7 @@
     // Attach for Add Modal
     attachSlugListener('addmodals');
 
-    // Attach for all Edit Modals
-    @foreach ($liabilities as $assetsubsubcategory)
-        attachSlugListener('editModal{{ $assetsubsubcategory->id }}');
-    @endforeach
+    
 </script>
 
 <script>
@@ -703,7 +934,7 @@
 </script>
 
 
-<script>
+{{-- <script>
     $(document).ready(function () {
         $('form[id^="editIncomeCategoryForms"] button[type="submit"]').on('click', function (e) {
             e.preventDefault();
@@ -751,6 +982,106 @@
             });
         });
     });
+
+</script> --}}
+
+<script>
+   $(function() {
+
+    // Contact select fills user fields
+    $('#liability_contact_select').on('change', function() {
+        let opt = $(this).find(':selected');
+        if (!opt.val()) return;
+
+        $('#liability_name').val(opt.data('name') || '');
+        $('#liability_slug').val(opt.data('slug') || '');
+        $('#liability_user_name').val(opt.data('name') || '');
+        $('#liability_mobile').val(opt.data('mobile') || '');
+        $('#liability_email').val(opt.data('email') || '');
+        $('#liability_national_id').val(opt.data('national_id') || '');
+        $('#liability_father_name').val(opt.data('father_name') || '');
+        $('#liability_father_mobile').val(opt.data('father_mobile') || '');
+        $('#liability_mother_name').val(opt.data('mother_name') || '');
+        $('#liability_mother_mobile').val(opt.data('mother_mobile') || '');
+        $('#liability_spouse_name').val(opt.data('spouse_name') || '');
+        $('#liability_spouse_mobile').val(opt.data('spouse_mobile') || '');
+        $('#liability_present_address').val(opt.data('present_address') || '');
+        $('#liability_permanent_address').val(opt.data('permanent_address') || '');
+        $('#liability_send_sms').prop('checked', opt.data('sms_option') == 1);
+        $('#liability_send_email').prop('checked', opt.data('send_email') == 1);
+    });
+
+    // Step navigation
+    $('#toLiabilityStep2').click(function() {
+        $('#editLiabilityStep1').hide();
+        $('#editLiabilityStep2').show();
+    });
+    $('#backToLiabilityStep1').click(function() {
+        $('#editLiabilityStep2').hide();
+        $('#editLiabilityStep1').show();
+    });
+
+    // Photo preview
+    $('#liability_photo').on('change', function(e){
+        let reader = new FileReader();
+        reader.onload = e => $('#liabilityPhotoPreview').attr('src', e.target.result);
+        reader.readAsDataURL(this.files[0]);
+    });
+
+    // Open modal and populate via AJAX
+    $(document).on('click', '.editLiabilityBtn', function(){
+        let id = $(this).data('id');
+        let url = "{{ route('liabilities.edit', ':id') }}".replace(':id', id);
+
+        $.get(url, function(liability){
+            $('#editLiabilityForm').attr('action', "{{ route('liability.update', ':id') }}".replace(':id', liability.id));
+            $('#liability_entry_date').val(liability.entry_date ? liability.entry_date.substr(0,10) : '');
+            $('#liability_category_select').val(liability.subcategory_id);
+            $('#liability_description').val(liability.description || '');
+            $('#liability_contact_select').val(liability.contact_id).trigger('change');
+            $('#liabilityPhotoPreview').attr('src', liability.photo ? "{{ url('/') }}/" + liability.photo : "{{ asset('admin-assets/img/nophoto.jpg') }}");
+
+            // Fill user fields
+            ['user_name','national_id','mobile','email','father_name','father_mobile','mother_name','mother_mobile','spouse_name','spouse_mobile','present_address','permanent_address']
+            .forEach(f => { if(liability[f]) $('#liability_'+f).val(liability[f]); });
+
+            $('#liability_send_sms').prop('checked', liability.send_sms == 1);
+            $('#liability_send_email').prop('checked', liability.send_email == 1);
+
+            $('#editLiabilityStep1').show();
+            $('#editLiabilityStep2').hide();
+
+            $('#editLiabilityModal').modal('show');
+        });
+    });
+
+    // AJAX submit
+    $('#editLiabilityForm').on('submit', function(e){
+        e.preventDefault();
+        let formData = new FormData(this);
+
+        $.ajax({
+            url: this.action,
+            method: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(response){
+                $('#successMessage').text(response.message);
+                    $('#successModal').modal('show');
+                $('#editLiabilityModal').modal('hide');
+                setTimeout(() => location.reload(), 1500);
+            },
+            error: function(xhr){
+                if(xhr.status === 422){
+                    $.each(xhr.responseJSON.errors, (k,v) => toastr.error(v[0]));
+                } else toastr.error('Something went wrong');
+            }
+        });
+    });
+
+});
+
 
 </script>
 
@@ -917,61 +1248,61 @@
 </script>
 
 <script>
-    $(document).ready(function () {
+$(document).ready(function () {
 
-        
-            $('form[id^="assetForms"] button[type="submit"]').on('click', function (e) {
-            e.preventDefault();
-           
+    // Submit handler for dynamic liability form inside the modal
+    $(document).on('submit', 'form[id^="liabilityForm"]', function(e) {
+        e.preventDefault();
 
-            toastr.clear();
+        toastr.clear();
+        $('#fullscreenLoader').fadeIn();
 
-            let form = $(this).closest('form')[0]; // ✅ get the actual form element
-            let formData = new FormData(form);         // ✅ pass the form here
+        let form = this;
+        let formData = new FormData(form);
 
-            for (let [key, value] of formData.entries()) {
-                console.log(`${key}: ${value}`);
-            }
+        // Debug: see form data
+        for (let [key, value] of formData.entries()) {
+            console.log(`${key}: ${value}`);
+        }
 
-            $('#fullscreenLoader').fadeIn();
+        $.ajax({
+            url: "{{ route('liabilitytransaction.store') }}", // store or update route
+            method: "POST",
+            data: formData,
+            processData: false,
+            contentType: false,
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
+            success: function(response) {
+                $('#fullscreenLoader').fadeOut();
+                $('#successMessage').text(response.message);
+                $('#successModal').modal('show');
+                $('#updateLiabilityModal').modal('hide'); // single modal
 
-            $.ajax({
-                url: "{{ route('liabilitytransaction.store') }}",
-                method: "POST",
-                data: formData,
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                },
-                processData: false,
-                contentType: false,
-                success: function (response) {
-                    $('#fullscreenLoader').fadeOut();
-                    $('#successMessage').text(response.message); // Set dynamic success message
-                    $('#successModal').modal('show');
-
-                    form.reset();
-                    $('#updateModal' + response.id).modal('hide');
-
-                    setTimeout(function () {
-                        window.location.reload();
-                    }, 2000);
-                },
-                error: function (xhr) {
-                    $('#fullscreenLoader').fadeOut();
-                    console.log('Error:', xhr);
-                    if (xhr.status === 422) {
-                        let errors = xhr.responseJSON.errors;
-                        for (let key in errors) {
-                            toastr.error(errors[key][0]);
-                        }
-                    } else {
-                        toastr.error("An error occurred. Please try again.");
+                form.reset();
+                setTimeout(() => {
+                    window.location.reload();
+                }, 2000);
+            },
+            error: function(xhr) {
+                $('#fullscreenLoader').fadeOut();
+                console.log('Error:', xhr);
+                if (xhr.status === 422) {
+                    let errors = xhr.responseJSON.errors;
+                    for (let key in errors) {
+                        toastr.error(errors[key][0]);
                     }
+                } else {
+                    toastr.error("An error occurred. Please try again.");
                 }
-            });
+            }
         });
     });
+
+});
 </script>
+
 
 <script>
     document.querySelectorAll('.contact-select').forEach(function(select) {
@@ -1161,6 +1492,113 @@
             $form.find('.slug-output').val(slug);
         }
     });
+</script>
+
+<script>
+    $(document).on('click', '.viewLiabilityBtn', function() {
+    let id = $(this).data('id');
+    let url = "{{ route('liabilities.view', ':id') }}".replace(':id', id);
+
+    $('#viewLiabilityBody').html('<div class="text-center"><div class="spinner-border text-primary"></div></div>');
+
+    $.get(url, function(data) {
+        let photo = data.photo ? "{{ url('/') }}/" + data.photo : "{{ asset('admin-assets/img/nophoto.jpg') }}";
+
+        let fields = [
+            'user_name','national_id', 'mobile', 'email', 'father_name', 'father_mobile',
+            'mother_name', 'mother_mobile', 'spouse_name', 'spouse_mobile',
+            'present_address', 'permanent_address'
+        ];
+
+        let html = `<div class="col-12 mb-3 text-center">
+                        <img src="${photo}" width="100" height="100" style="object-fit: fill; border-radius: 50%;" alt="User Photo">
+                    </div>`;
+
+        fields.forEach(function(field) {
+            html += `
+                <div class="col-6 mb-3">
+                    <label>${field.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</label>
+                    <input type="text" class="form-control" value="${data[field] || ''}" readonly>
+                </div>`;
+        });
+
+        $('#viewLiabilityBody').html(html);
+        $('#viewLiabilityModal').modal('show');
+    });
+});
+
+</script>
+
+<script>
+    $(document).on('click', '.updateLiabilityBtn', function() {
+    let id = $(this).data('id');
+    let url = "{{ route('liabilities.updateForm', ':id') }}".replace(':id', id);
+
+    $('#updateLiabilityBody').html('<div class="text-center"><div class="spinner-border text-primary"></div></div>');
+
+    $.get(url, function(data) {
+        // Build bank options
+        let banksOptions = '<option value="">Select Bank</option>';
+        $.each(data.banks, function(index, bank) {
+            banksOptions += `<option value="${bank.id}">${bank.bank_name} - (${bank.account_type})</option>`;
+        });
+
+        // Build form
+        let html = `
+            <form id="liabilityForm${data.liability_id}">
+                @csrf
+                <input type="hidden" name="liability_id" value="${data.liability_id}">
+                <div class="row">
+                    <div class="col-12 mb-3">
+                        <label>Transaction Type</label>
+                        <select name="transaction_type" class="form-select">
+                            <option value="Deposit">উত্তোলন</option>
+                            <option value="Withdraw">জমা</option>
+                        </select>
+                    </div>
+                    <div class="col-12 mb-3">
+                        <label>Amount</label>
+                        <input type="number" name="amount" class="form-control"  required>
+                    </div>
+                    <div class="col-12 mb-3">
+                        <label>Transaction Date</label>
+                        <input type="date" name="transaction_date" class="form-control myDate" required>
+                    </div>
+                    <div class="col-12 mb-3">
+                        <label>Description</label>
+                        <textarea name="description" class="form-control"></textarea>
+                    </div>
+                    <div class="col-12 mb-3">
+                        <label>Select Bank Account (Optional)</label>
+                        <select name="bank_account_id" class="form-select">
+                            ${banksOptions}
+                        </select>
+                    </div>
+                    <div class="col-12 mb-3">
+                        <label>Bank Description (Optional)</label>
+                        <textarea class="form-control" name="bank_description"></textarea>
+                    </div>
+                    <div class="col-12 mb-3">
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </div>
+                </div>
+            </form>
+        `;
+
+        $('#updateLiabilityBody').html(html);
+
+        // Initialize flatpickr for date
+        document.querySelectorAll('.myDate').forEach(function(el) {
+            flatpickr(el, {
+                dateFormat: "Y-m-d",
+                defaultDate: el.value || "today"
+            });
+        });
+
+        $('#updateLiabilityModal').modal('show');
+    });
+});
+
 </script>
 
 @endsection
