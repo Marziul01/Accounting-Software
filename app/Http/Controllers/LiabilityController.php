@@ -165,8 +165,8 @@ class LiabilityController extends Controller
     }
 
     return view('admin.liability.fixed', [
-        'liabilities' => Liability::with(['category', 'subcategory', 'transactions'])->where('category_id', 3)->latest()->get(),
-        'liabilityCategories' => LiabilitySubCategory::where('liability_category_id', 3)->where('status', 1)->get(),
+        'liabilities' => Liability::with(['category', 'subcategory', 'transactions'])->where('category_id', 4)->latest()->get(),
+        'liabilityCategories' => LiabilitySubCategory::where('liability_category_id', 4)->where('status', 1)->get(),
         'liabilityTransactions' => LiabilityTransaction::all(),
         'users' => Contact::all(),
        'banks' => BankAccount::all(),
