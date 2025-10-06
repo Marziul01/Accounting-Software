@@ -761,7 +761,7 @@
                     },
                 ],
                 language: {
-                        processing: '<div class="loader-custom1"></div>'
+                        processing: '<div class="loader-custom-wrapper"><div class="loader-custom1"></div></div>'
                     }
             });
         });
@@ -963,6 +963,7 @@
 
             // 🟢 When clicking Edit button
             $(document).on('click', '.edit-btn', function(e) {
+                $('#fullscreenLoader').fadeIn();
                 e.preventDefault();
                 let id = $(this).data('id');
 
@@ -986,6 +987,7 @@
                         .id);
 
                     // Open modal
+                    $('#fullscreenLoader').fadeOut();
                     $('#editModal').modal('show');
                 });
             });
@@ -1210,6 +1212,7 @@
 
             // 🟢 Open Transaction Modal with correct investment_id
             $(document).on('click', '.add-transaction-btn', function() {
+                $('#fullscreenLoader').fadeIn();
                 let investmentId = $(this).data('id');
 
                 // Reset form first
@@ -1217,6 +1220,7 @@
                 $('#transaction_investment_id').val(investmentId);
 
                 // Show modal
+                $('#fullscreenLoader').fadeOut();
                 $('#transactionModal').modal('show');
             });
 
@@ -1340,12 +1344,14 @@
             });
             // 🔹 When button clicked, open modal & inject values 
             $(document).on('click', '.openIncomeModal', function(e) {
+                $('#fullscreenLoader').fadeIn();
                 e.preventDefault();
                 let investmentId = $(this).data('id');
                 let subcategoryId = $(this).data('category'); // Fill modal hidden inputs 
                 $('#gain_investment_id').val(investmentId);
                 $('#subcategory_id').val(subcategoryId); // Reset form 
                 $('#investmentIncomeForm')[0].reset(); // Open modal 
+                $('#fullscreenLoader').fadeOut();
                 $('#incomeModal').modal('show');
             }); // 🔹 Handle form submit 
             $(document).on('submit', '#investmentIncomeForm', function(e) {
@@ -1446,6 +1452,7 @@ $(function () {
 
     // 🔹 Open expense modal & inject values
     $(document).on('click', '.openExpenseModal', function (e) {
+        $('#fullscreenLoader').fadeIn();
         e.preventDefault();
 
         let investmentId = $(this).data('id');
@@ -1459,6 +1466,7 @@ $(function () {
         $form[0].reset();
 
         // Show modal
+        $('#fullscreenLoader').fadeOut();
         $('#expenseModal').modal('show');
     });
 

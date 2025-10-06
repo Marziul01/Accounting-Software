@@ -474,6 +474,7 @@
         $(document).ready(function() {
             // Show Edit Modal with data
             $(document).on('click', '.openBankEditModal', function() {
+                $('#fullscreenLoader').fadeIn();
                 const button = $(this);
                 const id = button.data('id');
 
@@ -489,6 +490,7 @@
                 $('#editBankAccount').val(button.data('bank-id'));
                 $('#editTransactionType').val(button.data('type'));
                 $('#editTransactionType').val(button.data('type'));
+                $('#fullscreenLoader').fadeOut();
                 $('#editBankTransactionModal').modal('show');
                 $('#edittransfer_from').val(button.data('transfared-from'));
                 $('#edittransfer_to').val(button.data('transfared-to'));

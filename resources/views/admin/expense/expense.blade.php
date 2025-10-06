@@ -268,7 +268,7 @@
                         [5, 'desc']
                     ],
                     language: {
-                        processing: '<div class="loader-custom1"></div>'
+                        processing: '<div class="loader-custom-wrapper"><div class="loader-custom1"></div></div>'
                     }
                 });
             });
@@ -468,6 +468,7 @@
         $(document).ready(function() {
             // On Edit button click
             $(document).on('click', '.openEditModal', function() {
+                $('#fullscreenLoader').fadeIn();
                 let button = $(this);
 
                 // Get data from button
@@ -499,7 +500,7 @@
                 let subCategorySelect = $('#editSubCategory');
                 let url = "{{ route('get.expensesubcategories', ':id') }}".replace(':id', categoryId);
                 subCategorySelect.html('<option value="">Loading...</option>');
-
+                $('#fullscreenLoader').fadeOut();
                 $.ajax({
                     url: url,
                     type: 'GET',

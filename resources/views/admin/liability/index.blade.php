@@ -553,11 +553,11 @@
 
                             <div class="col-12 row mx-0 mb-3">
                                 <div class="col-6 form-check">
-                                    <input type="checkbox" class="form-check-input" id="liability_send_sms" name="send_sms">
+                                    <input type="checkbox" class="form-check-input" id="liability_send_sms" value="1" name="send_sms">
                                     <label class="form-check-label">SMS Enabled</label>
                                 </div>
                                 <div class="col-6 form-check">
-                                    <input type="checkbox" class="form-check-input" id="liability_send_email" name="send_email">
+                                    <input type="checkbox" class="form-check-input" id="liability_send_email" value="1" name="send_email">
                                     <label class="form-check-label">Email Enabled</label>
                                 </div>
                             </div>
@@ -822,7 +822,7 @@ $(document).ready(function() {
         ],
         order: [[0, 'desc']],
         language: {
-                        processing: '<div class="loader-custom1"></div>'
+                        processing: '<div class="loader-custom-wrapper"><div class="loader-custom1"></div></div>'
                     }
     });
 });
@@ -1030,6 +1030,7 @@ $(document).ready(function() {
 
     // Open modal and populate via AJAX
     $(document).on('click', '.editLiabilityBtn', function(){
+        $('#fullscreenLoader').fadeIn();
         let id = $(this).data('id');
         let url = "{{ route('liabilities.edit', ':id') }}".replace(':id', id);
 
@@ -1050,7 +1051,7 @@ $(document).ready(function() {
 
             $('#editLiabilityStep1').show();
             $('#editLiabilityStep2').hide();
-
+            $('#fullscreenLoader').fadeOut();
             $('#editLiabilityModal').modal('show');
         });
     });
@@ -1531,6 +1532,7 @@ $(document).ready(function () {
 
 <script>
     $(document).on('click', '.updateLiabilityBtn', function() {
+        $('#fullscreenLoader').fadeIn();
     let id = $(this).data('id');
     let url = "{{ route('liabilities.updateForm', ':id') }}".replace(':id', id);
 
@@ -1594,7 +1596,7 @@ $(document).ready(function () {
                 defaultDate: el.value || "today"
             });
         });
-
+        $('#fullscreenLoader').fadeOut();
         $('#updateLiabilityModal').modal('show');
     });
 });

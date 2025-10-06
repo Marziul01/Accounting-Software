@@ -559,7 +559,7 @@ $(document).ready(function() {
         ],
         order: [[0, 'desc']],
         language: {
-                        processing: '<div class="loader-custom1"></div>'
+                        processing: '<div class="loader-custom-wrapper"><div class="loader-custom1"></div></div>'
                     }
     });
 });
@@ -726,6 +726,7 @@ $(document).ready(function () {
 
     // Click Edit button → Fetch details
     $(document).on('click', '#editLiabilityBtn', function () {
+        $('#fullscreenLoader').fadeIn();
         let id = $(this).data('id');
 
         $.ajax({
@@ -745,6 +746,7 @@ $(document).ready(function () {
                 $('#editLiabilityForm').attr('action', "{{ route('liability.update', ':id') }}".replace(':id', res.id));
 
                 // open modal
+                $('#fullscreenLoader').fadeOut();
                 $('#editLiabilityModal').modal('show');
             },
             error: function (xhr) {
@@ -1012,6 +1014,7 @@ $(document).ready(function () {
 
     // Open Modal & Prefill Hidden Field
     $(document).on('click', '#updateLiabilityBtn', function () {
+        $('#fullscreenLoader').fadeIn();
         let id = $(this).data('id');
 
         // set hidden input for liability id
@@ -1022,6 +1025,7 @@ $(document).ready(function () {
         $('#bankAccount').val('').trigger('change');
 
         // open modal
+        $('#fullscreenLoader').fadeOut();
         $('#updateLiabilityModal').modal('show');
     });
 

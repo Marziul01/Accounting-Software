@@ -595,7 +595,7 @@
                         }
                     ],
                     language: {
-                        processing: '<div class="loader-custom1"></div>'
+                        processing: '<div class="loader-custom-wrapper"><div class="loader-custom1"></div></div>'
                     }
                 });
             });
@@ -764,6 +764,7 @@ $(function () {
 
     // When clicking "Edit" button
     $(document).on('click', '#editAssetBtn', function () {
+        $('#fullscreenLoader').fadeIn();
         const assetId = $(this).data('id');
 
         // Fetch asset details
@@ -778,6 +779,7 @@ $(function () {
             $('#asset_description').val(res.description);
 
             // Show modal
+            $('#fullscreenLoader').fadeOut();
             $('#editAssetModal').modal('show');
         });
     });

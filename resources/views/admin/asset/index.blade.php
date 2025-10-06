@@ -885,7 +885,7 @@
                         }
                     ],
                     language: {
-                        processing: '<div class="loader-custom1"></div>'
+                        processing: '<div class="loader-custom-wrapper"><div class="loader-custom1"></div></div>'
                     }
                 });
             });
@@ -1117,6 +1117,7 @@
 
             // edit button
             $(document).on('click', '.editAssetBtn', function() {
+                $('#fullscreenLoader').fadeIn();
                 let id = $(this).data('id');
                 let url = "{{ route('assets.edits', ':id') }}".replace(':id', id);
 
@@ -1145,7 +1146,7 @@
                     // reset steps
                     $('#editStep1').show();
                     $('#editStep2').hide();
-
+                    $('#fullscreenLoader').fadeOut();
                     $('#editModal').modal('show');
                 });
             });
@@ -1702,6 +1703,7 @@
 
     <script>
         $(document).on('click', '.updateAssetBtn', function() {
+            $('#fullscreenLoader').fadeIn();
             let id = $(this).data('id');
 
             $.get("{{ route('assets.updateForm', ':id') }}".replace(':id', id), function(data) {
@@ -1759,7 +1761,7 @@
                 defaultDate: this.value || "today"
             });
         });
-
+        $('#fullscreenLoader').fadeOut();
         $('#updateAssetModal').modal('show');
             });
         });

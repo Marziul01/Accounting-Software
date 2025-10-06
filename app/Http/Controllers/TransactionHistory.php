@@ -381,20 +381,56 @@ class TransactionHistory extends Controller
         // Fetch the transaction
         $transaction = AssetTransaction::with('asset')->findOrFail($id);
         $asset = $transaction->asset;
+        $totalAmount = $asset->transactions()->where('transaction_type', 'Deposit')->sum('amount') -
+                         $asset->transactions()->where('transaction_type', 'Withdraw')->sum('amount');
 
-        // Example calculation (adjust with your logic)
-        $totalAmountBn = $transaction->amount;
-        $previousAmountBn = 0;
-        $requestASmount = $transaction->amount;
+        $isFirstTransaction = !AssetTransaction::where('asset_id', $transaction->asset_id)
+            ->where('id', '!=', $transaction->id)
+            ->where('transaction_date', '<', $transaction->transaction_date)
+            ->exists();
 
-        // Render Blade view into HTML
-        $html = view('pdf.asset_deposit_invoice', [
-            'asset' => $transaction->asset,
-            'request' => $transaction,
-            'totalAmount' => $totalAmountBn,
-            'previousAmount' => $previousAmountBn,
-            'requestASmount' => $requestASmount,
-        ])->render();
+        if ($isFirstTransaction) {
+            $requestASmount = $this->engToBnNumber(number_format($transaction->amount, 2));
+            $totalAmountBn = $this->engToBnNumber(number_format($totalAmount, 2));
+
+            $html = view('pdf.asset_invoice', [
+                'asset' => $asset,
+                'request' => $transaction,
+                'totalAmount' => $totalAmountBn,
+                'requestASmount' => $requestASmount,
+            ])->render();
+
+        }else{
+            if($transaction->transaction_type == 'Deposit'){
+
+                $requestASmount = $this->engToBnNumber(number_format($transaction->amount, 2));
+                $totalAmountBn = $this->engToBnNumber(number_format($totalAmount, 2));
+                $previousAmountBn = $this->engToBnNumber(number_format($totalAmount - $transaction->amount, 2));
+
+                // Render Blade view into HTML
+                $html = view('pdf.asset_deposit_invoice', [
+                    'asset' => $asset,
+                    'request' => $transaction,
+                    'totalAmount' => $totalAmountBn,
+                    'previousAmount' => $previousAmountBn,
+                    'requestASmount' => $requestASmount,
+                ])->render();
+
+            }else{
+                
+                $requestASmount = $this->engToBnNumber(number_format($transaction->amount, 2));
+                $totalAmountBn = $this->engToBnNumber(number_format($totalAmount, 2));
+                $previousAmountBn = $this->engToBnNumber(number_format($totalAmount + $transaction->amount, 2));
+                $html = view('pdf.asset_withdraw_invoice', [
+                    'asset' => $asset,
+                    'request' => $transaction,
+                    'totalAmount' => $totalAmountBn,
+                    'previousAmount' => $previousAmountBn,
+                    'requestASmount' => $requestASmount,
+                ])->render();
+
+            }
+        }
 
         // mPDF config
         $defaultConfig = (new ConfigVariables())->getDefaults();
@@ -430,20 +466,57 @@ class TransactionHistory extends Controller
         // Fetch the transaction
         $transaction = LiabilityTransaction::with('liability')->findOrFail($id);
         $liability = $transaction->liability;
+        $totalAmount = $liability->transactions()->where('transaction_type', 'Deposit')->sum('amount') -
+                         $liability->transactions()->where('transaction_type', 'Withdraw')->sum('amount');
 
-        // Example calculation (adjust with your logic)
-        $totalAmountBn = $transaction->amount;
-        $previousAmountBn = 0;
-        $requestASmount = $transaction->amount;
+        $isFirstTransaction = !LiabilityTransaction::where('liability_id', $transaction->liability_id)
+            ->where('id', '!=', $transaction->id)
+            ->where('transaction_date', '<', $transaction->transaction_date)
+            ->exists();
 
-        // Render Blade view into HTML
-        $html = view('pdf.liability_deposit_invoice', [
-            'liability' => $transaction->liability,
-            'request' => $transaction,
-            'totalAmount' => $totalAmountBn,
-            'previousAmount' => $previousAmountBn,
-            'requestASmount' => $requestASmount,
-        ])->render();
+        if ($isFirstTransaction) {
+            $requestASmount = $this->engToBnNumber(number_format($transaction->amount, 2));
+            $totalAmountBn = $this->engToBnNumber(number_format($totalAmount, 2));
+
+            $html = view('pdf.liability_invoice', [
+                'liability' => $transaction->liability,
+                'request' => $transaction,
+                'totalAmount' => $totalAmountBn,
+                'requestASmount' => $requestASmount,
+            ])->render();
+
+        } else {
+
+            if($transaction->transaction_type == 'Deposit'){
+
+                $requestASmount = $this->engToBnNumber(number_format($transaction->amount, 2));
+                $totalAmountBn = $this->engToBnNumber(number_format($totalAmount, 2));
+                $previousAmountBn = $this->engToBnNumber(number_format($totalAmount - $transaction->amount, 2));
+
+                // Render Blade view into HTML
+                $html = view('pdf.liability_deposit_invoice', [
+                    'liability' => $transaction->liability,
+                    'request' => $transaction,
+                    'totalAmount' => $totalAmountBn,
+                    'previousAmount' => $previousAmountBn,
+                    'requestASmount' => $requestASmount,
+                ])->render();
+
+            }else{
+                
+                $requestASmount = $this->engToBnNumber(number_format($transaction->amount, 2));
+                $totalAmountBn = $this->engToBnNumber(number_format($totalAmount, 2));
+                $previousAmountBn = $this->engToBnNumber(number_format($totalAmount + $transaction->amount, 2));
+                $html = view('pdf.liability_withdraw_invoice', [
+                    'liability' => $transaction->liability,
+                    'request' => $transaction,
+                    'totalAmount' => $totalAmountBn,
+                    'previousAmount' => $previousAmountBn,
+                    'requestASmount' => $requestASmount,
+                ])->render();
+
+            }
+        }
 
         // mPDF config
         $defaultConfig = (new ConfigVariables())->getDefaults();
@@ -472,5 +545,12 @@ class TransactionHistory extends Controller
         // Open directly in new tab
         return response($mpdf->Output('', 'I'))
             ->header('Content-Type', 'application/pdf');
+    }
+
+    private function engToBnNumber($number)
+    {
+        $eng = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+        $bn  = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
+        return str_replace($eng, $bn, $number);
     }
 }

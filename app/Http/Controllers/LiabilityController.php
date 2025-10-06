@@ -202,8 +202,11 @@ class LiabilityController extends Controller
             'entry_date' => 'required',
         ]);
 
-
+        
         $data = $request->all();
+        $send_sms = $request->has('send_sms') ? 1 : 0;
+        $data['send_sms'] = $send_sms;
+        $data['send_email'] = $request->has('send_email') ? 1 : 0;
         $photoPath = null;
 
         if( $request->category_id == 3){
@@ -222,8 +225,8 @@ class LiabilityController extends Controller
                     $contact->spouse_mobile = $request->spouse_mobile;
                     $contact->present_address = $request->present_address;
                     $contact->permanent_address = $request->permanent_address;
-                    $contact->sms_option = $request->send_sms;
-                    $contact->send_email = $request->send_email;
+                    $contact->sms_option = $data['send_sms'];
+                    $contact->send_email = $data['send_email'];
                     
                     $contact->save();
                 }
@@ -256,8 +259,8 @@ class LiabilityController extends Controller
                     $existingContact->spouse_mobile = $request->spouse_mobile;
                     $existingContact->present_address = $request->present_address;
                     $existingContact->permanent_address = $request->permanent_address;
-                    $existingContact->sms_option = $request->send_sms;
-                    $existingContact->send_email = $request->send_email;
+                    $existingContact->sms_option = $data['send_sms'];
+                    $existingContact->send_email = $data['send_email'];
                     $existingContact->save();
                 } else {
                     $baseSlug = Str::slug($this->convertToEnglish($request->user_name));
@@ -286,6 +289,8 @@ class LiabilityController extends Controller
                     $contact->spouse_mobile = $request->spouse_mobile;
                     $contact->present_address = $request->present_address;
                     $contact->permanent_address = $request->permanent_address;
+                    $contact->sms_option = $data['send_sms'];
+                    $contact->send_email = $data['send_email'];
                     $contact->save();
                     $data['contact_id'] = $contact->id;
                 }
@@ -457,6 +462,10 @@ $site_name->site_owner";
 
         $asset = Liability::findOrFail($id);
         $data = $request->except('amount'); // Exclude amount from update
+
+        $send_sms = $request->has('send_sms') ? 1 : 0;
+        $data['send_sms'] = $send_sms;
+        $data['send_email'] = $request->has('send_email') ? 1 : 0;
         $photoPath = null;
 
         if( $request->category_id == 3){
@@ -477,8 +486,8 @@ $site_name->site_owner";
                     $contact->spouse_mobile = $request->spouse_mobile;
                     $contact->present_address = $request->present_address;
                     $contact->permanent_address = $request->permanent_address;
-                    $contact->sms_option = $request->send_sms;
-                    $contact->send_email = $request->send_email;
+                    $contact->sms_option = $data['send_sms'];
+                    $contact->send_email = $data['send_email'];
 
                     // ✅ If new photo is uploaded, replace the old one
                     if ($request->hasFile('photo')) {
@@ -522,8 +531,8 @@ $site_name->site_owner";
                     $existingContact->spouse_mobile = $request->spouse_mobile;
                     $existingContact->present_address = $request->present_address;
                     $existingContact->permanent_address = $request->permanent_address;
-                    $existingContact->sms_option = $request->send_sms;
-                    $existingContact->send_email = $request->send_email;
+                    $existingContact->sms_option = $data['send_sms'];
+                    $existingContact->send_email = $data['send_email'];
                     $existingContact->save();
                 } else {
                     // Upload new image if available
@@ -568,7 +577,8 @@ $site_name->site_owner";
                     $contact->spouse_mobile = $request->spouse_mobile;
                     $contact->present_address = $request->present_address;
                     $contact->permanent_address = $request->permanent_address;
-
+                    $contact->sms_option = $data['send_sms'];
+                    $contact->send_email = $data['send_email'];
                     $contact->save();
 
                     $data['contact_id'] = $contact->id;
