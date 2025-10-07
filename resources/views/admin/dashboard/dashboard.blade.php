@@ -369,7 +369,7 @@
                                                     </div>
                                                     <div>
                                                         <h6 class="mb-0">{{ $trx->type }}</h6>
-                                                        <small>
+                                                        <small style="text-transform: capitalize">
                                                             {{ $trx->name }}
                                                             {{ $trx->transaction_type ? '- (' . $trx->transaction_type . ')' : '' }}
                                                         </small>
@@ -559,7 +559,7 @@
                                                             {{ $latestBankTransaction->bankAccount->bank_name }} -
                                                             {{ $latestBankTransaction->bankAccount->account_type }}
                                                         </small>
-                                                        <small class="fw-normal mb-0">{{ $latestBankTransaction->transaction_type }}</small>
+                                                        <small class="fw-normal mb-0" style="text-transform: capitalize">{{ $latestBankTransaction->transaction_type }}</small>
                                                     </div>
                                                 </div>
                                             </td>

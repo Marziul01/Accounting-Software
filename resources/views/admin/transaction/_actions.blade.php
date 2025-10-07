@@ -74,7 +74,7 @@
 
     <a href="{{ route('asset.invoice', $row->other->id) }}" 
         target="_blank" 
-        class="btn btn-sm btn-outline-secondary">
+        class="btn btn-sm btn-outline-primary">
         <i class="fa-solid fa-download me-1"></i> Invoice
     </a>
 </div>
@@ -97,7 +97,7 @@
     </form>
     <a href="{{ route('liability.invoice', $row->other->id) }}" 
         target="_blank" 
-        class="btn btn-sm btn-outline-secondary">
+        class="btn btn-sm btn-outline-primary">
         <i class="fa-solid fa-download  me-1"></i> Invoice
     </a>
 </div>

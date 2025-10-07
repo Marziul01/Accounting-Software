@@ -144,6 +144,15 @@
                                      // ensures long words also break
                                 });
                             }
+                        },
+                        { 
+                            targets: [3], // 👈 "name" column (0-based index: 0=DT_RowIndex, 1=type, 2=name)
+                            createdCell: function (td) {
+                                $(td).css({
+                                    "text-transform": "capitalize", // allows wrapping
+                                     // ensures long words also break
+                                });
+                            }
                         }
                     ],
                     language: {
