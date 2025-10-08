@@ -466,6 +466,37 @@
 
     @yield('scripts')
     <script src="{{ asset('admin-assets') }}/assets/js/tranalte.js"></script>
+    <script>
+// Disable right-click context menu
+document.addEventListener('contextmenu', event => event.preventDefault());
+
+// Disable certain key combinations
+document.addEventListener('keydown', event => {
+    // Disable F12
+    if (event.key === "F12") {
+        event.preventDefault();
+    }
+
+    // Disable Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U, Ctrl+S, Ctrl+Shift+C
+    if (event.ctrlKey && (event.shiftKey && ['I', 'J', 'C'].includes(event.key.toUpperCase()) ||
+        ['U', 'S'].includes(event.key.toUpperCase()))) {
+        event.preventDefault();
+    }
+});
+
+// Disable dragging images
+document.addEventListener('dragstart', event => event.preventDefault());
+
+// Try to detect if DevTools is open (basic check)
+setInterval(function() {
+    const start = performance.now();
+    debugger;
+    if (performance.now() - start > 100) {
+        window.location.href = "about:blank"; // Redirect or show warning
+    }
+}, 1000);
+</script>
+
 </body>
 
 </html>

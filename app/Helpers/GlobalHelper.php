@@ -9,7 +9,7 @@ if (!function_exists('sendSMS')) {
             'api_key'  => '123456',         // <-- Replace with real key
             'type'     => 'unicode',
             'phone'    => $phone,                 // Can be comma-separated
-            'senderid' => 'Rashel_Book',       // <-- Replace with real sender ID
+            'senderid' => 'SoftDivz',       // <-- Replace with real sender ID
             'message'  => $message,
         ];
 
