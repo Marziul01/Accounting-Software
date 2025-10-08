@@ -3,10 +3,10 @@
 if (!function_exists('sendSMS')) {
     function sendSMS($phone, $message)
     {
-        $url = "http://45.120.38.242/api/sendsms";
+        $url = "#";
 
         $data = [
-            'api_key'  => '01601989118.bN2a9kvNidsVjVXn1K',         // <-- Replace with real key
+            'api_key'  => '123456',         // <-- Replace with real key
             'type'     => 'unicode',
             'phone'    => $phone,                 // Can be comma-separated
             'senderid' => 'Rashel_Book',       // <-- Replace with real sender ID
