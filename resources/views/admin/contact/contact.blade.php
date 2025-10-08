@@ -116,11 +116,11 @@
                             </div>
                             <div class="mb-3 col-6">
                                 <label for="income_date" class="form-label">Date of Birth</label>
-                                <input type="date" class="form-control myDate" id="income_date" name="date_of_birth" required>
+                                <input type="date" class="form-control" id="income_date" name="date_of_birth" required>
                             </div>
                             <div class="mb-3 col-6">
                                 <label for="income_date" class="form-label">Marrige Date</label>
-                                <input type="date" class="form-control myDate" id="income_date" name="marriage_date"
+                                <input type="date" class="form-control" id="income_date" name="marriage_date"
                                     required>
                             </div>
 
@@ -230,13 +230,13 @@
                                     </div>
                                     <div class="mb-3 col-6">
                                         <label for="income_date" class="form-label">Date of Birth</label>
-                                        <input type="date" class="form-control myDate" id="income_date" name="date_of_birth"
+                                        <input type="date" class="form-control" id="income_date" name="date_of_birth"
                                             required
                                             value="{{ $contact->date_of_birth ? \Carbon\Carbon::parse($contact->date_of_birth)->format('Y-m-d') : '' }}">
                                     </div>
                                     <div class="mb-3 col-6">
                                         <label for="income_date" class="form-label">Marrige Date</label>
-                                        <input type="date" class="form-control myDate" id="income_date" name="marriage_date"
+                                        <input type="date" class="form-control" id="income_date" name="marriage_date"
                                             required
                                             value="{{ $contact->marriage_date ? \Carbon\Carbon::parse($contact->marriage_date)->format('Y-m-d') : '' }}">
                                     </div>
